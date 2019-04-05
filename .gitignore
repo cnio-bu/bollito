@@ -1,0 +1,9 @@
+.snakemake
+log
+log.txt*
+out
+*.swp
+res/data
+tmp
+jdk*
+launch.sh

@@ -1,0 +1,18 @@
+# path or URL to sample sheet (TSV format, columns: sample, condition, ...)
+samples: samples.tsv
+# path or URL to sequencing unit sheet (TSV format, columns: sample, unit, fq1, fq2)
+# Units are technical replicates (e.g. lanes, or resequencing of the same biological
+# sample).
+units: units.tsv
+
+ref:
+    # gtf file with transcripts
+    annotation: "/home/tdidomenico/projects/bollito_data/genome/gencode.vM20.annotation.gtf.gz"
+    sequence: "/home/tdidomenico/projects/bollito_data/genome/GRCm38.primary_assembly.genome.fa.gz"
+
+whitelist: "res/whitelists/3M-february-2018.txt"
+
+params:
+    star: "--soloType Droplet --readFilesCommand gunzip -c --soloFeatures Gene --outFilterMultimapNmax 50 --winAnchorMultimapNmax 50 --alignEndsType EndToEnd --outSAMtype BAM SortedByCoordinate --outReadsUnmapped Fastx --soloUMIlen 12"
+    cutadapt-se: ""
+    cutadapt-pe: "-G GCAGTGGTATCAACGCAGAGTACATGGG"
