@@ -21,7 +21,7 @@ validate(units, schema="schemas/units.schema.yaml")
 
 rule all:
     input:
-        "qc/multiqc_report.html"
+        "out/qc/multiqc_report.html"
 
 
 ##### setup singularity #####
@@ -38,6 +38,7 @@ report: "report/workflow.rst"
 
 ##### load rules #####
 
+include: "rules/index.smk"
 include: "rules/trim.smk"
 include: "rules/align.smk"
 include: "rules/qc.smk"

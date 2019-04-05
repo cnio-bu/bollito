@@ -11,15 +11,16 @@ def get_trimmed(wildcards):
 
 rule align:
     input:
-        sample=get_trimmed
+        sample=get_trimmed,
+        idx="out/index/genomeParameters.txt"
     output:
         # see STAR manual for additional output files
-        "star/{sample}-{unit}/Aligned.out.bam"
+        "out/star/{sample}-{unit}/Aligned.out.bam"
     log:
         "logs/star/{sample}-{unit}.log"
     params:
         # path to STAR reference genome index
-        index="out/star_idx",
+        index="out/index",
         # optional parameters
         extra="--sjdbGTFfile {} --soloCBwhitelist {} {}".format(config["ref"]["annotation"], config["whitelist"], config["params"]["star"])
     threads: 24

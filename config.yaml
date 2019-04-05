@@ -7,8 +7,8 @@ units: units.tsv
 
 ref:
     # gtf file with transcripts
-    annotation: "/home/tdidomenico/projects/bollito_data/genome/gencode.vM20.annotation.gtf.gz"
-    sequence: "/home/tdidomenico/projects/bollito_data/genome/GRCm38.primary_assembly.genome.fa.gz"
+    annotation: "/home/tdidomenico/projects/bollito_data/genome/gencode.vM20.annotation.gtf"
+    sequence: "/home/tdidomenico/projects/bollito_data/genome/GRCm38.primary_assembly.genome.fa"
 
 whitelist: "res/whitelists/3M-february-2018.txt"
 
