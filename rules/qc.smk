@@ -7,7 +7,7 @@ rule rseqc_gtf2bed:
         bed="out/qc/rseqc/annotation.bed",
         db=temp("out/qc/rseqc/annotation.db")
     log:
-        "logs/rseqc_gtf2bed.log"
+        "log/rseqc_gtf2bed.log"
     conda:
         "../envs/gffutils.yaml"
     script:
@@ -15,16 +15,16 @@ rule rseqc_gtf2bed:
        
 rule rseqc_junction_annotation:
     input:
-        bam="out/star/{sample}-{unit}/Aligned.out.bam",
+        bam="out/star/{sample}/Aligned.sortedByCoord.out.bam",
         bed="out/qc/rseqc/annotation.bed"
     output:
-        "out/qc/rseqc/{sample}-{unit}.junctionanno.junction.bed"
+        "out/qc/rseqc/{sample}.junctionanno.junction.bed"
     priority: 1
     log:
-        "logs/rseqc/rseqc_junction_annotation/{sample}-{unit}.log"
+        "log/rseqc/rseqc_junction_annotation/{sample}.log"
     params:
         extra=r"-q 255",  # STAR uses 255 as a score for unique mappers
-        prefix="out/qc/rseqc/{sample}-{unit}.junctionanno"
+        prefix="out/qc/rseqc/{sample}.junctionanno"
     conda:
         "../envs/rseqc.yaml"
     shell:
@@ -33,16 +33,16 @@ rule rseqc_junction_annotation:
         
 rule rseqc_junction_saturation:
     input:
-        bam="out/star/{sample}-{unit}/Aligned.out.bam",
+        bam="out/star/{sample}/Aligned.sortedByCoord.out.bam",
         bed="out/qc/rseqc/annotation.bed"
     output:
-        "out/qc/rseqc/{sample}-{unit}.junctionsat.junctionSaturation_plot.pdf"
+        "out/qc/rseqc/{sample}.junctionsat.junctionSaturation_plot.pdf"
     priority: 1
     log:
-        "logs/rseqc/rseqc_junction_saturation/{sample}-{unit}.log"
+        "log/rseqc/rseqc_junction_saturation/{sample}.log"
     params:
         extra=r"-q 255", 
-        prefix="out/qc/rseqc/{sample}-{unit}.junctionsat"
+        prefix="out/qc/rseqc/{sample}.junctionsat"
     conda:
         "../envs/rseqc.yaml"
     shell:
@@ -51,12 +51,12 @@ rule rseqc_junction_saturation:
 
 rule rseqc_stat:
     input:
-        "out/star/{sample}-{unit}/Aligned.out.bam",
+        "out/star/{sample}/Aligned.sortedByCoord.out.bam",
     output:
-        "out/qc/rseqc/{sample}-{unit}.stats.txt"
+        "out/qc/rseqc/{sample}.stats.txt"
     priority: 1
     log:
-        "logs/rseqc/rseqc_stat/{sample}-{unit}.log"
+        "log/rseqc/rseqc_stat/{sample}.log"
     conda:
         "../envs/rseqc.yaml"
     shell:
@@ -65,13 +65,13 @@ rule rseqc_stat:
         
 rule rseqc_infer:
     input:
-        bam="out/star/{sample}-{unit}/Aligned.out.bam",
+        bam="out/star/{sample}/Aligned.sortedByCoord.out.bam",
         bed="out/qc/rseqc/annotation.bed"
     output:
-        "out/qc/rseqc/{sample}-{unit}.infer_experiment.txt"
+        "out/qc/rseqc/{sample}.infer_experiment.txt"
     priority: 1
     log:
-        "logs/rseqc/rseqc_infer/{sample}-{unit}.log"
+        "log/rseqc/rseqc_infer/{sample}.log"
     conda:
         "../envs/rseqc.yaml"
     shell:
@@ -79,15 +79,15 @@ rule rseqc_infer:
         
 rule rseqc_innerdis:
     input:
-        bam="out/star/{sample}-{unit}/Aligned.out.bam",
+        bam="out/star/{sample}/Aligned.sortedByCoord.out.bam",
         bed="out/qc/rseqc/annotation.bed"
     output:
-        "out/qc/rseqc/{sample}-{unit}.inner_distance_freq.inner_distance.txt"
+        "out/qc/rseqc/{sample}.inner_distance_freq.inner_distance.txt"
     priority: 1
     log:
-        "logs/rseqc/rseqc_innerdis/{sample}-{unit}.log"
+        "log/rseqc/rseqc_innerdis/{sample}.log"
     params:
-        prefix="out/qc/rseqc/{sample}-{unit}.inner_distance_freq"
+        prefix="out/qc/rseqc/{sample}.inner_distance_freq"
     conda:
         "../envs/rseqc.yaml"
     shell:
@@ -95,13 +95,13 @@ rule rseqc_innerdis:
 
 rule rseqc_readdis:
     input:
-        bam="out/star/{sample}-{unit}/Aligned.out.bam",
+        bam="out/star/{sample}/Aligned.sortedByCoord.out.bam",
         bed="out/qc/rseqc/annotation.bed"
     output:
-        "out/qc/rseqc/{sample}-{unit}.readdistribution.txt"
+        "out/qc/rseqc/{sample}.readdistribution.txt"
     priority: 1
     log:
-        "logs/rseqc/rseqc_readdis/{sample}-{unit}.log"
+        "log/rseqc/rseqc_readdis/{sample}.log"
     conda:
         "../envs/rseqc.yaml"
     shell:
@@ -109,14 +109,14 @@ rule rseqc_readdis:
 
 rule rseqc_readdup:
     input:
-        "out/star/{sample}-{unit}/Aligned.out.bam"
+        "out/star/{sample}/Aligned.sortedByCoord.out.bam"
     output:
-        "out/qc/rseqc/{sample}-{unit}.readdup.DupRate_plot.pdf"
+        "out/qc/rseqc/{sample}.readdup.DupRate_plot.pdf"
     priority: 1
     log:
-        "logs/rseqc/rseqc_readdup/{sample}-{unit}.log"
+        "log/rseqc/rseqc_readdup/{sample}.log"
     params:
-        prefix="out/qc/rseqc/{sample}-{unit}.readdup"
+        prefix="out/qc/rseqc/{sample}.readdup"
     conda:
         "../envs/rseqc.yaml"
     shell:
@@ -124,14 +124,14 @@ rule rseqc_readdup:
         
 rule rseqc_readgc:
     input:
-        "out/star/{sample}-{unit}/Aligned.out.bam"
+        "out/star/{sample}/Aligned.sortedByCoord.out.bam"
     output:
-        "out/qc/rseqc/{sample}-{unit}.readgc.GC_plot.pdf"
+        "out/qc/rseqc/{sample}.readgc.GC_plot.pdf"
     priority: 1
     log:
-        "logs/rseqc/rseqc_readgc/{sample}-{unit}.log"
+        "log/rseqc/rseqc_readgc/{sample}.log"
     params:
-        prefix="out/qc/rseqc/{sample}-{unit}.readgc"
+        prefix="out/qc/rseqc/{sample}.readgc"
     conda:
         "../envs/rseqc.yaml"
     shell:
@@ -139,19 +139,19 @@ rule rseqc_readgc:
         
 rule multiqc:
     input:
-        expand("out/star/{unit.sample}-{unit.unit}/Aligned.out.bam", unit=units.itertuples()),
-        expand("out/qc/rseqc/{unit.sample}-{unit.unit}.junctionanno.junction.bed", unit=units.itertuples()),
-        expand("out/qc/rseqc/{unit.sample}-{unit.unit}.junctionsat.junctionSaturation_plot.pdf", unit=units.itertuples()),
-        expand("out/qc/rseqc/{unit.sample}-{unit.unit}.infer_experiment.txt", unit=units.itertuples()),
-        expand("out/qc/rseqc/{unit.sample}-{unit.unit}.stats.txt", unit=units.itertuples()),
-        expand("out/qc/rseqc/{unit.sample}-{unit.unit}.inner_distance_freq.inner_distance.txt", unit=units.itertuples()),
-        expand("out/qc/rseqc/{unit.sample}-{unit.unit}.readdistribution.txt", unit=units.itertuples()),
-        expand("out/qc/rseqc/{unit.sample}-{unit.unit}.readdup.DupRate_plot.pdf", unit=units.itertuples()),
-        expand("out/qc/rseqc/{unit.sample}-{unit.unit}.readgc.GC_plot.pdf", unit=units.itertuples()),
-        expand("logs/rseqc/rseqc_junction_annotation/{unit.sample}-{unit.unit}.log", unit=units.itertuples())
+        expand("out/star/{unit.sample}/Aligned.sortedByCoord.out.bam", unit=units.itertuples()),
+        expand("out/qc/rseqc/{unit.sample}.junctionanno.junction.bed", unit=units.itertuples()),
+        expand("out/qc/rseqc/{unit.sample}.junctionsat.junctionSaturation_plot.pdf", unit=units.itertuples()),
+        expand("out/qc/rseqc/{unit.sample}.infer_experiment.txt", unit=units.itertuples()),
+        expand("out/qc/rseqc/{unit.sample}.stats.txt", unit=units.itertuples()),
+        expand("out/qc/rseqc/{unit.sample}.inner_distance_freq.inner_distance.txt", unit=units.itertuples()),
+        expand("out/qc/rseqc/{unit.sample}.readdistribution.txt", unit=units.itertuples()),
+        expand("out/qc/rseqc/{unit.sample}.readdup.DupRate_plot.pdf", unit=units.itertuples()),
+        expand("out/qc/rseqc/{unit.sample}.readgc.GC_plot.pdf", unit=units.itertuples()),
+        expand("log/rseqc/rseqc_junction_annotation/{unit.sample}.log", unit=units.itertuples())
     output:
         "out/qc/multiqc_report.html"
     log:
-        "logs/multiqc.log"
+        "log/multiqc.log"
     wrapper:
         "0.31.1/bio/multiqc"

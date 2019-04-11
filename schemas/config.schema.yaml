@@ -30,14 +30,11 @@ properties:
         properties:
             star: 
                 type: string
-            cutadapt-se:
-                type: string
-            cutadapt-pe:
+            cutadapt:
                 type: string
         required:
             - star
-            - cutadapt-se
-            - cutadapt-pe
+            - cutadapt
 
 required:
     - samples
