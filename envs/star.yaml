@@ -4,4 +4,4 @@ channels:
     - main
 
 dependencies:
-    - star=2.7.0e
+    - star=2.7.0f
