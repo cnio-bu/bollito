@@ -13,6 +13,5 @@ ref:
 whitelist: "res/whitelists/3M-february-2018.txt"
 
 params:
-    star: "--soloType Droplet --readFilesCommand gunzip -c --soloFeatures Gene --outFilterMultimapNmax 50 --winAnchorMultimapNmax 50 --alignEndsType EndToEnd --outSAMtype BAM SortedByCoordinate --outReadsUnmapped Fastx --soloUMIlen 12"
-    cutadapt-se: ""
-    cutadapt-pe: "-G GCAGTGGTATCAACGCAGAGTACATGGG"
+    star: "--soloType Droplet --soloFeatures Gene --outFilterMultimapNmax 50 --winAnchorMultimapNmax 50 --alignEndsType EndToEnd --outReadsUnmapped Fastx --soloUMIlen 12 --outSAMtype BAM SortedByCoordinate"
+    cutadapt: "-G GCAGTGGTATCAACGCAGAGTACATGGG -m 16"
