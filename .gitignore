@@ -7,3 +7,5 @@ res/data
 tmp
 jdk*
 launch.sh
+samples.tsv
+units.tsv

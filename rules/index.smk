@@ -10,6 +10,8 @@ rule index:
     conda: "../envs/star.yaml"
     resources:
         mem = 64000
+    benchmark:
+        "log/index/index.bmk"
     log:
         stdout="log/index/log.out",
         stderr="log/index/log.err"

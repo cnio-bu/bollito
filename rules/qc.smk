@@ -1,4 +1,19 @@
 # RSEQC
+#
+rule fastqc:
+    input:
+        lambda wc: units.loc[(wc.sample,wc.unit)]['fq' + wc.read]
+    output:
+        html="out/qc/fastqc/{sample}.{unit}.r{read}_fastqc.html",
+        zip="out/qc/fastqc/{sample}.{unit}.r{read}_fastqc.zip"
+    threads: 4
+    params: "-t 4"
+    log:
+        "log/fastqc/{sample}.{unit}.r{read}.log"
+    benchmark:
+        "log/fastqc/{sample}.{unit}.r{read}.bmk"
+    wrapper:
+        "0.32.0/bio/fastqc"
 
 rule rseqc_gtf2bed:
     input:
@@ -8,6 +23,8 @@ rule rseqc_gtf2bed:
         db=temp("out/qc/rseqc/annotation.db")
     log:
         "log/rseqc_gtf2bed.log"
+    benchmark:
+        "log/rseqc_gtf2bed.bmk"
     conda:
         "../envs/gffutils.yaml"
     script:
@@ -22,6 +39,8 @@ rule rseqc_junction_annotation:
     priority: 1
     log:
         "log/rseqc/rseqc_junction_annotation/{sample}.log"
+    benchmark:
+        "log/rseqc/rseqc_junction_annotation/{sample}.bmk"
     params:
         extra=r"-q 255",  # STAR uses 255 as a score for unique mappers
         prefix="out/qc/rseqc/{sample}.junctionanno"
@@ -40,6 +59,8 @@ rule rseqc_junction_saturation:
     priority: 1
     log:
         "log/rseqc/rseqc_junction_saturation/{sample}.log"
+    benchmark:
+        "log/rseqc/rseqc_junction_saturation/{sample}.bmk"
     params:
         extra=r"-q 255", 
         prefix="out/qc/rseqc/{sample}.junctionsat"
@@ -57,6 +78,8 @@ rule rseqc_stat:
     priority: 1
     log:
         "log/rseqc/rseqc_stat/{sample}.log"
+    benchmark:
+        "log/rseqc/rseqc_stat/{sample}.bmk"
     conda:
         "../envs/rseqc.yaml"
     shell:
@@ -72,6 +95,8 @@ rule rseqc_infer:
     priority: 1
     log:
         "log/rseqc/rseqc_infer/{sample}.log"
+    benchmark:
+        "log/rseqc/rseqc_infer/{sample}.bmk"
     conda:
         "../envs/rseqc.yaml"
     shell:
@@ -86,6 +111,8 @@ rule rseqc_innerdis:
     priority: 1
     log:
         "log/rseqc/rseqc_innerdis/{sample}.log"
+    benchmark:
+        "log/rseqc/rseqc_innerdis/{sample}.bmk"
     params:
         prefix="out/qc/rseqc/{sample}.inner_distance_freq"
     conda:
@@ -102,6 +129,8 @@ rule rseqc_readdis:
     priority: 1
     log:
         "log/rseqc/rseqc_readdis/{sample}.log"
+    benchmark:
+        "log/rseqc/rseqc_readdis/{sample}.bmk"
     conda:
         "../envs/rseqc.yaml"
     shell:
@@ -115,8 +144,12 @@ rule rseqc_readdup:
     priority: 1
     log:
         "log/rseqc/rseqc_readdup/{sample}.log"
+    benchmark:
+        "log/rseqc/rseqc_readdup/{sample}.bmk"
     params:
         prefix="out/qc/rseqc/{sample}.readdup"
+    resources:
+        mem=16000
     conda:
         "../envs/rseqc.yaml"
     shell:
@@ -130,6 +163,8 @@ rule rseqc_readgc:
     priority: 1
     log:
         "log/rseqc/rseqc_readgc/{sample}.log"
+    benchmark:
+        "log/rseqc/rseqc_readgc/{sample}.bmk"
     params:
         prefix="out/qc/rseqc/{sample}.readgc"
     conda:
@@ -139,6 +174,8 @@ rule rseqc_readgc:
         
 rule multiqc:
     input:
+        expand("out/qc/fastqc/{unit.sample}.{unit.unit}.r{read}_fastqc.zip", unit=units.itertuples(), read=('1','2')),
+        expand("log/cutadapt/{unit.sample}.out", unit=units.itertuples()),
         expand("out/star/{unit.sample}/Aligned.sortedByCoord.out.bam", unit=units.itertuples()),
         expand("out/qc/rseqc/{unit.sample}.junctionanno.junction.bed", unit=units.itertuples()),
         expand("out/qc/rseqc/{unit.sample}.junctionsat.junctionSaturation_plot.pdf", unit=units.itertuples()),
@@ -151,7 +188,11 @@ rule multiqc:
         expand("log/rseqc/rseqc_junction_annotation/{unit.sample}.log", unit=units.itertuples())
     output:
         "out/qc/multiqc_report.html"
+    params:
+        "--title '{}' --comment '{}' --config res/config/multiqc_config.yaml".format(config["project_name"],config["project_desc"])
+    benchmark:
+        "log/multiqc.bmk"
     log:
         "log/multiqc.log"
     wrapper:
-        "0.31.1/bio/multiqc"
+        "0.32.0/bio/multiqc"

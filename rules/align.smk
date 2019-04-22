@@ -9,12 +9,16 @@ rule align:
         "out/star/{sample}/Aligned.sortedByCoord.out.bam"
     log:
         "log/star/{sample}.log"
+    benchmark:
+        "log/star/{sample}.bmk"
     params:
         # path to STAR reference genome index
         index="out/index",
         # optional parameters
         extra="--sjdbGTFfile {} --soloCBwhitelist {} {}".format(config["ref"]["annotation"], config["whitelist"], config["params"]["star"])
     threads: 24
+    resources:
+        mem=64000
     conda: "../envs/star.yaml"
     wrapper: 
         "file:wrappers/star/align"

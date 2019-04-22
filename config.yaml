@@ -1,3 +1,6 @@
+project_name: 'CNIO test'
+project_desc: 'Test run of the CNIO Chromium 10X'
+
 # path or URL to sample sheet (TSV format, columns: sample, condition, ...)
 samples: samples.tsv
 # path or URL to sequencing unit sheet (TSV format, columns: sample, unit, fq1, fq2)
