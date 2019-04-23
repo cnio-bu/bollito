@@ -1,3 +1,14 @@
 custom_logo: 'res/img/Logo_BU.png'
 custom_logo_url: 'https://bioinformatics.cnio.es/'
 custom_logo_title: 'CNIO Bioinformatics Unit'
+
+title: "CNIO Bioinformatics Unit Single-Cell sequencing QC."
+subtitle: "Summary of sequencing data pre and post-alignment."
+intro_text: ""
+report_comment: ""
+
+report_header_info:
+    - Contact E-mail: 'bioinformatica@cnio.es'
+    - Application Type: 'Single Cell RNA-seq'
+    - Sequencing Platform: 'Chromium 10X'
+    - Sequencing Setup: '1x28+1x55'

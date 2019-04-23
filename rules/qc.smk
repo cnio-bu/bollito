@@ -189,7 +189,7 @@ rule multiqc:
     output:
         "out/qc/multiqc_report.html"
     params:
-        "--title '{}' --comment '{}' --config res/config/multiqc_config.yaml".format(config["project_name"],config["project_desc"])
+        "--config res/config/multiqc_config.yaml"
     benchmark:
         "log/multiqc.bmk"
     log:
