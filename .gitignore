@@ -1,7 +1,6 @@
 .snakemake
-log
+projects
 log.txt*
-out
 *.swp
 res/data
 res/genome
