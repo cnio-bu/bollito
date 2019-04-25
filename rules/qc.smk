@@ -4,14 +4,14 @@ rule fastqc:
     input:
         lambda wc: units.loc[(wc.sample,wc.unit)]['fq' + wc.read]
     output:
-        html="out/qc/fastqc/{sample}.{unit}.r{read}_fastqc.html",
-        zip="out/qc/fastqc/{sample}.{unit}.r{read}_fastqc.zip"
+        html="{}/qc/fastqc/{{sample}}.{{unit}}.r{{read}}_fastqc.html".format(OUTDIR),
+        zip="{}/qc/fastqc/{{sample}}.{{unit}}.r{{read}}_fastqc.zip".format(OUTDIR)
     threads: 4
     params: "-t 4"
     log:
-        "log/fastqc/{sample}.{unit}.r{read}.log"
+        "{}/fastqc/{{sample}}.{{unit}}.r{{read}}.log".format(LOGDIR)
     benchmark:
-        "log/fastqc/{sample}.{unit}.r{read}.bmk"
+        "{}/fastqc/{{sample}}.{{unit}}.r{{read}}.bmk".format(LOGDIR)
     wrapper:
         "0.32.0/bio/fastqc"
 
@@ -19,12 +19,12 @@ rule rseqc_gtf2bed:
     input:
         config["ref"]["annotation"]
     output:
-        bed="out/qc/rseqc/annotation.bed",
-        db=temp("out/qc/rseqc/annotation.db")
+        bed="{}/qc/rseqc/annotation.bed".format(OUTDIR),
+        db=temp("{}/qc/rseqc/annotation.db".format(OUTDIR))
     log:
-        "log/rseqc_gtf2bed.log"
+        "{}/rseqc/rseqc_gtf2bed.log".format(LOGDIR)
     benchmark:
-        "log/rseqc_gtf2bed.bmk"
+        "{}/rseqc/rseqc_gtf2bed.bmk".format(LOGDIR)
     conda:
         "../envs/gffutils.yaml"
     script:
@@ -32,18 +32,18 @@ rule rseqc_gtf2bed:
        
 rule rseqc_junction_annotation:
     input:
-        bam="out/star/{sample}/Aligned.sortedByCoord.out.bam",
-        bed="out/qc/rseqc/annotation.bed"
+        bam="{}/star/{{sample}}/Aligned.sortedByCoord.out.bam".format(OUTDIR),
+        bed="{}/qc/rseqc/annotation.bed".format(OUTDIR)
     output:
-        "out/qc/rseqc/{sample}.junctionanno.junction.bed"
+        "{}/qc/rseqc/{{sample}}.junctionanno.junction.bed".format(OUTDIR)
     priority: 1
     log:
-        "log/rseqc/rseqc_junction_annotation/{sample}.log"
+        "{}/rseqc/rseqc_junction_annotation/{{sample}}.log".format(LOGDIR)
     benchmark:
-        "log/rseqc/rseqc_junction_annotation/{sample}.bmk"
+        "{}/rseqc/rseqc_junction_annotation/{{sample}}.bmk".format(LOGDIR)
     params:
         extra=r"-q 255",  # STAR uses 255 as a score for unique mappers
-        prefix="out/qc/rseqc/{sample}.junctionanno"
+        prefix="{}/qc/rseqc/{{sample}}.junctionanno".format(OUTDIR)
     conda:
         "../envs/rseqc.yaml"
     shell:
@@ -52,34 +52,36 @@ rule rseqc_junction_annotation:
         
 rule rseqc_junction_saturation:
     input:
-        bam="out/star/{sample}/Aligned.sortedByCoord.out.bam",
-        bed="out/qc/rseqc/annotation.bed"
+        bam="{}/star/{{sample}}/Aligned.sortedByCoord.out.bam".format(OUTDIR),
+        bed="{}/qc/rseqc/annotation.bed".format(OUTDIR)
     output:
-        "out/qc/rseqc/{sample}.junctionsat.junctionSaturation_plot.pdf"
+        "{}/qc/rseqc/{{sample}}.junctionsat.junctionSaturation_plot.pdf".format(OUTDIR)
     priority: 1
     log:
-        "log/rseqc/rseqc_junction_saturation/{sample}.log"
+        "{}/rseqc/rseqc_junction_saturation/{{sample}}.log".format(LOGDIR)
     benchmark:
-        "log/rseqc/rseqc_junction_saturation/{sample}.bmk"
+        "{}/rseqc/rseqc_junction_saturation/{{sample}}.bmk".format(LOGDIR)
     params:
         extra=r"-q 255", 
-        prefix="out/qc/rseqc/{sample}.junctionsat"
+        prefix="{}/qc/rseqc/{{sample}}.junctionsat".format(OUTDIR)
     conda:
         "../envs/rseqc.yaml"
+    resources:
+        mem=8000
     shell:
         "junction_saturation.py {params.extra} -i {input.bam} -r {input.bed} -o {params.prefix} "
         "> {log} 2>&1"
 
 rule rseqc_stat:
     input:
-        "out/star/{sample}/Aligned.sortedByCoord.out.bam",
+        "{}/star/{{sample}}/Aligned.sortedByCoord.out.bam".format(OUTDIR),
     output:
-        "out/qc/rseqc/{sample}.stats.txt"
+        "{}/qc/rseqc/{{sample}}.stats.txt".format(OUTDIR)
     priority: 1
     log:
-        "log/rseqc/rseqc_stat/{sample}.log"
+        "{}/rseqc/rseqc_stat/{{sample}}.log".format(LOGDIR)
     benchmark:
-        "log/rseqc/rseqc_stat/{sample}.bmk"
+        "{}/rseqc/rseqc_stat/{{sample}}.bmk".format(LOGDIR)
     conda:
         "../envs/rseqc.yaml"
     shell:
@@ -88,15 +90,15 @@ rule rseqc_stat:
         
 rule rseqc_infer:
     input:
-        bam="out/star/{sample}/Aligned.sortedByCoord.out.bam",
-        bed="out/qc/rseqc/annotation.bed"
+        bam="{}/star/{{sample}}/Aligned.sortedByCoord.out.bam".format(OUTDIR),
+        bed="{}/qc/rseqc/annotation.bed".format(OUTDIR)
     output:
-        "out/qc/rseqc/{sample}.infer_experiment.txt"
+        "{}/qc/rseqc/{{sample}}.infer_experiment.txt".format(OUTDIR)
     priority: 1
     log:
-        "log/rseqc/rseqc_infer/{sample}.log"
+        "{}/rseqc/rseqc_infer/{{sample}}.log".format(LOGDIR)
     benchmark:
-        "log/rseqc/rseqc_infer/{sample}.bmk"
+        "{}/rseqc/rseqc_infer/{{sample}}.bmk".format(LOGDIR)
     conda:
         "../envs/rseqc.yaml"
     shell:
@@ -104,17 +106,17 @@ rule rseqc_infer:
         
 rule rseqc_innerdis:
     input:
-        bam="out/star/{sample}/Aligned.sortedByCoord.out.bam",
-        bed="out/qc/rseqc/annotation.bed"
+        bam="{}/star/{{sample}}/Aligned.sortedByCoord.out.bam".format(OUTDIR),
+        bed="{}/qc/rseqc/annotation.bed".format(OUTDIR)
     output:
-        "out/qc/rseqc/{sample}.inner_distance_freq.inner_distance.txt"
+        "{}/qc/rseqc/{{sample}}.inner_distance_freq.inner_distance.txt".format(OUTDIR)
     priority: 1
     log:
-        "log/rseqc/rseqc_innerdis/{sample}.log"
+        "{}/rseqc/rseqc_innerdis/{{sample}}.log".format(LOGDIR)
     benchmark:
-        "log/rseqc/rseqc_innerdis/{sample}.bmk"
+        "{}/rseqc/rseqc_innerdis/{{sample}}.bmk".format(LOGDIR)
     params:
-        prefix="out/qc/rseqc/{sample}.inner_distance_freq"
+        prefix="{}/qc/rseqc/{{sample}}.inner_distance_freq".format(OUTDIR)
     conda:
         "../envs/rseqc.yaml"
     shell:
@@ -122,15 +124,15 @@ rule rseqc_innerdis:
 
 rule rseqc_readdis:
     input:
-        bam="out/star/{sample}/Aligned.sortedByCoord.out.bam",
-        bed="out/qc/rseqc/annotation.bed"
+        bam="{}/star/{{sample}}/Aligned.sortedByCoord.out.bam".format(OUTDIR),
+        bed="{}/qc/rseqc/annotation.bed".format(OUTDIR)
     output:
-        "out/qc/rseqc/{sample}.readdistribution.txt"
+        "{}/qc/rseqc/{{sample}}.readdistribution.txt".format(OUTDIR)
     priority: 1
     log:
-        "log/rseqc/rseqc_readdis/{sample}.log"
+        "{}/rseqc/rseqc_readdis/{{sample}}.log".format(LOGDIR)
     benchmark:
-        "log/rseqc/rseqc_readdis/{sample}.bmk"
+        "{}/rseqc/rseqc_readdis/{{sample}}.bmk".format(LOGDIR)
     conda:
         "../envs/rseqc.yaml"
     shell:
@@ -138,18 +140,18 @@ rule rseqc_readdis:
 
 rule rseqc_readdup:
     input:
-        "out/star/{sample}/Aligned.sortedByCoord.out.bam"
+        "{}/star/{{sample}}/Aligned.sortedByCoord.out.bam".format(OUTDIR)
     output:
-        "out/qc/rseqc/{sample}.readdup.DupRate_plot.pdf"
+        "{}/qc/rseqc/{{sample}}.readdup.DupRate_plot.pdf".format(OUTDIR)
     priority: 1
     log:
-        "log/rseqc/rseqc_readdup/{sample}.log"
+        "{}/rseqc/rseqc_readdup/{{sample}}.log".format(LOGDIR)
     benchmark:
-        "log/rseqc/rseqc_readdup/{sample}.bmk"
+        "{}/rseqc/rseqc_readdup/{{sample}}.bmk".format(LOGDIR)
     params:
-        prefix="out/qc/rseqc/{sample}.readdup"
+        prefix="{}/qc/rseqc/{{sample}}.readdup".format(OUTDIR)
     resources:
-        mem=16000
+        mem=32000
     conda:
         "../envs/rseqc.yaml"
     shell:
@@ -157,16 +159,16 @@ rule rseqc_readdup:
         
 rule rseqc_readgc:
     input:
-        "out/star/{sample}/Aligned.sortedByCoord.out.bam"
+        "{}/star/{{sample}}/Aligned.sortedByCoord.out.bam".format(OUTDIR)
     output:
-        "out/qc/rseqc/{sample}.readgc.GC_plot.pdf"
+        "{}/qc/rseqc/{{sample}}.readgc.GC_plot.pdf".format(OUTDIR)
     priority: 1
     log:
-        "log/rseqc/rseqc_readgc/{sample}.log"
+        "{}/rseqc/rseqc_readgc/{{sample}}.log".format(LOGDIR)
     benchmark:
-        "log/rseqc/rseqc_readgc/{sample}.bmk"
+        "{}/rseqc/rseqc_readgc/{{sample}}.bmk".format(LOGDIR)
     params:
-        prefix="out/qc/rseqc/{sample}.readgc"
+        prefix="{}/qc/rseqc/{{sample}}.readgc".format(OUTDIR)
     conda:
         "../envs/rseqc.yaml"
     shell:
@@ -174,25 +176,25 @@ rule rseqc_readgc:
         
 rule multiqc:
     input:
-        expand("out/qc/fastqc/{unit.sample}.{unit.unit}.r{read}_fastqc.zip", unit=units.itertuples(), read=('1','2')),
-        expand("log/cutadapt/{unit.sample}.out", unit=units.itertuples()),
-        expand("out/star/{unit.sample}/Aligned.sortedByCoord.out.bam", unit=units.itertuples()),
-        expand("out/qc/rseqc/{unit.sample}.junctionanno.junction.bed", unit=units.itertuples()),
-        expand("out/qc/rseqc/{unit.sample}.junctionsat.junctionSaturation_plot.pdf", unit=units.itertuples()),
-        expand("out/qc/rseqc/{unit.sample}.infer_experiment.txt", unit=units.itertuples()),
-        expand("out/qc/rseqc/{unit.sample}.stats.txt", unit=units.itertuples()),
-        expand("out/qc/rseqc/{unit.sample}.inner_distance_freq.inner_distance.txt", unit=units.itertuples()),
-        expand("out/qc/rseqc/{unit.sample}.readdistribution.txt", unit=units.itertuples()),
-        expand("out/qc/rseqc/{unit.sample}.readdup.DupRate_plot.pdf", unit=units.itertuples()),
-        expand("out/qc/rseqc/{unit.sample}.readgc.GC_plot.pdf", unit=units.itertuples()),
-        expand("log/rseqc/rseqc_junction_annotation/{unit.sample}.log", unit=units.itertuples())
+        expand("{OUTDIR}/qc/fastqc/{unit.sample}.{unit.unit}.r{read}_fastqc.zip", unit=units.itertuples(), read=('1','2'), OUTDIR=OUTDIR),
+        expand("{LOGDIR}/cutadapt/{unit.sample}.out", unit=units.itertuples(), LOGDIR=LOGDIR),
+        expand("{OUTDIR}/star/{unit.sample}/Aligned.sortedByCoord.out.bam", unit=units.itertuples(), OUTDIR=OUTDIR),
+        expand("{OUTDIR}/qc/rseqc/{unit.sample}.junctionanno.junction.bed", unit=units.itertuples(), OUTDIR=OUTDIR),
+        expand("{OUTDIR}/qc/rseqc/{unit.sample}.junctionsat.junctionSaturation_plot.pdf", unit=units.itertuples(), OUTDIR=OUTDIR),
+        expand("{OUTDIR}/qc/rseqc/{unit.sample}.infer_experiment.txt", unit=units.itertuples(), OUTDIR=OUTDIR),
+        expand("{OUTDIR}/qc/rseqc/{unit.sample}.stats.txt", unit=units.itertuples(), OUTDIR=OUTDIR),
+        expand("{OUTDIR}/qc/rseqc/{unit.sample}.inner_distance_freq.inner_distance.txt", unit=units.itertuples(), OUTDIR=OUTDIR),
+        expand("{OUTDIR}/qc/rseqc/{unit.sample}.readdistribution.txt", unit=units.itertuples(), OUTDIR=OUTDIR),
+        expand("{OUTDIR}/qc/rseqc/{unit.sample}.readdup.DupRate_plot.pdf", unit=units.itertuples(), OUTDIR=OUTDIR),
+        expand("{OUTDIR}/qc/rseqc/{unit.sample}.readgc.GC_plot.pdf", unit=units.itertuples(), OUTDIR=OUTDIR),
+        expand("{LOGDIR}/rseqc/rseqc_junction_annotation/{unit.sample}.log", unit=units.itertuples(), LOGDIR=LOGDIR)
     output:
-        "out/qc/multiqc_report.html"
+        "{}/qc/multiqc_report.html".format(OUTDIR)
     params:
         "--config res/config/multiqc_config.yaml"
     benchmark:
-        "log/multiqc.bmk"
+        "{}/multiqc.bmk".format(LOGDIR)
     log:
-        "log/multiqc.log"
+        "{}/multiqc.log".format(LOGDIR)
     wrapper:
         "0.32.0/bio/multiqc"

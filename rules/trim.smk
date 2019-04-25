@@ -5,28 +5,28 @@ rule merge:
     input:
         get_fastq
     output:
-        "out/merged/{sample}.r{group}.fastq.gz"
+        "{}/merged/{{sample}}.r{{group}}.fastq.gz".format(OUTDIR)
     log:
-        "log/merge/{sample}.r{group}.log"
+        "{}/merge/{{sample}}.r{{group}}.log".format(LOGDIR)
     benchmark:
-        "log/merge/{sample}.r{group}.bmk"
+        "{}/merge/{{sample}}.r{{group}}.bmk".format(LOGDIR)
     shell:"""
         cat {input} > {output} 2> {log}
     """
 
 rule cutadapt:
     input:
-        fastq1="out/merged/{sample}.r1.fastq.gz",
-        fastq2="out/merged/{sample}.r2.fastq.gz"
+        fastq1="{}/merged/{{sample}}.r1.fastq.gz".format(OUTDIR),
+        fastq2="{}/merged/{{sample}}.r2.fastq.gz".format(OUTDIR)
     output:
-        fastq1="out/trimmed/{sample}.r1.fastq.gz",
-        fastq2="out/trimmed/{sample}.r2.fastq.gz",
-        qc="log/cutadapt/{sample}.out"
+        fastq1="{}/trimmed/{{sample}}.r1.fastq.gz".format(OUTDIR),
+        fastq2="{}/trimmed/{{sample}}.r2.fastq.gz".format(OUTDIR),
+        qc="{}/cutadapt/{{sample}}.out".format(LOGDIR)
     params:
         config["params"]["cutadapt"]
     log:
-        "log/cutadapt/{sample}.err"
+        "{}/cutadapt/{{sample}}.err".format(LOGDIR)
     benchmark:
-        "log/cutadapt/{sample}.bmk"
+        "{}/cutadapt/{{sample}}.bmk".format(LOGDIR)
     wrapper:
         "0.32.0/bio/cutadapt/pe"

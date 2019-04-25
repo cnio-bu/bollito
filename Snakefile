@@ -9,6 +9,9 @@ min_version("5.1.2")
 configfile: "config.yaml"
 validate(config, schema="schemas/config.schema.yaml")
 
+OUTDIR = config["outdir"]
+LOGDIR = config["logdir"]
+
 samples = pd.read_csv(config["samples"], sep="\t").set_index("sample", drop=False)
 validate(samples, schema="schemas/samples.schema.yaml")
 
@@ -21,7 +24,7 @@ validate(units, schema="schemas/units.schema.yaml")
 
 rule all:
     input:
-        "out/qc/multiqc_report.html"
+        "{}/qc/multiqc_report.html".format(OUTDIR)
 
 
 ##### setup singularity #####

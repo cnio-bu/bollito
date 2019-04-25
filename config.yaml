@@ -5,6 +5,9 @@ samples: samples.tsv
 # sample).
 units: units.tsv
 
+outdir: 'out'
+logdir: 'log'
+
 ref:
     # gtf file with transcripts
     annotation: "/home/tdidomenico/projects/bollito_data/genome/gencode.vM20.annotation.gtf"
