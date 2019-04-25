@@ -25,8 +25,10 @@ rules:
     cutadapt:
         params: "-G GCAGTGGTATCAACGCAGAGTACATGGG -m 16"
     fastq_screen_indexes:
+        threads: 8
         outdir: "res"
     fastq_screen:
+        threads: 8
         disabled: false
     star_index:
         res:
