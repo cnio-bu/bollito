@@ -6,8 +6,11 @@ rule fastqc:
     output:
         html="{}/qc/fastqc/{{sample}}.{{unit}}.r{{read}}_fastqc.html".format(OUTDIR),
         zip="{}/qc/fastqc/{{sample}}.{{unit}}.r{{read}}_fastqc.zip".format(OUTDIR)
-    threads: 4
-    params: "-t 4"
+    threads: get_resource("fastqc","threads")
+    resources:
+        mem=get_resource("fastqc","mem")
+    params: 
+        lambda wc: "-t {}".format(get_resource("fastqc","threads"))
     log:
         "{}/fastqc/{{sample}}.{{unit}}.r{{read}}.log".format(LOGDIR)
     benchmark:
@@ -27,6 +30,9 @@ rule rseqc_gtf2bed:
         "{}/rseqc/rseqc_gtf2bed.bmk".format(LOGDIR)
     conda:
         "../envs/gffutils.yaml"
+    threads: get_resource("rseqc_gtf2bed","threads")
+    resources:
+        mem=get_resource("rseqc_gtf2bed","mem")
     script:
         "../scripts/gtf2bed.py"
        
@@ -46,6 +52,9 @@ rule rseqc_junction_annotation:
         prefix="{}/qc/rseqc/{{sample}}.junctionanno".format(OUTDIR)
     conda:
         "../envs/rseqc.yaml"
+    threads: get_resource("rseqc_junction_annotation","threads")
+    resources:
+        mem=get_resource("rseqc_junction_annotation","mem")
     shell:
         "junction_annotation.py {params.extra} -i {input.bam} -r {input.bed} -o {params.prefix} "
         "> {log[0]} 2>&1"
@@ -66,8 +75,9 @@ rule rseqc_junction_saturation:
         prefix="{}/qc/rseqc/{{sample}}.junctionsat".format(OUTDIR)
     conda:
         "../envs/rseqc.yaml"
+    threads: get_resource("rseqc_junction_saturation","threads")
     resources:
-        mem=8000
+        mem=get_resource("rseqc_junction_saturation","mem")
     shell:
         "junction_saturation.py {params.extra} -i {input.bam} -r {input.bed} -o {params.prefix} "
         "> {log} 2>&1"
@@ -84,6 +94,9 @@ rule rseqc_stat:
         "{}/rseqc/rseqc_stat/{{sample}}.bmk".format(LOGDIR)
     conda:
         "../envs/rseqc.yaml"
+    threads: get_resource("rseqc_stat","threads")
+    resources:
+        mem=get_resource("rseqc_stat","mem")
     shell:
         "bam_stat.py -i {input} > {output} 2> {log}"
 
@@ -101,6 +114,9 @@ rule rseqc_infer:
         "{}/rseqc/rseqc_infer/{{sample}}.bmk".format(LOGDIR)
     conda:
         "../envs/rseqc.yaml"
+    threads: get_resource("rseqc_infer","threads")
+    resources:
+        mem=get_resource("rseqc_infer","mem")
     shell:
         "infer_experiment.py -r {input.bed} -i {input.bam} > {output} 2> {log}"
         
@@ -119,6 +135,9 @@ rule rseqc_innerdis:
         prefix="{}/qc/rseqc/{{sample}}.inner_distance_freq".format(OUTDIR)
     conda:
         "../envs/rseqc.yaml"
+    threads: get_resource("rseqc_innerdis","threads")
+    resources:
+        mem=get_resource("rseqc_innerdis","mem")
     shell:
         "inner_distance.py -r {input.bed} -i {input.bam} -o {params.prefix} > {log} 2>&1"
 
@@ -135,6 +154,9 @@ rule rseqc_readdis:
         "{}/rseqc/rseqc_readdis/{{sample}}.bmk".format(LOGDIR)
     conda:
         "../envs/rseqc.yaml"
+    threads: get_resource("rseqc_readdis","threads")
+    resources:
+        mem=get_resource("rseqc_readdis","mem")
     shell:
         "read_distribution.py -r {input.bed} -i {input.bam} > {output} 2> {log}"
 
@@ -150,10 +172,11 @@ rule rseqc_readdup:
         "{}/rseqc/rseqc_readdup/{{sample}}.bmk".format(LOGDIR)
     params:
         prefix="{}/qc/rseqc/{{sample}}.readdup".format(OUTDIR)
-    resources:
-        mem=32000
     conda:
         "../envs/rseqc.yaml"
+    threads: get_resource("rseqc_readdup","threads")
+    resources:
+        mem=get_resource("rseqc_readdup","mem")
     shell:
         "read_duplication.py -i {input} -o {params.prefix} > {log} 2>&1"
         
@@ -171,6 +194,9 @@ rule rseqc_readgc:
         prefix="{}/qc/rseqc/{{sample}}.readgc".format(OUTDIR)
     conda:
         "../envs/rseqc.yaml"
+    threads: get_resource("rseqc_readgc","threads")
+    resources:
+        mem=get_resource("rseqc_readgc","mem")
     shell:
         "read_GC.py -i {input} -o {params.prefix} > {log} 2>&1"
         
@@ -196,5 +222,8 @@ rule multiqc:
         "{}/multiqc.bmk".format(LOGDIR)
     log:
         "{}/multiqc.log".format(LOGDIR)
+    threads: get_resource("multiqc","threads")
+    resources:
+        mem=get_resource("multiqc","mem")
     wrapper:
         "0.32.0/bio/multiqc"

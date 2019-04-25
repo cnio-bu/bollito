@@ -19,6 +19,12 @@ units = pd.read_csv(config["units"], dtype=str, sep="\t").set_index(["sample", "
 units.index = units.index.set_levels([i.astype(str) for i in units.index.levels])  # enforce str in index
 validate(units, schema="schemas/units.schema.yaml")
 
+def get_resource(rule,resource):
+    try:
+        return config["resources"][rule][resource]
+    except KeyError:
+        return config["resources"]["default"][resource]
+
 
 ##### target rules #####
 

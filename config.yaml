@@ -5,8 +5,8 @@ samples: samples.tsv
 # sample).
 units: units.tsv
 
-outdir: 'out'
-logdir: 'log'
+outdir: 'test/out'
+logdir: 'test/log'
 
 ref:
     # gtf file with transcripts
@@ -21,3 +21,19 @@ params:
     star: "--soloType Droplet --soloFeatures Gene --outFilterMultimapNmax 50 --winAnchorMultimapNmax 50 --alignEndsType EndToEnd --outReadsUnmapped Fastx --soloUMIlen 12 --outSAMtype BAM SortedByCoordinate"
     cutadapt: "-G GCAGTGGTATCAACGCAGAGTACATGGG -m 16"
 
+resources:
+    default:
+        threads: 1
+        mem: 2000
+    star_index:
+        threads: 6
+        mem: 64000
+    star:
+        threads: 6
+        mem: 64000
+    fastqc:
+        threads: 4
+    rseqc_junction_saturation:
+        mem: 8000
+    rseqc_readdup:
+        mem: 24000

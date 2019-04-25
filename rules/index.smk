@@ -1,20 +1,20 @@
-rule index:
+rule star_index:
     shadow:"shallow"
     input:
         config["ref"]["sequence"]
     output:
-        f="{}/index/genomeParameters.txt".format(OUTDIR)
+        f="{}/star_index/genomeParameters.txt".format(OUTDIR)
     params:
-        d="{}/index".format(OUTDIR)
-    threads: 6
+        d="{}/star_index".format(OUTDIR)
     conda: "../envs/star.yaml".format(OUTDIR)
     resources:
-        mem = 64000
+        mem=get_resource("star_index","mem")
+    threads: get_resource("star_index","threads")
     benchmark:
-        "{}/index/index.bmk".format(LOGDIR)
+        "{}/star_index/star_index.bmk".format(LOGDIR)
     log:
-        stdout="{}/index/log.out".format(LOGDIR),
-        stderr="{}/index/log.err".format(LOGDIR)
+        stdout="{}/star_index/log.out".format(LOGDIR),
+        stderr="{}/star_index/log.err".format(LOGDIR)
     shell:"""
         STAR --runThreadN {threads} --runMode genomeGenerate --genomeDir {params.d} --genomeFastaFiles {input} > {log.stdout} 2> {log.stderr}
     """

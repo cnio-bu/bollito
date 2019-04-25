@@ -1,4 +1,4 @@
-rule align:
+rule star:
     input:
         #star needs the barcoding read (read 1) to be in the second position
         fq1="{}/trimmed/{{sample}}.r2.fastq.gz".format(OUTDIR),
@@ -16,9 +16,9 @@ rule align:
         index="out/index",
         # optional parameters
         extra="--sjdbGTFfile {} --soloCBwhitelist {} {}".format(config["ref"]["annotation"], config["whitelist"], config["params"]["star"])
-    threads: 24
+    threads: get_resource("star","threads")
     resources:
-        mem=64000
+        mem=get_resource("star","mem")
     conda: "../envs/star.yaml"
     wrapper: 
         "file:wrappers/star/align"
