@@ -15,7 +15,7 @@ rule star:
         # path to STAR reference genome index
         index="out/index",
         # optional parameters
-        extra="--sjdbGTFfile {} --soloCBwhitelist {} {}".format(config["ref"]["annotation"], config["whitelist"], config["params"]["star"])
+        extra="--sjdbGTFfile {} --soloCBwhitelist {} {}".format(config["ref"]["annotation"], config["whitelist"], config["rules"]["star"]["params"])
     threads: get_resource("star","threads")
     resources:
         mem=get_resource("star","mem")

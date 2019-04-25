@@ -5,8 +5,8 @@ samples: samples.tsv
 # sample).
 units: units.tsv
 
-outdir: 'test/out'
-logdir: 'test/log'
+outdir: 'projects/test/out'
+logdir: 'projects/test/log'
 
 ref:
     # gtf file with transcripts
@@ -17,23 +17,32 @@ ref:
 # barcodes whitelist
 whitelist: "res/whitelists/3M-february-2018.txt"
 
-params:
-    star: "--soloType Droplet --soloFeatures Gene --outFilterMultimapNmax 50 --winAnchorMultimapNmax 50 --alignEndsType EndToEnd --outReadsUnmapped Fastx --soloUMIlen 12 --outSAMtype BAM SortedByCoordinate"
-    cutadapt: "-G GCAGTGGTATCAACGCAGAGTACATGGG -m 16"
-
-resources:
+rules:
     default:
-        threads: 1
-        mem: 2000
+        res:
+            threads: 1
+            mem: 2000
+    cutadapt:
+        params: "-G GCAGTGGTATCAACGCAGAGTACATGGG -m 16"
+    fastq_screen_indexes:
+        outdir: "res"
+    fastq_screen:
+        disabled: false
     star_index:
-        threads: 6
-        mem: 64000
+        res:
+            threads: 6
+            mem: 64000
     star:
-        threads: 6
-        mem: 64000
+        params: "--soloType Droplet --soloFeatures Gene --outFilterMultimapNmax 50 --winAnchorMultimapNmax 50 --alignEndsType EndToEnd --outReadsUnmapped Fastx --soloUMIlen 12 --outSAMtype BAM SortedByCoordinate"
+        res:
+            threads: 6
+            mem: 64000
     fastqc:
-        threads: 4
+        res:
+            threads: 4
     rseqc_junction_saturation:
-        mem: 8000
+        res:
+            mem: 8000
     rseqc_readdup:
-        mem: 24000
+        res:
+            mem: 24000

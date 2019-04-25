@@ -26,7 +26,7 @@ rule cutadapt:
         fastq2="{}/trimmed/{{sample}}.r2.fastq.gz".format(OUTDIR),
         qc="{}/cutadapt/{{sample}}.out".format(LOGDIR)
     params:
-        config["params"]["cutadapt"]
+        config["rules"]["cutadapt"]["params"]
     log:
         "{}/cutadapt/{{sample}}.err".format(LOGDIR)
     benchmark:

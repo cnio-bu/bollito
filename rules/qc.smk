@@ -18,6 +18,47 @@ rule fastqc:
     wrapper:
         "0.32.0/bio/fastqc"
 
+rule fastq_screen_indexes:
+    output:
+        "res/FastQ_Screen_Genomes/fastq_screen.conf"
+    log:
+        "{}/fastq_screen_indexes.log".format(LOGDIR)
+    benchmark:
+        "{}/fastq_screen_indexes.bmk".format(LOGDIR)
+    conda:
+        "../envs/fastq_screen.yaml"
+    threads: get_resource("fastq_screen_indexes","threads")
+    params:
+        outdir=config["rules"]["fastq_screen_indexes"]["outdir"]
+    resources:
+        mem=get_resource("fastq_screen_indexes","mem")
+    shell:"""
+        fastq_screen --get_genomes --outdir {params.outdir}/ &> {log}
+    """
+
+rule fastq_screen:
+    input:
+        lambda wc: units.loc[(wc.sample,wc.unit)]['fq' + wc.read],
+        conf="res/FastQ_Screen_Genomes/fastq_screen.conf"
+    output:
+        txt="{}/qc/fastq_screen/{{sample}}.{{unit}}.r{{read}}.fastq_screen.txt".format(OUTDIR),
+        png="{}/qc/fastq_screen/{{sample}}.{{unit}}.r{{read}}.fastq_screen.png".format(OUTDIR)
+    log:
+        "{}/fastq_screen/{{sample}}.{{unit}}.r{{read}}.log".format(LOGDIR)
+    benchmark:
+        "{}/fastq_screen/{{sample}}.{{unit}}.r{{read}}.bmk".format(LOGDIR)
+    conda:
+        "../envs/fastq_screen.yaml"
+    threads: get_resource("fastq_screen","threads")
+    resources:
+        mem=get_resource("fastq_screen","mem")
+    params:
+        fastq_screen_config="res/fastq_screen_indexes/fastq_screen.conf",
+        subset=100000,
+        aligner='bowtie2'
+    wrapper:
+        "0.32.0/bio/fastq_screen"
+
 rule rseqc_gtf2bed:
     input:
         config["ref"]["annotation"]
@@ -199,21 +240,30 @@ rule rseqc_readgc:
         mem=get_resource("rseqc_readgc","mem")
     shell:
         "read_GC.py -i {input} -o {params.prefix} > {log} 2>&1"
+
+def multiqc_input(wc):
+    f = expand("{OUTDIR}/qc/fastqc/{unit.sample}.{unit.unit}.r{read}_fastqc.zip", unit=units.itertuples(), read=('1','2'), OUTDIR=OUTDIR)
+    f += expand("{LOGDIR}/cutadapt/{unit.sample}.out", unit=units.itertuples(), LOGDIR=LOGDIR) 
+    f += expand("{OUTDIR}/star/{unit.sample}/Aligned.sortedByCoord.out.bam", unit=units.itertuples(), OUTDIR=OUTDIR)
+    f += expand("{OUTDIR}/qc/rseqc/{unit.sample}.junctionanno.junction.bed", unit=units.itertuples(), OUTDIR=OUTDIR)
+    f += expand("{OUTDIR}/qc/rseqc/{unit.sample}.junctionsat.junctionSaturation_plot.pdf", unit=units.itertuples(), OUTDIR=OUTDIR)
+    f += expand("{OUTDIR}/qc/rseqc/{unit.sample}.infer_experiment.txt", unit=units.itertuples(), OUTDIR=OUTDIR)
+    f += expand("{OUTDIR}/qc/rseqc/{unit.sample}.stats.txt", unit=units.itertuples(), OUTDIR=OUTDIR)
+    f += expand("{OUTDIR}/qc/rseqc/{unit.sample}.inner_distance_freq.inner_distance.txt", unit=units.itertuples(), OUTDIR=OUTDIR)
+    f += expand("{OUTDIR}/qc/rseqc/{unit.sample}.readdistribution.txt", unit=units.itertuples(), OUTDIR=OUTDIR)
+    f += expand("{OUTDIR}/qc/rseqc/{unit.sample}.readdup.DupRate_plot.pdf", unit=units.itertuples(), OUTDIR=OUTDIR)
+    f += expand("{OUTDIR}/qc/rseqc/{unit.sample}.readgc.GC_plot.pdf", unit=units.itertuples(), OUTDIR=OUTDIR)
+    f += expand("{LOGDIR}/rseqc/rseqc_junction_annotation/{unit.sample}.log", unit=units.itertuples(), LOGDIR=LOGDIR)
+    try:
+        if not config["rules"]["fastq_screen"]["disabled"]:
+            f += expand("{OUTDIR}/qc/fastq_screen/{unit.sample}.{unit.unit}.r{read}_fastq_screen.png", unit=units.itertuples(), read=('1','2'), OUTDIR=OUTDIR)
+    except KeyError:
+        print("FASTQ_SCREEN disabled by config file. Skipping...")
+    return f
         
 rule multiqc:
     input:
-        expand("{OUTDIR}/qc/fastqc/{unit.sample}.{unit.unit}.r{read}_fastqc.zip", unit=units.itertuples(), read=('1','2'), OUTDIR=OUTDIR),
-        expand("{LOGDIR}/cutadapt/{unit.sample}.out", unit=units.itertuples(), LOGDIR=LOGDIR),
-        expand("{OUTDIR}/star/{unit.sample}/Aligned.sortedByCoord.out.bam", unit=units.itertuples(), OUTDIR=OUTDIR),
-        expand("{OUTDIR}/qc/rseqc/{unit.sample}.junctionanno.junction.bed", unit=units.itertuples(), OUTDIR=OUTDIR),
-        expand("{OUTDIR}/qc/rseqc/{unit.sample}.junctionsat.junctionSaturation_plot.pdf", unit=units.itertuples(), OUTDIR=OUTDIR),
-        expand("{OUTDIR}/qc/rseqc/{unit.sample}.infer_experiment.txt", unit=units.itertuples(), OUTDIR=OUTDIR),
-        expand("{OUTDIR}/qc/rseqc/{unit.sample}.stats.txt", unit=units.itertuples(), OUTDIR=OUTDIR),
-        expand("{OUTDIR}/qc/rseqc/{unit.sample}.inner_distance_freq.inner_distance.txt", unit=units.itertuples(), OUTDIR=OUTDIR),
-        expand("{OUTDIR}/qc/rseqc/{unit.sample}.readdistribution.txt", unit=units.itertuples(), OUTDIR=OUTDIR),
-        expand("{OUTDIR}/qc/rseqc/{unit.sample}.readdup.DupRate_plot.pdf", unit=units.itertuples(), OUTDIR=OUTDIR),
-        expand("{OUTDIR}/qc/rseqc/{unit.sample}.readgc.GC_plot.pdf", unit=units.itertuples(), OUTDIR=OUTDIR),
-        expand("{LOGDIR}/rseqc/rseqc_junction_annotation/{unit.sample}.log", unit=units.itertuples(), LOGDIR=LOGDIR)
+        multiqc_input
     output:
         "{}/qc/multiqc_report.html".format(OUTDIR)
     params:
