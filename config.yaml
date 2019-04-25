@@ -10,9 +10,11 @@ logdir: 'log'
 
 ref:
     # gtf file with transcripts
-    annotation: "/home/tdidomenico/projects/bollito_data/genome/gencode.vM20.annotation.gtf"
-    sequence: "/home/tdidomenico/projects/bollito_data/genome/GRCm38.primary_assembly.genome.fa"
+    annotation: "res/genome/gencode.vM20.annotation.gtf"
+    # fasta file of the genome
+    sequence: "res/genome/GRCm38.primary_assembly.genome.fa"
 
+# barcodes whitelist
 whitelist: "res/whitelists/3M-february-2018.txt"
 
 params:

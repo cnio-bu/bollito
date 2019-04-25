@@ -4,8 +4,7 @@ log.txt*
 out
 *.swp
 res/data
+res/genome
 tmp
 jdk*
 launch.sh
-samples.tsv
-units.tsv
