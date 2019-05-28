@@ -12,7 +12,7 @@ before_script:
   - conda create -q -n snakemake snakemake python=${PYTHON_VERSION}
   - conda create -q -n prep star
   - source activate prep
-  - mkdir .test/data/ref/genome.chr19.fa_idx
+  - mkdir -p .test/data/ref/genome.chr19.fa_idx
   - STAR --runMode genomeGenerate --genomeDir .test/data/ref/genome.chr19.fa_idx --genomeFastaFiles .test/data/ref/genome.chr19.fa
 
 tests:
