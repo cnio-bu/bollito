@@ -9,11 +9,11 @@ outdir: 'out/test'
 logdir: 'log/test'
 
 ref:
-    annotation: "/scratch/resources/annotations/m_musculus/gencode.vM20.annotation.gtf"
-    idx: "/scratch/resources/genomes/m_musculus/GRCm38.primary_assembly.genome_idx_star"
+    annotation: "data/ref/annotation.chr19.gtf"
+    idx: "data/ref/genome.chr19.fa_idx"
 
 # barcodes whitelist
-whitelist: "res/whitelists/3M-february-2018.txt"
+whitelist: "../res/whitelists/3M-february-2018.txt"
 
 rules:
     default:

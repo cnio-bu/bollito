@@ -43,7 +43,6 @@ report: "report/workflow.rst"
 
 ##### load rules #####
 
-include: "rules/index.smk"
 include: "rules/trim.smk"
 include: "rules/align.smk"
 include: "rules/qc.smk"

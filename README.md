@@ -11,9 +11,9 @@ The system is pre-configured to run an example based on sample data available fr
 
 The pipeline can optionally run FASTQ\_SCREEN to check the samples for contamination.
 
-To disable it use the config file option ```config["rules"]["fastq\_screen"]["disabled"]```.
+To disable it use the config file option ```config["rules"]["fastq_screen"]["disabled"]```.
 
 Config file pointing to indexes should be placed in a directory named ```config['rules']['fastq_screen_indexes']['outdir']/FastQ_Screen_Genomes```.
 
-If the rule is enabled and no config file provided, default indexes will be download using the command ```fastq_screen --get_genomes```.
+If the rule is enabled and no config file provided, default indexes will be downloaded using the command ```fastq_screen --get_genomes```.
 

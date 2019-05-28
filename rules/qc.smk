@@ -243,7 +243,8 @@ rule rseqc_readgc:
 
 def multiqc_input(wc):
     f = expand("{OUTDIR}/qc/fastqc/{unit.sample}.{unit.unit}.r{read}_fastqc.zip", unit=units.itertuples(), read=('1','2'), OUTDIR=OUTDIR)
-    f += expand("{LOGDIR}/cutadapt/{unit.sample}.out", unit=units.itertuples(), LOGDIR=LOGDIR) 
+    if not config["rules"]["cutadapt"]["disabled"]:
+        f += expand("{LOGDIR}/cutadapt/{unit.sample}.out", unit=units.itertuples(), LOGDIR=LOGDIR) 
     f += expand("{OUTDIR}/star/{unit.sample}/Aligned.sortedByCoord.out.bam", unit=units.itertuples(), OUTDIR=OUTDIR)
     f += expand("{OUTDIR}/qc/rseqc/{unit.sample}.junctionanno.junction.bed", unit=units.itertuples(), OUTDIR=OUTDIR)
     f += expand("{OUTDIR}/qc/rseqc/{unit.sample}.junctionsat.junctionSaturation_plot.pdf", unit=units.itertuples(), OUTDIR=OUTDIR)

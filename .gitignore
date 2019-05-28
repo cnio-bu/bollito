@@ -1,5 +1,6 @@
 .snakemake
-projects
+out
+log
 log.txt*
 *.swp
 res/data
