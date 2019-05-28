@@ -11,10 +11,6 @@ before_script:
   - conda config --add channels conda-forge
   - conda create -q -n snakemake snakemake python=${PYTHON_VERSION}
   - conda create -q -n prep star
-  - source activate snakemake
-  - cd .test/data
-  - snakemake --use-conda
-  - cd
   - source activate prep
   - STAR --runMode genomeGenerate --genomeDir .test/data/ref/genome.chr19.fa_idx --genomeFastaFiles .test/data/ref/genome.chr19.fa
 
