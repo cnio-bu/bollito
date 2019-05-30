@@ -26,8 +26,3 @@ tests:
     # run the workflow
     # put a test case into the subfolder .test (e.g., use https://gitlab.com/bu_cnio/ngs-test-data as a submodule)
     - snakemake --use-conda --directory .test
-  artifacts:
-    paths:
-        - log/star/brain.log
-        - log/star/heart.log
-    expire_in: 1 week
