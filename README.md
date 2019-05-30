@@ -1,5 +1,7 @@
 # Bollito SC pipeline
 
+[![pipeline status](https://gitlab.com/bu_cnio/bollito/badges/master/pipeline.svg)](https://gitlab.com/bu_cnio/bollito/commits/master)
+
 ## Test data
 
 The system is pre-configured to run an example based on sample data available from 10X Genomics. The required datasets can be found at these URLS. Please update the "units.tsv" file to point at the data as needed.
