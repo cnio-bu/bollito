@@ -1,3 +1,3 @@
 [submodule ".test/data"]
 	path = .test/data
-	url = ../sc-test-data.git
+	url = https://gitlab.com/bu_cnio/sc-test-data.git

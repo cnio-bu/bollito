@@ -47,3 +47,5 @@ rules:
     rseqc_readdup:
         res:
             mem: 24000
+    multiqc:
+        params: "--config res/config/multiqc_config.yaml"

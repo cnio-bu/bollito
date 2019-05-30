@@ -18,6 +18,5 @@ rule star:
     threads: get_resource("star","threads")
     resources:
         mem=get_resource("star","mem")
-    conda: "../envs/star.yaml"
     wrapper: 
-        "file:wrappers/star/align"
+        "https://bitbucket.org/tdido/snakemake-wrappers/raw/2c0dc0c2b5bb8ecade2beafadd74972db520723f/bio/star/align"

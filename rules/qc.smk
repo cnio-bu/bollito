@@ -268,7 +268,7 @@ rule multiqc:
     output:
         "{}/qc/multiqc_report.html".format(OUTDIR)
     params:
-        "--config res/config/multiqc_config.yaml"
+        config["rules"]["multiqc"]["params"]
     benchmark:
         "{}/multiqc.bmk".format(LOGDIR)
     log:

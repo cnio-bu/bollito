@@ -5,15 +5,15 @@ samples: samples.tsv
 # sample).
 units: units.tsv
 
-outdir: 'out/test'
-logdir: 'log/test'
+outdir: 'out'
+logdir: 'log'
 
 ref:
     annotation: "data/ref/annotation.chr19.gtf"
     idx: "data/ref/genome.chr19.fa_idx"
 
 # barcodes whitelist
-whitelist: "../res/whitelists/3M-february-2018.txt"
+whitelist: "res/whitelists/3M-february-2018.txt"
 
 rules:
     default:
@@ -28,7 +28,7 @@ rules:
         outdir: "res"
     fastq_screen:
         threads: 8
-        disabled: false
+        disabled: true
     star_index:
         res:
             threads: 6
@@ -47,3 +47,5 @@ rules:
     rseqc_readdup:
         res:
             mem: 24000
+    multiqc:
+        params: "--config ../res/config/multiqc_config.yaml"

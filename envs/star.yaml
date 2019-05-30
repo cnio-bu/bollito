@@ -1,7 +1,0 @@
-channels:
-    - bioconda
-    - conda-forge
-    - main
-
-dependencies:
-    - star=2.7.0f
