@@ -1,10 +1,9 @@
 library("Seurat")
 library("dplyr")
 library("reticulate")
-py_install("umap-learn") # UMAP needs to be installed in order to run the RunUMAP function
 
 # Read STARSolo output
-data_dir = "Solo.out/"
+data_dir = paste0(snakemake@params[["input_dir"]],"/","Solo.out")
 expression_matrix <- Read10X(data.dir = data_dir)
 
 # Seurat folder
@@ -15,7 +14,7 @@ folders = c("1_Preprocessing", "2_CellTypeID", "3_Postprocessing", "4_DEGs", "5_
 
 # A.1. Beginning with Seurat: http://satijalab.org/seurat/
 ## Creating a seurat object 
-seurat = CreateSeuratObject(expression_matrix, project = "project-name", min.features = 200) # Here, a project name should be added by the user. 
+seurat = CreateSeuratObject(expression_matrix, project = "bollito", min.features = 200) # Here, a project name should be added by the user. 
 
 # A.2. Preprocessing: Filter out low-quality cells
 dir.create(paste0(dir.name, "/", folders[1]))

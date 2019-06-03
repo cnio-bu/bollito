@@ -49,3 +49,6 @@ rules:
             mem: 24000
     multiqc:
         params: "--config res/config/multiqc_config.yaml"
+    seurat:
+        res:
+            mem: 8000

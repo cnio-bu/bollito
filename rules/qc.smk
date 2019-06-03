@@ -16,7 +16,7 @@ rule fastqc:
     benchmark:
         "{}/fastqc/{{sample}}.{{unit}}.r{{read}}.bmk".format(LOGDIR)
     wrapper:
-        "0.32.0/bio/fastqc"
+        "0.35.0/bio/fastqc"
 
 rule fastq_screen_indexes:
     output:
@@ -57,7 +57,7 @@ rule fastq_screen:
         subset=100000,
         aligner='bowtie2'
     wrapper:
-        "0.32.0/bio/fastq_screen"
+        "0.35.0/bio/fastq_screen"
 
 rule rseqc_gtf2bed:
     input:
@@ -277,4 +277,4 @@ rule multiqc:
     resources:
         mem=get_resource("multiqc","mem")
     wrapper:
-        "0.32.0/bio/multiqc"
+        "0.35.0/bio/multiqc"

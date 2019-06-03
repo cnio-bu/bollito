@@ -26,7 +26,8 @@ def get_resource(rule,resource):
 
 rule all:
     input:
-        "{}/qc/multiqc_report.html".format(OUTDIR),
+        f"{OUTDIR}/qc/multiqc_report.html",
+        expand("{OUTDIR}/seurat/{unit.sample}.done", unit=units.itertuples(),OUTDIR=OUTDIR)
 
 
 ##### setup singularity #####
@@ -46,3 +47,4 @@ report: "report/workflow.rst"
 include: "rules/trim.smk"
 include: "rules/align.smk"
 include: "rules/qc.smk"
+include: "rules/analyse.smk"
