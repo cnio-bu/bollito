@@ -1,7 +1,6 @@
 channels:
-    - bioconda
     - conda-forge
-    - main
+    - bioconda
 
 dependencies:
-    - fastq-screen
+    - fastq-screen=0.13.0

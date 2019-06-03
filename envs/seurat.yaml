@@ -1,0 +1,9 @@
+channels:
+    - conda-forge
+    - bioconda
+
+dependencies:
+    - seurat=3.0.1
+    - r-dplyr=0.8.1
+    - r-reticulate=1.12
+    - umap-learn=0.3.9
