@@ -2,7 +2,8 @@ rule seurat:
     input:
         "{}/star/{{sample}}/Aligned.sortedByCoord.out.bam".format(OUTDIR)
     output:
-        "{}/seurat/{{sample}}.done".format(OUTDIR)
+        dir="{}/seurat/{{sample}}".format(OUTDIR),
+        flag="{}/seurat/{{sample}}.done".format(OUTDIR)
     log:
         "{}/seurat/{{sample}}.log".format(LOGDIR)
     benchmark:

@@ -8,8 +8,7 @@ expression_matrix <- Read10X(data.dir = data_dir)
 
 # Seurat folder
 sys_date = Sys.Date()
-dir.create(paste0(data_dir, sys_date,"_Seurat_Analysis"))
-dir.name = paste0(data_dir, sys_date ,"_Seurat_Analysis")
+dir.name = snakemake@output[["dir"]]
 folders = c("1_Preprocessing", "2_CellTypeID", "3_Postprocessing", "4_DEGs", "5_Cell_cycle")
 
 # A.1. Beginning with Seurat: http://satijalab.org/seurat/
@@ -17,7 +16,7 @@ folders = c("1_Preprocessing", "2_CellTypeID", "3_Postprocessing", "4_DEGs", "5_
 seurat = CreateSeuratObject(expression_matrix, project = "bollito", min.features = 200) # Here, a project name should be added by the user. 
 
 # A.2. Preprocessing: Filter out low-quality cells
-dir.create(paste0(dir.name, "/", folders[1]))
+dir.create(paste0(dir.name, "/", folders[1]),recursive=TRUE)
 
 ## 1. Mitochondrial genes - check levels of expression for mt genes 
 seurat[["percent.mt"]] <- PercentageFeatureSet(seurat, pattern = "^mt-")
@@ -63,7 +62,7 @@ dev.off()
 
 
 # A.3. Start of Identifying Cell Types
-dir.create(paste0(dir.name, "/", folders[2]))
+dir.create(paste0(dir.name, "/", folders[2]),recursive=TRUE)
 
 ## 1. Scale the data
 all.genes <- rownames(seurat)
@@ -90,7 +89,7 @@ ElbowPlot(seurat, ndims = 100)
 dev.off()
 
 # A.4. Post-processing
-dir.create(paste0(dir.name, "/", folders[3]))
+dir.create(paste0(dir.name, "/", folders[3]),recursive=TRUE)
 
 ## 1. FindClusters
 set.seed(8458)
@@ -112,7 +111,7 @@ DimPlot(seurat.no.umap, pt.size = 1, label = TRUE, label.size = 5) + RotatedAxis
 dev.off()
 
 # A.5 Differentially expressed genes between clusters. 
-dir.create(paste0(dir.name, "/", folders[4]))
+dir.create(paste0(dir.name, "/", folders[4]),recursive=TRUE)
 
 ## 1. Table on differentially expressed genes - using basic filterings
 for (i in 1:length(unique(Idents(seurat)))){
