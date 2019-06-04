@@ -47,8 +47,6 @@ rule fastq_screen:
         "{}/fastq_screen/{{sample}}.{{unit}}.r{{read}}.log".format(LOGDIR)
     benchmark:
         "{}/fastq_screen/{{sample}}.{{unit}}.r{{read}}.bmk".format(LOGDIR)
-    conda:
-        "../envs/fastq_screen.yaml"
     threads: get_resource("fastq_screen","threads")
     resources:
         mem=get_resource("fastq_screen","mem")
