@@ -1,3 +1,0 @@
-sample	unit	fq1	fq2
-brain	r1	data/reads/brain.chr19.r1.fastq.gz	data/reads/brain.chr19.r2.fastq.gz
-heart	r1	data/reads/heart.chr19.r1.fastq.gz	data/reads/heart.chr19.r2.fastq.gz

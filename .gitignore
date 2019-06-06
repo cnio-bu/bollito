@@ -10,3 +10,6 @@ jdk*
 launch.sh
 res/FastQ_Screen_Genomes/*
 !res/FastQ_Screen_Genomes/fastq_screen.conf
+samples.tsv
+units.tsv
+config.yaml
