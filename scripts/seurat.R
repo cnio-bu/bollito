@@ -1,6 +1,7 @@
 library("Seurat")
 library("dplyr")
 library("reticulate")
+library("ggplot2")
 
 # Read STARSolo output
 data_dir = paste0(snakemake@params[["input_dir"]],"/","Solo.out")
@@ -72,7 +73,7 @@ seurat <- ScaleData(seurat, features = all.genes)
 seurat <- RunPCA(seurat, features = VariableFeatures(object = seurat), npcs = 100) # This result could all be saved in a table. 
 # print(seurat[["pca"]], dims = 1:5, nfeatures = 5)
 ## Visualizing PCA in Different Ways: elbow plot most variable genes 
-pdf(paste0(dir.name, "/", folders[3], "/VizPCA_most_Vargenes.pdf"), paper = "USr", width = 14)
+pdf(paste0(dir.name, "/", folders[2], "/VizPCA_most_Vargenes.pdf"), paper = "USr", width = 14)
 VizDimLoadings(seurat, dims = 1:2, reduction = "pca")
 DimPlot(seurat, reduction = "pca")
 DimHeatmap(seurat, dims = 1, cells = 500, balanced = TRUE)
@@ -83,7 +84,7 @@ dev.off()
 seurat <- JackStraw(seurat, num.replicate = 100, dims = 100)
 seurat <- ScoreJackStraw(seurat, dims = 1:100)
 ## Visualize
-pdf(paste0(dir.name, "/", folders[3], "/Significant_PCs.png"))
+pdf(paste0(dir.name, "/", folders[2], "/Significant_PCs.png"))
 JackStrawPlot(seurat, dims = 1:100)
 ElbowPlot(seurat, ndims = 100)
 dev.off()
