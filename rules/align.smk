@@ -19,4 +19,4 @@ rule star:
     resources:
         mem=get_resource("star","mem")
     wrapper: 
-        "https://bitbucket.org/tdido/snakemake-wrappers/raw/2c0dc0c2b5bb8ecade2beafadd74972db520723f/bio/star/align"
+        "68ce581/bio/star/align"
