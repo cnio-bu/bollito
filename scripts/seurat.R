@@ -37,7 +37,7 @@ CombinePlots(plots = list(plot1, plot2))
 dev.off()
 
 ## 4. We should apply these filterings once the QC plots (GenePlot and Violin plots) have been checked.
-seurat <- subset(seurat, subset = nFeature_RNA > 200 & nFeature_RNA < 6000 & percent.mt < 5 & percent.ribo < 40 )
+try(seurat <- subset(seurat, subset = nFeature_RNA > 200 & nFeature_RNA < 6000 & percent.mt < 5 & percent.ribo < 40 ), silent=FALSE)
 
 ## 6. QC: violin plots - After
 pdf(paste0(dir.name, "/",folders[1], "/VlnPlot_distr_nGene_nUMI_percentMit_afterFiltering.pdf"), paper= "USr", width = 20)
