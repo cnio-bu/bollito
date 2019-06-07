@@ -1,15 +1,15 @@
 rule seurat:
     input:
-        "{}/star/{{sample}}/Aligned.sortedByCoord.out.bam".format(OUTDIR)
+        f"{OUTDIR}/star/{{sample}}/Aligned.sortedByCoord.out.bam"
     output:
-        dir="{}/seurat/{{sample}}".format(OUTDIR),
-        flag="{}/seurat/{{sample}}.done".format(OUTDIR)
+        data=f"{OUTDIR}/seurat/{{sample}}/seurat_final.rds"
     log:
-        "{}/seurat/{{sample}}.log".format(LOGDIR)
+        f"{LOGDIR}/seurat/{{sample}}.log"
     benchmark:
-        "{}/seurat/{{sample}}.bmk".format(LOGDIR)
+        f"{LOGDIR}/seurat/{{sample}}.bmk"
     params:
-        input_dir = lambda wc: "{}/star/{}".format(OUTDIR,wc.sample)
+        input_dir = lambda wc: "{}/star/{}".format(OUTDIR,wc.sample),
+        output_dir = f"{OUTDIR}/seurat/{{sample}}"
     threads: get_resource("seurat","threads")
     conda: "../envs/seurat.yaml"
     resources:
