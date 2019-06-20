@@ -1,12 +1,12 @@
-rule seurat:
+rule preQC:
     input:
         f"{OUTDIR}/star/{{sample}}/Aligned.sortedByCoord.out.bam"
     output:
-        data=f"{OUTDIR}/seurat/{{sample}}/seurat_final.rds"
+        data=f"{OUTDIR}/seurat/{{sample}}/seurat_pre-QC.rds"
     log:
-        f"{LOGDIR}/seurat/{{sample}}.log"
+        f"{LOGDIR}/seurat/{{sample}}.preQC.log"
     benchmark:
-        f"{LOGDIR}/seurat/{{sample}}.bmk"
+        f"{LOGDIR}/seurat/{{sample}}.preQC.bmk"
     params:
         input_dir = lambda wc: "{}/star/{}".format(OUTDIR,wc.sample),
         output_dir = f"{OUTDIR}/seurat/{{sample}}"
@@ -15,4 +15,5 @@ rule seurat:
     resources:
         mem=get_resource("seurat","mem")
     script: 
-        "../scripts/seurat.R"
+        "../scripts/1_PreQC.R"
+
