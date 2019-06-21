@@ -15,6 +15,3 @@ conda create -y -q -n bollito_prep star=2.7.1a
 source activate bollito_prep
 mkdir data/ref/genome.chr19.fa_idx
 STAR --runMode genomeGenerate --genomeDir data/ref/genome.chr19.fa_idx --genomeFastaFiles data/ref/genome.chr19.fa --genomeSAindexNbases 11
-conda deactivate
-conda remove -n bollito_snakemake --all -y
-conda remove -n bollito_prep --all -y

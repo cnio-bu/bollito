@@ -13,5 +13,5 @@ before_script:
 tests:
   stage: test
   script:
-    - source activate snakemake
+    - source activate bollito_snakemake
     - snakemake --use-conda --directory .test
