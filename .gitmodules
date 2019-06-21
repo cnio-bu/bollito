@@ -1,3 +1,0 @@
-[submodule ".test/data"]
-	path = .test/data
-	url = ../sc-test-data.git
