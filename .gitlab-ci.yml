@@ -7,7 +7,7 @@ before_script:
   - conda config --add channels bioconda
   - conda config --add channels conda-forge
   - cd .test/
-  - bash generate_data.sh
+  - bash generate_data.sh ${PYTHON_VERSION}
   - cd ../
 
 tests:
