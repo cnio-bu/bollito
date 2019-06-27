@@ -9,3 +9,4 @@ dependencies:
     - umap-learn=0.3.9
     - r-tidyverse=1.2.1
     - nomkl
+    - r-ggplot2=3.1.1
