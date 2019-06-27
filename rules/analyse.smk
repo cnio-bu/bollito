@@ -1,4 +1,4 @@
-rule preQC:
+rule qc:
     input:
         f"{OUTDIR}/star/{{sample}}/Aligned.sortedByCoord.out.bam"
     output:
@@ -15,5 +15,5 @@ rule preQC:
     resources:
         mem=get_resource("seurat","mem")
     script: 
-        "../scripts/1_PreQC.R"
+        "../scripts/step1_qc.R"
 
