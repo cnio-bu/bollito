@@ -2,11 +2,12 @@ library("Seurat")
 library("dplyr")
 library("data.table")
 library("reticulate")
+library("ggplot2")
 
 # A. Parameters: folder configuration 
 data_dir = paste0(snakemake@params[["input_dir"]],"/","Solo.out")
 dir.name = snakemake@params[["output_dir"]]
-folders = c("1_Preprocessing", "2_CellTypeID", "3_Postprocessing", "4_DEGs", "5_Cell_cycle")
+folders = c("1_preprocessing", "2_celltypeid", "3_postprocessing", "4_degs", "5_cellcycle")
 
 # B. Parameters: analysis configuration 
 project_name = "Test"
@@ -15,7 +16,7 @@ project_name = "Test"
 # Read STARSolo output
 expression_matrix <- Read10X(data.dir = data_dir)
 # Create Analysis folder
-dir.create(paste0(data_dir, dir.name))
+dir.create(dir.name)
 # 1. Creating a seurat object 
 seurat = CreateSeuratObject(expression_matrix, project = project_name, min.features = 200)
 
