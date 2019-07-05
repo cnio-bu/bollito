@@ -2,7 +2,7 @@ rule qc:
     input:
         f"{OUTDIR}/star/{{sample}}/Aligned.sortedByCoord.out.bam"
     output:
-        data=f"{OUTDIR}/seurat/{{sample}}/seurat_pre-QC.rds"
+        data=f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_pre-QC.rds"
     log:
         f"{LOGDIR}/seurat/{{sample}}.preQC.log"
     benchmark:
