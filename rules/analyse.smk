@@ -4,9 +4,9 @@ rule qc:
     output:
         data=f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_pre-QC.rds"
     log:
-        f"{LOGDIR}/seurat/{{sample}}.preQC.log"
+        f"{LOGDIR}/seurat/{{sample}}/1_preprocessing/{{sample}}.preqc.log"
     benchmark:
-        f"{LOGDIR}/seurat/{{sample}}.preQC.bmk"
+        f"{LOGDIR}/seurat/{{sample}}/1_preprocessing/{{sample}}.preQC.bmk"
     params:
         input_dir = lambda wc: "{}/star/{}".format(OUTDIR,wc.sample),
         output_dir = f"{OUTDIR}/seurat/{{sample}}"
