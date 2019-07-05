@@ -39,5 +39,5 @@ ggsave(paste0(dir.name, "/", folders[1], "/3_GenePlot_nUMI_vs_percentMit_nGene.p
 
 
 # Save RDS: we can use this object to generate all the rest of the data
-saveRDS(seurat, file = paste0(paste0(dir.name, "/" ,folders[1], "/seurat_pre-QC.rds"))
+saveRDS(seurat, file = paste0(dir.name, "/" ,folders[1], "/seurat_pre-QC.rds"))
 
