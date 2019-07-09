@@ -1,0 +1,50 @@
+library("Seurat")
+library("dplyr")
+library("data.table")
+library("reticulate")
+library("ggplot2")
+
+# A. Parameters: folder configuration 
+data_dir = paste0(snakemake@params[["input_dir"]],"/","Solo.out")
+dir.name = snakemake@params[["output_dir"]]
+folders = c("1_preprocessing", "2_celltypeid", "3_postprocessing", "4_degs", "5_cellcycle")
+
+# B. Parameters: analysis configuration 
+# project_name = "Test"
+min = snakemake@params[["min"]]
+max = snakemake@params[["max"]]
+mit = snakemake@params[["mit"]]
+ribo = snakemake@params[["ribo"]]
+filter.out = c(snakemake@params[["filter.out"]]) # Check this
+filter.threshold = snakemake@params[["filter.threshold"]]# -1 would mean "<", the rest means ">"
+
+# C. Analysis
+# 3. We should apply the filterings once the QC plots (GenePlot and Violin plots) have been checked.
+seurat <- subset(seurat, subset = nFeature_RNA > min & nFeature_RNA < max & percent.mt < mit & percent.ribo < ribo )
+# 3.1. QC: violin plots - After
+VlnPlot(seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3, pt.size = 0.5)
+ggsave(paste0(dir.name, "/",folders[1], "/4_VlnPlot_distr_nGene_nUMI_percentMit_afterFiltering.png"))
+VlnPlot(seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.ribo"), ncol = 3, pt.size = 0.5)
+ggsave(paste0(dir.name, "/",folders[1], "/5_VlnPlot_distr_nGene_nUMI_percentRibo_afterFiltering.png"))
+
+# 4. If there are negative markers availale: filter out cells based on gene expression. In this specific case, we are filtering out all cells expressing: Epcam, Pecam1, Krt19 and Ptprc. CHECK THIS
+
+if(length(filter.out) > 0){
+	if (filter.threshold >= 0){
+		for(i in 1:length(filter.out)){
+			sub_seurat <- FetchData(object = seurat, vars = filter.out[i])
+			seurat <- seurat[, which(x = sub_seurat > filter.threshold)]
+		}			
+	} else {
+		for(i in 1:length(filter.out)){
+			sub_seurat <- FetchData(object = seurat, vars = filter.out[i])
+			seurat <- seurat[, which(x = sub_seurat < 0)]
+		}	
+	}
+} else {
+	next()
+}
+
+# Save RDS: we can use this object to generate all the rest of the data
+saveRDS(seurat, file = paste0(dir.name, "/",folders[1], "/seurat_post-qc.rds"))
+
