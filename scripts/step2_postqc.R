@@ -11,16 +11,25 @@ folders = c("1_preprocessing", "2_celltypeid", "3_postprocessing", "4_degs", "5_
 
 # B. Parameters: analysis configuration 
 # project_name = "Test"
-min = snakemake@params[["min"]]
-max = snakemake@params[["max"]]
-mit = snakemake@params[["mit"]]
-ribo = snakemake@params[["ribo"]]
-filter.out = c(snakemake@params[["filter.out"]]) # Check this
-filter.threshold = snakemake@params[["filter.threshold"]]# -1 would mean "<", the rest means ">"
+min = as.numeric(snakemake@params[["min"]])
+max = as.numeric(snakemake@params[["max"]])
+mit = as.numeric(snakemake@params[["mit"]])
+ribo = as.numeric(snakemake@params[["ribo"]])
+filter.out = c(snakemake@params[["filter_out"]]) # Check this
+filter.threshold = snakemake@params[["filter_threshold"]]# -1 would mean "<", the rest means ">"
 
 # C. Analysis
+# Read RDS file from previous step
+seurat = readRDS(paste0(dir.name, "/", folders[1], "/seurat_pre-QC.rds"))
 # 3. We should apply the filterings once the QC plots (GenePlot and Violin plots) have been checked.
-seurat <- subset(seurat, subset = nFeature_RNA > min & nFeature_RNA < max & percent.mt < mit & percent.ribo < ribo )
+#seurat <- subset(seurat, subset = nFeature_RNA > min & nFeature_RNA < max & percent.mt < mit & percent.ribo < ribo )
+cells_seurat <- FetchData(object = seurat, vars = "nFeature_RNA")
+seurat <- seurat[, which(x = cells_seurat > min & cells_seurat < max)] 
+mit_seurat <- FetchData(object = seurat, vars = "percent.mt")
+seurat <- seurat[, which(x = mit_seurat < mit)]
+ribo_seurat <- FetchData(object = seurat, vars = "percent.ribo")
+seurat <- seurat[, which(x = ribo_seurat < ribo)]
+
 # 3.1. QC: violin plots - After
 VlnPlot(seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3, pt.size = 0.5)
 ggsave(paste0(dir.name, "/",folders[1], "/4_VlnPlot_distr_nGene_nUMI_percentMit_afterFiltering.png"))
