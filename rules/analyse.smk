@@ -39,3 +39,20 @@ rule post_qc:
         mem=get_resource("seurat_postqc","mem")
     script:
         "../scripts/step2_postqc.R"
+rule normalization:
+    input:
+        f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_post-qc.rds"
+    output:
+        data=f"{OUTDIR}/seurat/{{sample}}/2_celltypeid/seurat_normalized-pcs.rds"
+    log:
+        f"{LOGDIR}/seurat/{{sample}}/2_celltypeid/{{sample}}.normalization.log"
+    benchmark:
+        f"{LOGDIR}/seurat/{{sample}}/2_celltypeid/{{sample}}.normalization.bmk"
+    params:
+        input_dir = lambda wc: "{}/star/{}".format(OUTDIR, wc.sample),
+        output_dir = f"{OUTDIR}/seurat/{{sample}}"
+    conda: "../envs/seurat.yaml"
+    resources:
+        mem=get_resource("seurat_normalization","mem")
+    script:
+        "../scripts/step3_normalization.R"

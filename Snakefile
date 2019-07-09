@@ -27,7 +27,7 @@ def get_resource(rule,resource):
 rule all:
     input:
         f"{OUTDIR}/qc/multiqc_report.html",
-        expand("{OUTDIR}/seurat/{unit.sample}/1_preprocessing/seurat_post-qc.rds", unit=units.itertuples(),OUTDIR=OUTDIR)
+        expand("{OUTDIR}/seurat/{unit.sample}/2_celltypeid/seurat_normalized-pcs.rds", unit=units.itertuples(),OUTDIR=OUTDIR)
 
 
 ##### setup singularity #####
