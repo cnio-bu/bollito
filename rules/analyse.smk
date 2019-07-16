@@ -56,3 +56,23 @@ rule normalization:
         mem=get_resource("seurat_normalization","mem")
     script:
         "../scripts/step3_normalization.R"
+rule find_clusters:
+    input:
+        f"{OUTDIR}/seurat/{{sample}}/2_celltypeid/seurat_normalized-pcs.rds"
+    output:
+        data=f"{OUTDIR}/seurat/{{sample}}/3_postprocessing/seurat_find-clusters.rds"
+    log:
+        f"{LOGDIR}/seurat/{{sample}}/3_postprocessing/{{sample}}.find-clusters.log"
+    benchmark:
+        f"{LOGDIR}/seurat/{{sample}}/3_postprocessing/{{sample}}.find-clusters.bmk"
+    params:
+        input_dir = lambda wc: "{}/star/{}".format(OUTDIR, wc.sample),
+        output_dir = f"{OUTDIR}/seurat/{{sample}}",
+        seed =  config["rules"]["seurat_find_clusters"]["params"]["random_seed"],
+        pc = config["rules"]["seurat_find_clusters"]["params"]["principal_components"],
+        res = config["rules"]["seurat_find_clusters"]["params"]["resolutions"]
+    conda: "../envs/seurat.yaml"
+    resources:
+        mem=get_resource("seurat_find_clusters","mem")
+    script:
+        "../scripts/step4_find-clusters.R"
