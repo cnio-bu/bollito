@@ -76,3 +76,21 @@ rule find_clusters:
         mem=get_resource("seurat_find_clusters","mem")
     script:
         "../scripts/step4_find-clusters.R"
+rule degs:
+    input:
+        f"{OUTDIR}/seurat/{{sample}}/3_postprocessing/seurat_find-clusters.rds"
+    output:
+        data=f"{OUTDIR}/seurat/{{sample}}/4_degs/seurat_degs.rds"
+    log:
+        f"{LOGDIR}/seurat/{{sample}}/4_degs/{{sample}}.seurat_degs.log"
+    benchmark:
+        f"{LOGDIR}/seurat/{{sample}}/4_degs/{{sample}}.seurat_degs.bmk"
+    params:
+        input_dir = lambda wc: "{}/star/{}".format(OUTDIR, wc.sample),
+        output_dir = f"{OUTDIR}/seurat/{{sample}}",
+        selected_res = config["rules"]["seurat_degs"]["params"]["selected_res"]
+    conda: "../envs/seurat.yaml"
+    resources:
+        mem=get_resource("seurat_degs","mem")
+    script:
+        "../scripts/step5_degs.R"
