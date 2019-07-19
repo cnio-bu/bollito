@@ -7,7 +7,7 @@ library("ggplot2")
 # A. Parameters: folder configuration 
 data_dir = paste0(snakemake@params[["input_dir"]],"/","Solo.out")
 dir.name = snakemake@params[["output_dir"]]
-folders = c("1_preprocessing", "2_celltypeid", "3_postprocessing", "4_degs", "5_cellcycle")
+folders = c("1_preprocessing", "2_celltypeid", "3_postprocessing", "4_degs", "5_gs")
 
 # B. Parameters: analysis configuration 
 # project_name = "Test"
@@ -20,7 +20,7 @@ filter.threshold = snakemake@params[["filter_threshold"]]# -1 would mean "<", th
 
 # C. Analysis
 # Read RDS file from previous step
-seurat = readRDS(paste0(dir.name, "/", folders[1], "/seurat_pre-QC.rds"))
+seurat = readRDS(paste0(dir.name, "/", folders[1], "/seurat_pre-qc.rds"))
 # 3. We should apply the filterings once the QC plots (GenePlot and Violin plots) have been checked.
 #seurat <- subset(seurat, subset = nFeature_RNA > min & nFeature_RNA < max & percent.mt < mit & percent.ribo < ribo )
 cells_seurat <- FetchData(object = seurat, vars = "nFeature_RNA")
@@ -31,10 +31,10 @@ ribo_seurat <- FetchData(object = seurat, vars = "percent.ribo")
 seurat <- seurat[, which(x = ribo_seurat < ribo)]
 
 # 3.1. QC: violin plots - After
-VlnPlot(seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3, pt.size = 0.5)
-ggsave(paste0(dir.name, "/",folders[1], "/4_VlnPlot_distr_nGene_nUMI_percentMit_afterFiltering.png"))
-VlnPlot(seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.ribo"), ncol = 3, pt.size = 0.5)
-ggsave(paste0(dir.name, "/",folders[1], "/5_VlnPlot_distr_nGene_nUMI_percentRibo_afterFiltering.png"))
+VlnPlot(seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3, pt.size = 0.25)
+ggsave(paste0(dir.name, "/",folders[1], "/4_vlnplot_ngene_numi_pctmit_afterfilt.png"))
+VlnPlot(seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.ribo"), ncol = 3, pt.size = 0.25)
+ggsave(paste0(dir.name, "/",folders[1], "/5_vlnplot_ngene_numi_pctribo_afterfilt.png"))
 
 # 4. If there are negative markers availale: filter out cells based on gene expression. In this specific case, we are filtering out all cells expressing: Epcam, Pecam1, Krt19 and Ptprc. CHECK THIS
 

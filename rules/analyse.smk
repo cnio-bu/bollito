@@ -2,14 +2,15 @@ rule qc:
     input:
         f"{OUTDIR}/star/{{sample}}/Aligned.sortedByCoord.out.bam"
     output:
-        data=f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_pre-QC.rds"
+        data=f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_pre-qc.rds"
     log:
         f"{LOGDIR}/seurat/{{sample}}/1_preprocessing/{{sample}}.preqc.log"
     benchmark:
         f"{LOGDIR}/seurat/{{sample}}/1_preprocessing/{{sample}}.preQC.bmk"
     params:
         input_dir = lambda wc: "{}/star/{}".format(OUTDIR,wc.sample),
-        output_dir = f"{OUTDIR}/seurat/{{sample}}"
+        output_dir = f"{OUTDIR}/seurat/{{sample}}",
+        project_name = config["rules"]["seurat_qc"]["params"]["project_name"]
     conda: "../envs/seurat.yaml"
     resources:
         mem=get_resource("seurat_qc","mem")
@@ -18,7 +19,7 @@ rule qc:
 
 rule post_qc:
     input:
-        f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_pre-QC.rds"
+        f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_pre-qc.rds"
     output:
         data=f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_post-qc.rds"
     log:
@@ -98,11 +99,11 @@ rule gs:
     input:
 	    f"{OUTDIR}/seurat/{{sample}}/4_degs/seurat_degs.rds"
     output:
-        data=f"{OUTDIR}/seurat/{{sample}}/5_genesets/seurat_complete.rds"
+        data=f"{OUTDIR}/seurat/{{sample}}/5_gs/seurat_complete.rds"
     log:
-        f"{LOGDIR}/seurat/{{sample}}/5_genesets/{{sample}}.seurat_complete.log"
+        f"{LOGDIR}/seurat/{{sample}}/5_gs/{{sample}}.seurat_complete.log"
     benchmark:
-        f"{LOGDIR}/seurat/{{sample}}/5_genesets/{{sample}}.seurat_complete.bmk"
+        f"{LOGDIR}/seurat/{{sample}}/5_gs/{{sample}}.seurat_complete.bmk"
     params:
         input_dir = lambda wc: "{}/star/{}".format(OUTDIR, wc.sample),
         output_dir = f"{OUTDIR}/seurat/{{sample}}",

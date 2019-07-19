@@ -8,7 +8,7 @@ library("BiocParallel")
 # A. Parameters: folder configuration 
 data_dir = paste0(snakemake@params[["input_dir"]],"/","Solo.out")
 dir.name = snakemake@params[["output_dir"]]
-folders = c("1_preprocessing", "2_celltypeid", "3_postprocessing", "4_degs", "5_genesets")
+folders = c("1_preprocessing", "2_celltypeid", "3_postprocessing", "4_degs", "5_gs")
 
 # B. Parameters: analysis configuration 
 selected_res = snakemake@params[["selected_res"]]
@@ -44,7 +44,7 @@ groupedby.clusters.markers = seurat.markers %>% group_by(cluster) %>% top_n(10, 
 DoHeatmap(object = seurat, features = groupedby.clusters.markers$gene, cells = 1:1000, size = 3, angle = 45, 
 	  group.bar = TRUE, draw.lines = F, raster = FALSE) +
 scale_fill_gradientn(colors = c("blue", "white", "red")) + guides(color=FALSE) + theme(axis.text.y = element_text(size = 4))
-ggsave(paste0(dir.name, "/", folders[4], "/1_Heatmap_TopMarkers_res0.1.pdf"))
+ggsave(paste0(dir.name, "/", folders[4], "/1_heatmap_topmarkers.pdf"))
 
 # Number of identified genes by cluster
 #n.clust <- length(unique(seurat@active.ident))

@@ -9,7 +9,7 @@ library("ggplot2")
 # A. Parameters: folder configuration 
 data_dir = paste0(snakemake@params[["input_dir"]],"/","Solo.out")
 dir.name = snakemake@params[["output_dir"]]
-folders = c("1_preprocessing", "2_celltypeid", "3_postprocessing", "4_degs", "5_cellcycle")
+folders = c("1_preprocessing", "2_celltypeid", "3_postprocessing", "4_degs", "5_gs")
 
 # B. Parameters: analysis configuration 
 seed = snakemake@params[["seed"]]#randomly generate seed
@@ -33,17 +33,17 @@ for(i in 1:length(which(grepl("RNA_snn_",colnames(seurat@meta.data))))){
   Idents(seurat) <- res
   seurat <- RunUMAP(seurat, dims = 1:50)
   DimPlot(seurat, reduction = "umap",  pt.size = 0.75, label = TRUE, label.size = 5) + theme_minimal()
-  ggsave(paste0(dir.name, "/", folders[3], "/2_UMAP_",res,".pdf"))
+  ggsave(paste0(dir.name, "/", folders[3], "/2_umap_",res,".pdf"))
 }
 
 FeaturePlot(seurat, 'nFeature_RNA', pt.size =  0.75)
-ggsave(paste0(dir.name, "/", folders[3], "/3_FeaturePlot.pdf"))
+ggsave(paste0(dir.name, "/", folders[3], "/3_featureplot.pdf"))
 
 # 8.3. Visualize no - Umap
 seurat.no.umap <- seurat
 seurat.no.umap[["umap"]] <- NULL
 DimPlot(seurat.no.umap, pt.size = 0.75, label = TRUE, label.size = 5) + RotatedAxis()
-ggsave(paste0(dir.name, "/", folders[3], "/4_noUMAP.png"))
+ggsave(paste0(dir.name, "/", folders[3], "/4_no_umap.png"))
 
 
 # Save RDS: we can use this object to generate all the rest of the data
