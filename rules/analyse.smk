@@ -94,3 +94,23 @@ rule degs:
         mem=get_resource("seurat_degs","mem")
     script:
         "../scripts/step5_degs.R"
+rule gs:
+    input:
+	    f"{OUTDIR}/seurat/{{sample}}/4_degs/seurat_degs.rds"
+    output:
+        data=f"{OUTDIR}/seurat/{{sample}}/5_genesets/seurat_complete.rds"
+    log:
+        f"{LOGDIR}/seurat/{{sample}}/5_genesets/{{sample}}.seurat_complete.log"
+    benchmark:
+        f"{LOGDIR}/seurat/{{sample}}/5_genesets/{{sample}}.seurat_complete.bmk"
+    params:
+        input_dir = lambda wc: "{}/star/{}".format(OUTDIR, wc.sample),
+        output_dir = f"{OUTDIR}/seurat/{{sample}}",
+        cc_file = config["rules"]["seurat_gs"]["params"]["cell_cycle_file"],
+        gs_collection = config["rules"]["seurat_gs"]["params"]["geneset_collection"]
+    conda: "../envs/seurat.yaml"
+    resources:
+        mem=get_resource("seurat_gs","mem")
+    script:
+        "../scripts/step6_gs-scoring.R"
+
