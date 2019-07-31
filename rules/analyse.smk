@@ -51,7 +51,7 @@ rule normalization:
         f"{LOGDIR}/seurat/{{sample}}/2_celltypeid/{{sample}}.normalization.bmk"
     params:
         input_dir = lambda wc: "{}/star/{}".format(OUTDIR, wc.sample),
-        output_dir = f"{OUTDIR}/seurat/{{sample}}"
+        output_dir = f"{OUTDIR}/seurat/{{sample}}",
     conda: "../envs/seurat.yaml"
     resources:
         mem=get_resource("seurat_normalization","mem")
@@ -71,7 +71,8 @@ rule find_clusters:
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
         seed =  config["rules"]["seurat_find_clusters"]["params"]["random_seed"],
         pc = config["rules"]["seurat_find_clusters"]["params"]["principal_components"],
-        res = config["rules"]["seurat_find_clusters"]["params"]["resolutions"]
+        res = config["rules"]["seurat_find_clusters"]["params"]["resolutions"],
+        cc_file = config["rules"]["seurat_find_clusters"]["params"]["cell_cycle_file"]
     conda: "../envs/seurat.yaml"
     resources:
         mem=get_resource("seurat_find_clusters","mem")
@@ -107,7 +108,6 @@ rule gs:
     params:
         input_dir = lambda wc: "{}/star/{}".format(OUTDIR, wc.sample),
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
-        cc_file = config["rules"]["seurat_gs"]["params"]["cell_cycle_file"],
         gs_collection = config["rules"]["seurat_gs"]["params"]["geneset_collection"]
     conda: "../envs/seurat.yaml"
     resources:

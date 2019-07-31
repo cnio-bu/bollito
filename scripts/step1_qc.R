@@ -11,7 +11,8 @@ folders = c("1_preprocessing", "2_celltypeid", "3_postprocessing", "4_degs", "5_
 
 # B. Parameters: analysis configuration 
 project_name = snakemake@params[["project_name"]]
-
+aspect_ratio = 1.5
+height = 5
 # C. Analysis
 # Read STARSolo output
 expression_matrix <- Read10X(data.dir = data_dir)
@@ -27,16 +28,18 @@ seurat[["percent.mt"]] <- PercentageFeatureSet(seurat, pattern = "^mt-")
 # 2.2. Ribosomal genes - check levels of expression for rb genes 
 seurat[["percent.ribo"]] <- PercentageFeatureSet(seurat, pattern = "^Rp[sl][[:digit:]]")
 # 2.3. QC: violin plots
-VlnPlot(seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3, pt.size = 0.25)
-ggsave(paste0(dir.name, "/", folders[1], "/1_vlnplot_ngene_numi_pctmit_beforefilt.png"))
-VlnPlot(seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.ribo"), ncol = 3, pt.size = 0.25)
-ggsave(paste0(dir.name, "/", folders[1], "/2_vlnplot_ngene_numi_pctribo_beforefilt.png"))
+VlnPlot(seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3, pt.size = 0.25) + theme(legend.position="bottom") 
+ggsave(paste0(dir.name, "/", folders[1], "/1_vlnplot_ngene_numi_pctmit_beforefilt.png"), height = height , width = height * aspect_ratio)
+#save_plot(plot = vln_mit, filename = paste0(dir.name, "/", folders[1], "/1_vlnplot_ngene_numi_pctmit_beforefilt.png"), base_asp = 3:1)
+VlnPlot(seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.ribo"), ncol = 3, pt.size = 0.25) + theme(legend.position="bottom") 
+ggsave(paste0(dir.name, "/", folders[1], "/2_vlnplot_ngene_numi_pctribo_beforefilt.png"), height = height , width = height * aspect_ratio)
+#save_plot(plot = vln_ribo, filename = paste0(dir.name, "/", folders[1], "/2_vlnplot_ngene_numi_pctribo_beforefilt.png"), base_asp = 3:1)
 # 2.4. QC: GenePlot
-plot1 <- FeatureScatter(seurat, feature1 = "nCount_RNA", feature2 = "percent.mt", pt.size = 0.25)
-plot2 <- FeatureScatter(seurat, feature1 = "nCount_RNA", feature2 = "nFeature_RNA", pt.size = 0.25)
+plot1 <- FeatureScatter(seurat, feature1 = "nCount_RNA", feature2 = "percent.mt", pt.size = 0.25)+ theme(legend.position="bottom") 
+plot2 <- FeatureScatter(seurat, feature1 = "nCount_RNA", feature2 = "nFeature_RNA", pt.size = 0.25) + theme(legend.position="bottom") 
 CombinePlots(plots = list(plot1, plot2))
-ggsave(paste0(dir.name, "/", folders[1], "/3_geneplot_numi_vs_pctmit_ngene.png"))
-
+ggsave(paste0(dir.name, "/", folders[1], "/3_geneplot_numi_vs_pctmit_ngene.png"), height = height , width = height * aspect_ratio)
+#save_plot(plot = combine12, filename = paste0(dir.name, "/", folders[1], "/3_geneplot_numi_vs_pctmit_ngene.png"), base_asp = 3:1)
 
 # Save RDS: we can use this object to generate all the rest of the data
 saveRDS(seurat, file = paste0(dir.name, "/" ,folders[1], "/seurat_pre-qc.rds"))

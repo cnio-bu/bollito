@@ -5,7 +5,6 @@ library("reticulate")
 library("ggplot2")
 
 # A. Parameters: folder configuration 
-data_dir = paste0(snakemake@params[["input_dir"]],"/","Solo.out")
 dir.name = snakemake@params[["output_dir"]]
 folders = c("1_preprocessing", "2_celltypeid", "3_postprocessing", "4_degs", "5_gs")
 
@@ -17,6 +16,9 @@ mit = as.numeric(snakemake@params[["mit"]])
 ribo = as.numeric(snakemake@params[["ribo"]])
 filter.out = c(snakemake@params[["filter_out"]]) # Check this
 filter.threshold = snakemake@params[["filter_threshold"]]# -1 would mean "<", the rest means ">"
+
+aspect_ratio <- 1.5
+height <- 5
 
 # C. Analysis
 # Read RDS file from previous step
@@ -31,10 +33,10 @@ ribo_seurat <- FetchData(object = seurat, vars = "percent.ribo")
 seurat <- seurat[, which(x = ribo_seurat < ribo)]
 
 # 3.1. QC: violin plots - After
-VlnPlot(seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3, pt.size = 0.25)
-ggsave(paste0(dir.name, "/",folders[1], "/4_vlnplot_ngene_numi_pctmit_afterfilt.png"))
-VlnPlot(seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.ribo"), ncol = 3, pt.size = 0.25)
-ggsave(paste0(dir.name, "/",folders[1], "/5_vlnplot_ngene_numi_pctribo_afterfilt.png"))
+VlnPlot(seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3, pt.size = 0.25) + theme(legend.position="bottom") 
+ggsave(paste0(dir.name, "/",folders[1], "/4_vlnplot_ngene_numi_pctmit_afterfilt.png"), height = height , width = height * aspect_ratio)
+VlnPlot(seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.ribo"), ncol = 3, pt.size = 0.25) + theme(legend.position="bottom") 
+ggsave(paste0(dir.name, "/",folders[1], "/5_vlnplot_ngene_numi_pctribo_afterfilt.png"), height = height , width = height * aspect_ratio)
 
 # 4. If there are negative markers availale: filter out cells based on gene expression. In this specific case, we are filtering out all cells expressing: Epcam, Pecam1, Krt19 and Ptprc. CHECK THIS
 
