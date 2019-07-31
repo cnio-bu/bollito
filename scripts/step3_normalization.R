@@ -20,8 +20,7 @@ seurat <- FindVariableFeatures(seurat, selection.method = "vst", nfeatures = 250
 # Identify the 10 most highly variable genes
 top10 <- head(VariableFeatures(seurat), 15)
 plot1 <- VariableFeaturePlot(seurat) + theme(legend.position="bottom") 
-plot2 <- LabelPoints(plot = plot1, points = top10, repel = TRUE) + theme(legend.position="bottom") 
-CombinePlots(plots = list(plot1, plot2))
+LabelPoints(plot = plot1, points = top10, repel = TRUE) + theme(legend.position="bottom") 
 ggsave(paste0(dir.name, "/",folders[1], "/6_variable_features.pdf"), height = height , width = height * aspect_ratio)
 
 
