@@ -11,8 +11,6 @@ folders = c("1_preprocessing", "2_celltypeid", "3_postprocessing", "4_degs", "5_
 
 # B. Parameters: analysis configuration 
 geneset_collection = snakemake@params[["gs_collection"]]
-aspect_ratio <- 1.5
-height <- 5
 
 # C. Analysis
 seurat <- readRDS(paste0(dir.name, "/", folders[4], "/seurat_degs.rds"))
@@ -26,7 +24,7 @@ seurat <- AddModuleScore(object = seurat, features= genesets, name = names(genes
 for (i in 1:length(genesets)){
 	module_name = colnames(seurat@meta.data)[grep(names(genesets)[i], colnames(seurat@meta.data))]
 	FeaturePlot(object = seurat, features = module_name) #+ theme(legend.position="bottom") 
-	ggsave(paste0(dir.name, "/", folders[5], "/", names(genesets)[i], "_featureplot.pdf"))
+	ggsave(paste0(dir.name, "/", folders[5], "/", names(genesets)[i], "_featureplot.pdf"), scale = 1.5)
 }
 
 saveRDS(seurat, file = paste0(dir.name, "/",folders[5], "/seurat_complete.rds"))

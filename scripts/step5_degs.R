@@ -8,8 +8,6 @@ library("BiocParallel")
 # A. Parameters: folder configuration 
 dir.name = snakemake@params[["output_dir"]]
 folders = c("1_preprocessing", "2_celltypeid", "3_postprocessing", "4_degs", "5_gs")
-aspect_ratio <- 1.5
-height <- 5
 # B. Parameters: analysis configuration 
 selected_res = snakemake@params[["selected_res"]]
 
@@ -44,7 +42,7 @@ groupedby.clusters.markers = seurat.markers %>% group_by(cluster) %>% top_n(10, 
 DoHeatmap(object = seurat, features = groupedby.clusters.markers$gene, cells = 1:1000, size = 3, angle = 45, 
 	  group.bar = TRUE, draw.lines = F, raster = FALSE) +
 scale_fill_gradientn(colors = c("blue", "white", "red")) + guides(color=FALSE) + theme(axis.text.y = element_text(size = 4)) + theme(legend.position="bottom") 
-ggsave(paste0(dir.name, "/", folders[4], "/1_heatmap_topmarkers.pdf"), height = height , width = height * aspect_ratio)
+ggsave(paste0(dir.name, "/", folders[4], "/1_heatmap_topmarkers.pdf"), scale = 3)
 
 # Save RDS: we can use this object to generate all the rest of the data
 saveRDS(seurat, file = paste0(dir.name, "/",folders[4], "/seurat_degs.rds"))
