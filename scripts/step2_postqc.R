@@ -38,7 +38,7 @@ ggsave(paste0(dir.name, "/",folders[1], "/5_vlnplot_ngene_numi_pctribo_afterfilt
 # 4. If there are negative markers availale: filter out cells based on gene expression. In this specific case, we are filtering out all cells expressing: Epcam, Pecam1, Krt19 and Ptprc. CHECK THIS
 
 if(length(filter.out) > 0){
-	if (filter.threshold >= 0){
+	if (filter.threshold == 0){
 		for(i in 1:length(filter.out)){
 			sub_seurat <- FetchData(object = seurat, vars = filter.out[i])
 			seurat <- seurat[, which(x = sub_seurat > filter.threshold)]
@@ -46,7 +46,7 @@ if(length(filter.out) > 0){
 	} else {
 		for(i in 1:length(filter.out)){
 			sub_seurat <- FetchData(object = seurat, vars = filter.out[i])
-			seurat <- seurat[, which(x = sub_seurat < 0)]
+			seurat <- seurat[, which(x = sub_seurat == 0)]
 		}	
 	}
 } else {
