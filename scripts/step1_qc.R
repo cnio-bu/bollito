@@ -3,6 +3,7 @@ library("dplyr")
 library("data.table")
 library("reticulate")
 library("ggplot2")
+library("stringr")
 
 # A. Parameters: folder configuration 
 data_dir = paste0(snakemake@params[["input_dir"]],"/","Solo.out")
@@ -14,13 +15,14 @@ project_name = snakemake@params[["project_name"]]
 # C. Analysis
 # Read STARSolo output
 expression_matrix <- Read10X(data.dir = data_dir)
+rownames(expression_matrix) = stringr::str_to_title(rownames(expression_matrix))
 # Create Analysis folder
 # 1. Creating a seurat object 
 seurat = CreateSeuratObject(expression_matrix, project = project_name, min.features = 200)
 
 # 2. Preprocessing: Filter out low-quality cells
 # 2.1. Mitochondrial genes - check levels of expression for mt genes 
-seurat[["percent.mt"]] <- PercentageFeatureSet(seurat, pattern = "^mt-")
+seurat[["percent.mt"]] <- PercentageFeatureSet(seurat, pattern = "^Mt-")
 # 2.2. Ribosomal genes - check levels of expression for rb genes 
 seurat[["percent.ribo"]] <- PercentageFeatureSet(seurat, pattern = "^Rp[sl][[:digit:]]")
 # 2.3. QC: violin plots

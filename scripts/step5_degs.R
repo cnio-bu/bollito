@@ -16,7 +16,7 @@ seurat <- readRDS(paste0(dir.name, "/", folders[3], "/seurat_find-clusters.rds")
 # 9 Differentially expressed genes between clusters. 
 # dir.create(paste0(dir.name, "/", folders[4]))
 # After checking out all results with the calculated resolutions, the rest of the analysis will be done using the specified one.
-Idents(seurat) <- selected_res
+Idents(seurat) <- paste0("RNA_snn_res.",selected_res)
 # 9.1. Table on differentially expressed genes - using basic filterings
 for (i in 1:length(unique(Idents(seurat)))){
   clusterX.markers <- FindMarkers(seurat, ident.1 = unique(Idents(seurat))[i], min.pct = 0.25) #min expressed

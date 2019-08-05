@@ -16,3 +16,4 @@ dependencies:
     - r-cowplot=1.0.0
     - r-egg=0.4.5
     - r-clustree=0.4.0
+    - r-stringr=1.4.0
