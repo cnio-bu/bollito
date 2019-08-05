@@ -47,9 +47,9 @@ g2m.genes <- cc.genes[44:97]
 
 seurat <- CellCycleScoring(object = seurat, s.features = s.genes, g2m.features = g2m.genes, set.ident = T)
 FeaturePlot(object = seurat, features ="S.Score") + theme(legend.position="bottom") 
-ggsave(paste0(dir.name, "/", folders[2], "/5_sscore_featureplot.pdf"), scale = 1.5)
+ggsave(paste0(dir.name, "/", folders[3], "/5_sscore_featureplot.pdf"), scale = 1.5)
 FeaturePlot(object = seurat, features ="G2M.Score") + theme(legend.position="bottom") 
-ggsave(paste0(dir.name, "/", folders[2], "/6_g2mscore_featureplot.pdf"), scale = 1.5)
+ggsave(paste0(dir.name, "/", folders[3], "/6_g2mscore_featureplot.pdf"), scale = 1.5)
 
 # 8.5. Visualize no - Umap
 seurat.no.umap <- seurat
