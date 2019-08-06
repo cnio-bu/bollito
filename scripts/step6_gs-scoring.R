@@ -1,9 +1,9 @@
-library("Seurat")
-library("dplyr")
-library("data.table")
-library("reticulate")
-library("ggplot2")
-library("qusage")
+suppressMessages(library("Seurat"))
+suppressMessages(library("dplyr"))
+suppressMessages(library("data.table"))
+suppressMessages(library("reticulate"))
+suppressMessages(library("ggplot2"))
+suppressMessages(library("qusage"))
 
 # A. Parameters: folder configuration 
 dir.name = snakemake@params[["output_dir"]]

@@ -1,4 +1,4 @@
-rule qc:
+rule seurat_qc:
     input:
         f"{OUTDIR}/star/{{sample}}/Aligned.sortedByCoord.out.bam"
     output:
@@ -17,7 +17,7 @@ rule qc:
     script: 
         "../scripts/step1_qc.R"
 
-rule post_qc:
+rule seurat_post_qc:
     input:
         f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_pre-qc.rds"
     output:
@@ -40,7 +40,7 @@ rule post_qc:
         mem=get_resource("seurat_postqc","mem")
     script:
         "../scripts/step2_postqc.R"
-rule normalization:
+rule seurat_normalization:
     input:
         f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_post-qc.rds"
     output:
@@ -57,7 +57,7 @@ rule normalization:
         mem=get_resource("seurat_normalization","mem")
     script:
         "../scripts/step3_normalization.R"
-rule find_clusters:
+rule seurat_find_clusters:
     input:
         f"{OUTDIR}/seurat/{{sample}}/2_celltypeid/seurat_normalized-pcs.rds"
     output:
@@ -72,13 +72,12 @@ rule find_clusters:
         seed =  config["rules"]["seurat_find_clusters"]["params"]["random_seed"],
         pc = config["rules"]["seurat_find_clusters"]["params"]["principal_components"],
         res = config["rules"]["seurat_find_clusters"]["params"]["resolutions"],
-        cc_file = config["rules"]["seurat_find_clusters"]["params"]["cell_cycle_file"]
     conda: "../envs/seurat.yaml"
     resources:
         mem=get_resource("seurat_find_clusters","mem")
     script:
         "../scripts/step4_find-clusters.R"
-rule degs:
+rule seurat_degs:
     input:
         f"{OUTDIR}/seurat/{{sample}}/3_postprocessing/seurat_find-clusters.rds"
     output:
@@ -96,7 +95,7 @@ rule degs:
         mem=get_resource("seurat_degs","mem")
     script:
         "../scripts/step5_degs.R"
-rule gs:
+rule seurat_gs:
     input:
 	    f"{OUTDIR}/seurat/{{sample}}/4_degs/seurat_degs.rds"
     output:

@@ -1,14 +1,13 @@
-library("Seurat")
-library("dplyr")
-library("data.table")
-library("reticulate")
-library("clustree")
-library("ggplot2")
+suppressMessages(library("Seurat"))
+suppressMessages(library("dplyr"))
+suppressMessages(library("data.table"))
+suppressMessages(library("reticulate"))
+suppressMessages(library("clustree"))
+suppressMessages(library("ggplot2"))
 
 # A. Parameters: folder configuration 
 dir.name = snakemake@params[["output_dir"]]
 folders = c("1_preprocessing", "2_celltypeid", "3_postprocessing", "4_degs", "5_gs")
-cell_cycle_file = snakemake@params[["cc_file"]]
 # B. Parameters: analysis configuration 
 seed = snakemake@params[["seed"]]#randomly generate seed
 pc = snakemake@params[["pc"]] # We should check the PCs using the Elbowplot
@@ -41,7 +40,7 @@ ggsave(paste0(dir.name, "/", folders[3], "/3_featureplot.pdf"), scale = 1.5)
 # 8.4 Cell cycle
 # Read in a list of cell cycle markers, from Tirosh et al, 2015.
 # We can segregate this list into markers of G2/M phase and markers of S phase.
-cc.genes <- readLines(cell_cycle_file)
+cc.genes <- c("Mcm5","Pcna","Tyms","Fen1","Mcm2","Mcm4","Rrm1","Ung","Gins2","Mcm6","Cdca7","Dtl","Prim1","Uhrf1","Mlf1Ip","Hells","Rfc2","Rpa2","Nasp","Rad51Ap1","Gmnn","Wdr76","Slbp","Ccne2","Ubr7","Pold3","Msh2","Atad2","Rad51","Rrm2","Cdc45","Cdc6","Exo1","Tipin","Dscc1","Blm","Casp8Ap2","Usp1","Clspn","Pola1","Chaf1B","Brip1","E2F8","Hmgb2","Cdk1","Nusap1","Ube2C","Birc5","Tpx2","Top2A","Ndc80","Cks2","Nuf2","Cks1B","Mki67","Tmpo","Cenpf","Tacc3","Fam64A","Smc4","Ccnb2","Ckap2L","Ckap2","Aurkb","Bub1","Kif11","Anp32E","Tubb4B","Gtse1","Kif20B","Hjurp","Cdca3","Hn1","Cdc20","Ttk","Cdc25C","Kif2C","Rangap1","Ncapd2","Dlgap5","Cdca2","Cdca8","Ect2","Kif23","Hmmr","Aurka","Psrc1","Anln","Lbr","Ckap5","Cenpe","Ctcf","Nek2","G2E3","Gas2L3","Cbx5","Cenpa")
 s.genes <- cc.genes[1:43]
 g2m.genes <- cc.genes[44:97]
 

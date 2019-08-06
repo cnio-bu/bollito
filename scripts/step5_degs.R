@@ -1,9 +1,9 @@
-library("Seurat")
-library("dplyr")
-library("data.table")
-library("reticulate")
-library("ggplot2")
-library("BiocParallel")
+suppressMessages(library("Seurat"))
+suppressMessages(library("dplyr"))
+suppressMessages(library("data.table"))
+suppressMessages(library("reticulate"))
+suppressMessages(library("ggplot2"))
+suppressMessages(library("BiocParallel"))
 
 # A. Parameters: folder configuration 
 dir.name = snakemake@params[["output_dir"]]
@@ -39,9 +39,9 @@ seurat.markers <- FindAllMarkers(object = seurat, only.pos = TRUE, min.pct = 0.2
 groupedby.clusters.markers = seurat.markers %>% group_by(cluster) %>% top_n(10, avg_logFC)
 # HeatMap top10
 # setting slim.col.label to TRUE will print just the cluster IDS instead of every cell name
-DoHeatmap(object = seurat, features = groupedby.clusters.markers$gene, cells = 1:1000, size = 3, angle = 45, 
+DoHeatmap(object = seurat, features = groupedby.clusters.markers$gene, cells = 1:1000, size = 8, angle = 45, 
 	  group.bar = TRUE, draw.lines = F, raster = FALSE) +
-scale_fill_gradientn(colors = c("blue", "white", "red")) + guides(color=FALSE) + theme(axis.text.y = element_text(size = 4)) + theme(legend.position="bottom") 
+scale_fill_gradientn(colors = c("blue", "white", "red")) + guides(color=FALSE) + theme(axis.text.y = element_text(size = 8)) + theme(legend.position="bottom") 
 ggsave(paste0(dir.name, "/", folders[4], "/1_heatmap_topmarkers.pdf"), scale = 3)
 
 # Save RDS: we can use this object to generate all the rest of the data
