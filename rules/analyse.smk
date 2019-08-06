@@ -33,8 +33,9 @@ rule seurat_post_qc:
         max = config["rules"]["seurat_postqc"]["params"]["max_genes"],
         mit = config["rules"]["seurat_postqc"]["params"]["mit_pct"],
         ribo = config["rules"]["seurat_postqc"]["params"]["ribo_pct"],
+        gene = config["rules"]["seurat_postqc"]["params"]["gene"],
         filter_out = config["rules"]["seurat_postqc"]["params"]["filter_out"],
-        filter_threshold = config["rules"]["seurat_postqc"]["params"]["filter_threshold"],
+        threshold = config["rules"]["seurat_postqc"]["params"]["threshold"]
     conda: "../envs/seurat.yaml"
     resources:
         mem=get_resource("seurat_postqc","mem")

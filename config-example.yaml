@@ -60,8 +60,9 @@ rules:
             max_genes: 4000
             mit_pct: 5 
             ribo_pct: 20
-            filter_out: "Hspd1" 
-            filter_threshold: "0"
+            gene: "Hspd1" 
+            threshold: "0"
+            filter_out: true
         res:
             mem: 8000
     seurat_normalization:
