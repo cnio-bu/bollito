@@ -10,7 +10,7 @@ logdir: 'log/test'
 
 ref:
     annotation: "/scratch/resources/annotations/m_musculus/gencode.vM20.annotation.gtf"
-    idx: "/scratch/resources/genomes/m_musculus/GRCm38.primary_assembly.genome_idx_star"
+    idx: "/scratch/resources/genomes/m_musculus/GRCm38.primary_assembly.genome_idx_star_2.7.1a"
 
 # barcodes whitelist
 whitelist: "res/whitelists/3M-february-2018.txt"
@@ -28,7 +28,7 @@ rules:
         outdir: "res"
     fastq_screen:
         threads: 8
-        disabled: false
+        disabled: true
     star_index:
         res:
             threads: 6
@@ -49,6 +49,38 @@ rules:
             mem: 24000
     multiqc:
         params: "--config res/config/multiqc_config.yaml"
-    seurat:
+    seurat_qc:
+        params:
+            project_name: "Test"
+        res:
+            mem: 8000
+    seurat_postqc:
+        params:
+            min_genes: 500
+            max_genes: 4000
+            mit_pct: 5 
+            ribo_pct: 20
+            filter_out: "Hspd1" 
+            filter_threshold: "0"
+        res:
+            mem: 8000
+    seurat_normalization:
+        res:
+            mem: 8000
+    seurat_find_clusters:
+        params:
+            random_seed: 8458
+            principal_components: 50
+            resolutions: [0.2, 0.4, 0.8, 1.2]
+        res:
+            mem: 8000
+    seurat_degs:
+        params:
+            selected_res: 0.2
+        res:
+            mem: 64000
+    seurat_gs:
+        params:
+            geneset_collection: "c2.cp.kegg.v6.2.symbols.gmt"
         res:
             mem: 8000
