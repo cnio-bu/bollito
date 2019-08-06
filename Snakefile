@@ -23,11 +23,15 @@ def get_resource(rule,resource):
         return config["rules"]["default"]["res"][resource]
 
 ##### target rules #####
+def output_seurat(wc):
+    fnames =  [f"{OUTDIR}/seurat/{unit.sample}/5_gs/seurat_complete.rds" for unit in units.itertuples()]
+
+    return fnames
 
 rule all:
     input:
         f"{OUTDIR}/qc/multiqc_report.html",
-        expand("{OUTDIR}/seurat/{unit.sample}/5_gs/seurat_complete.rds", unit=units.itertuples(),OUTDIR=OUTDIR)
+        output_seurat
 
 
 ##### setup singularity #####
