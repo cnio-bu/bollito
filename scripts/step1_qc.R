@@ -8,7 +8,7 @@ suppressMessages(library("stringr"))
 # A. Parameters: folder configuration 
 data_dir = paste0(snakemake@params[["input_dir"]],"/","Solo.out")
 dir.name = snakemake@params[["output_dir"]]
-folders = c("1_preprocessing", "2_celltypeid", "3_postprocessing", "4_degs", "5_gs")
+folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs")
 
 # B. Parameters: analysis configuration 
 project_name = snakemake@params[["project_name"]]

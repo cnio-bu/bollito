@@ -44,11 +44,11 @@ rule seurat_normalization:
     input:
         f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_post-qc.rds"
     output:
-        data=f"{OUTDIR}/seurat/{{sample}}/2_celltypeid/seurat_normalized-pcs.rds"
+        data=f"{OUTDIR}/seurat/{{sample}}/2_normalization/seurat_normalized-pcs.rds"
     log:
-        f"{LOGDIR}/seurat/{{sample}}/2_celltypeid/{{sample}}.normalization.log"
+        f"{LOGDIR}/seurat/{{sample}}/2_normalization/{{sample}}.normalization.log"
     benchmark:
-        f"{LOGDIR}/seurat/{{sample}}/2_celltypeid/{{sample}}.normalization.bmk"
+        f"{LOGDIR}/seurat/{{sample}}/2_normalization/{{sample}}.normalization.bmk"
     params:
         input_dir = lambda wc: "{}/star/{}".format(OUTDIR, wc.sample),
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
@@ -59,13 +59,13 @@ rule seurat_normalization:
         "../scripts/step3_normalization.R"
 rule seurat_find_clusters:
     input:
-        f"{OUTDIR}/seurat/{{sample}}/2_celltypeid/seurat_normalized-pcs.rds"
+        f"{OUTDIR}/seurat/{{sample}}/2_normalization/seurat_normalized-pcs.rds"
     output:
-        data=f"{OUTDIR}/seurat/{{sample}}/3_postprocessing/seurat_find-clusters.rds"
+        data=f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds"
     log:
-        f"{LOGDIR}/seurat/{{sample}}/3_postprocessing/{{sample}}.find-clusters.log"
+        f"{LOGDIR}/seurat/{{sample}}/3_clustering/{{sample}}.find-clusters.log"
     benchmark:
-        f"{LOGDIR}/seurat/{{sample}}/3_postprocessing/{{sample}}.find-clusters.bmk"
+        f"{LOGDIR}/seurat/{{sample}}/3_clustering/{{sample}}.find-clusters.bmk"
     params:
         input_dir = lambda wc: "{}/star/{}".format(OUTDIR, wc.sample),
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
@@ -79,7 +79,7 @@ rule seurat_find_clusters:
         "../scripts/step4_find-clusters.R"
 rule seurat_degs:
     input:
-        f"{OUTDIR}/seurat/{{sample}}/3_postprocessing/seurat_find-clusters.rds"
+        f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds"
     output:
         data=f"{OUTDIR}/seurat/{{sample}}/4_degs/seurat_degs.rds"
     log:

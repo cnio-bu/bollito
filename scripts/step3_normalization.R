@@ -6,7 +6,7 @@ suppressMessages(library("ggplot2"))
 
 # A. Parameters: folder configuration 
 dir.name = snakemake@params[["output_dir"]]
-folders = c("1_preprocessing", "2_celltypeid", "3_postprocessing", "4_degs", "5_gs")
+folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs")
 # B. Parameters: analysis configuration 
 # C. Analysis
 seurat = readRDS(paste0(dir.name, "/", folders[1], "/seurat_post-qc.rds"))
