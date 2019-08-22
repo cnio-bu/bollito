@@ -3,7 +3,6 @@ from snakemake.utils import min_version
 ##### set minimum snakemake version #####
 min_version("5.1.2")
 
-
 ##### load config and sample sheets #####
 
 configfile: "config.yaml"
@@ -22,18 +21,22 @@ def get_resource(rule,resource):
     except KeyError:
         return config["rules"]["default"]["res"][resource]
 
-def get_input_degs:
-    if config["rules"]["seurat_degs"]["disabled"]:
-        fnames = []
+## get rule all inputs depending on the enabled fields ## 
+def get_input_degs(wc):
+    if config["rules"]["seurat_degs"]["params"]["selected_res"]:
+        file = expand("{OUTDIR}/seurat/{unit.sample}/4_degs/seurat_degs.rds", unit=units.itertuples(),OUTDIR=OUTDIR)
+        print(file)
     else:
-        fnames = expand("{OUTDIR}/seurat/{unit.sample}/4_degs/seurat_degs.rds", unit=units.intertuples(),OUTDIR=OUTDIR)
-    return fnames
+        file = []
+    return file
 
-def get_input_gs:
-    if config["rules"]["seurat_gs"]["disabled"]:
-        fnames = []
-    else: 
-        fnames = expand("{OUTDIR}/seurat/{unit.sample}/5_gs/seurat_complete.rds", unit=units.itertuples(),OUTDIR=OUTDIR)
+def get_input_gs(wc):
+    if config["rules"]["seurat_gs"]["params"]["geneset_collection"]:
+        file = expand("{OUTDIR}/seurat/{unit.sample}/5_gs/seurat_complete.rds", unit=units.itertuples(),OUTDIR=OUTDIR)
+        print(file)
+    else:
+        file = []
+    return file
 
 rule all:
     input:
