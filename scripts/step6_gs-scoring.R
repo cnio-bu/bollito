@@ -7,13 +7,14 @@ suppressMessages(library("qusage"))
 
 # A. Parameters: folder configuration 
 dir.name = snakemake@params[["output_dir"]]
+input_data = snakemake@params[["input_data"]]
 folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs")
 
 # B. Parameters: analysis configuration 
 geneset_collection = snakemake@params[["gs_collection"]]
 
 # C. Analysis
-seurat <- readRDS(paste0(dir.name, "/", folders[4], "/seurat_degs.rds"))
+seurat <- readRDS(input_data)
 
 dir.create(paste0(dir.name, "/", folders[5]))
 

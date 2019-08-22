@@ -14,9 +14,6 @@ min = as.numeric(snakemake@params[["min"]])
 max = as.numeric(snakemake@params[["max"]])
 mit = as.numeric(snakemake@params[["mit"]])
 ribo = as.numeric(snakemake@params[["ribo"]])
-gene.filter = c(snakemake@params[["gene"]]) # Gene or list of genes.
-filter.out = snakemake@params[["filter_out"]] # true or false
-filter.threshold = snakemake@params[["threshold"]] # numeric
 
 # C. Analysis
 # Read RDS file from previous step
@@ -35,24 +32,6 @@ VlnPlot(seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol =
 ggsave(paste0(dir.name, "/",folders[1], "/4_vlnplot_ngene_numi_pctmit_afterfilt.png"), scale = 1.5)
 VlnPlot(seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.ribo"), ncol = 3, pt.size = 0.25) + theme(legend.position="bottom") 
 ggsave(paste0(dir.name, "/",folders[1], "/5_vlnplot_ngene_numi_pctribo_afterfilt.png"), scale = 1.5)
-
-# 4. If there are negative markers availale: filter out cells based on gene expression. In this specific case, we are filtering out all cells expressing: Epcam, Pecam1, Krt19 and Ptprc. CHECK THIS
-
-if(length(gene.filter) > 0){
-	if (filter.out == TRUE){
-		for(i in 1:length(gene.filter)){
-			sub_seurat <- FetchData(object = seurat, vars = gene.filter[i])
-			seurat <- seurat[, which(x = sub_seurat > filter.threshold)]
-		}			
-	} else {
-		for(i in 1:length(gene.filter)){
-			sub_seurat <- FetchData(object = seurat, vars = gene.filter[i])
-			seurat <- seurat[, which(x = sub_seurat <= filter.threshold)]
-		}	
-	}
-} else {
-	next()
-}
 
 # Save RDS: we can use this object to generate all the rest of the data
 saveRDS(seurat, file = paste0(dir.name, "/",folders[1], "/seurat_post-qc.rds"))

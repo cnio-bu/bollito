@@ -7,13 +7,14 @@ suppressMessages(library("BiocParallel"))
 
 # A. Parameters: folder configuration 
 dir.name = snakemake@params[["output_dir"]]
+input_data = snakemake@params[["input_data"]]
 folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs")
 
 # B. Parameters: analysis configuration 
 selected_res = snakemake@params[["selected_res"]]
 
 # C. Analysis
-seurat <- readRDS(paste0(dir.name, "/", folders[3], "/seurat_find-clusters.rds"))
+seurat <- readRDS(input_data)
 # 9 Differentially expressed genes between clusters. 
 # dir.create(paste0(dir.name, "/", folders[4]))
 # After checking out all results with the calculated resolutions, the rest of the analysis will be done using the specified one.

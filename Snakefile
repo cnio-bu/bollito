@@ -22,16 +22,24 @@ def get_resource(rule,resource):
     except KeyError:
         return config["rules"]["default"]["res"][resource]
 
-##### target rules #####
-def output_seurat(wc):
-    fnames =  [f"{OUTDIR}/seurat/{unit.sample}/5_gs/seurat_complete.rds" for unit in units.itertuples()]
-
+def get_input_degs:
+    if config["rules"]["seurat_degs"]["disabled"]:
+        fnames = []
+    else:
+        fnames = expand("{OUTDIR}/seurat/{unit.sample}/4_degs/seurat_degs.rds", unit=units.intertuples(),OUTDIR=OUTDIR)
     return fnames
+
+def get_input_gs:
+    if config["rules"]["seurat_gs"]["disabled"]:
+        fnames = []
+    else: 
+        fnames = expand("{OUTDIR}/seurat/{unit.sample}/5_gs/seurat_complete.rds", unit=units.itertuples(),OUTDIR=OUTDIR)
 
 rule all:
     input:
         f"{OUTDIR}/qc/multiqc_report.html",
-        output_seurat
+        get_input_degs, 
+        get_input_gs
 
 
 ##### setup singularity #####

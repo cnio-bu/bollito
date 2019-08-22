@@ -27,23 +27,40 @@ rule seurat_post_qc:
     benchmark:
         f"{LOGDIR}/seurat/{{sample}}/1_preprocessing/{{sample}}.postqc.bmk"
     params:
-        input_dir = lambda wc: "{}/star/{}".format(OUTDIR, wc.sample),
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
         min = config["rules"]["seurat_postqc"]["params"]["min_genes"],
         max = config["rules"]["seurat_postqc"]["params"]["max_genes"],
         mit = config["rules"]["seurat_postqc"]["params"]["mit_pct"],
-        ribo = config["rules"]["seurat_postqc"]["params"]["ribo_pct"],
-        gene = config["rules"]["seurat_postqc"]["params"]["gene"],
-        filter_out = config["rules"]["seurat_postqc"]["params"]["filter_out"],
-        threshold = config["rules"]["seurat_postqc"]["params"]["threshold"]
+        ribo = config["rules"]["seurat_postqc"]["params"]["ribo_pct"]
     conda: "../envs/seurat.yaml"
     resources:
         mem=get_resource("seurat_postqc","mem")
     script:
         "../scripts/step2_postqc.R"
-rule seurat_normalization:
+
+rule seurat_filter:
     input:
         f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_post-qc.rds"
+    output:
+        data=f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_post-qc-filtered.rds"
+    log:
+        f"{LOGDIR}/seurat/{{sample}}/1_preprocessing/{{sample}}.filter.log"
+    benchmark:
+        f"{LOGDIR}/seurat/{{sample}}/1_preprocessing/{{sample}}.filter.bmk"
+    params: 
+        output_dir = f"{OUTDIR}/seurat/{{sample}}",
+        gene = config["rules"]["seurat_filter"]["params"]["gene"],
+        filter_out = config["rules"]["seurat_filter"]["params"]["filter_out"],
+        threshold = config["rules"]["seurat_filter"]["params"]["threshold"]
+    conda: "../envs/seurat.yaml"
+    resources:
+        mem=get_resource("seurat_filter", "mem")
+    script:
+        "../scripts/step2.1_filter.R"
+
+rule seurat_normalization:
+    input:
+        f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_post-qc-filtered.rds" if config["rules"]["seurat_filter"]["params"]["gene"] else f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_post-qc.rds"
     output:
         data=f"{OUTDIR}/seurat/{{sample}}/2_normalization/seurat_normalized-pcs.rds"
     log:
@@ -51,13 +68,14 @@ rule seurat_normalization:
     benchmark:
         f"{LOGDIR}/seurat/{{sample}}/2_normalization/{{sample}}.normalization.bmk"
     params:
-        input_dir = lambda wc: "{}/star/{}".format(OUTDIR, wc.sample),
+        input_data= f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_post-qc-filtered.rds" if config["rules"]["seurat_filter"]["params"]["gene"] else f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_post-qc.rds",
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
     conda: "../envs/seurat.yaml"
     resources:
         mem=get_resource("seurat_normalization","mem")
     script:
         "../scripts/step3_normalization.R"
+
 rule seurat_find_clusters:
     input:
         f"{OUTDIR}/seurat/{{sample}}/2_normalization/seurat_normalized-pcs.rds"
@@ -68,7 +86,6 @@ rule seurat_find_clusters:
     benchmark:
         f"{LOGDIR}/seurat/{{sample}}/3_clustering/{{sample}}.find-clusters.bmk"
     params:
-        input_dir = lambda wc: "{}/star/{}".format(OUTDIR, wc.sample),
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
         seed =  config["rules"]["seurat_find_clusters"]["params"]["random_seed"],
         pc = config["rules"]["seurat_find_clusters"]["params"]["principal_components"],
@@ -78,6 +95,7 @@ rule seurat_find_clusters:
         mem=get_resource("seurat_find_clusters","mem")
     script:
         "../scripts/step4_find-clusters.R"
+
 rule seurat_degs:
     input:
         f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds"
@@ -88,7 +106,7 @@ rule seurat_degs:
     benchmark:
         f"{LOGDIR}/seurat/{{sample}}/4_degs/{{sample}}.seurat_degs.bmk"
     params:
-        input_dir = lambda wc: "{}/star/{}".format(OUTDIR, wc.sample),
+        input_data = f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds",
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
         selected_res = config["rules"]["seurat_degs"]["params"]["selected_res"]
     conda: "../envs/seurat.yaml"
@@ -96,9 +114,10 @@ rule seurat_degs:
         mem=get_resource("seurat_degs","mem")
     script:
         "../scripts/step5_degs.R"
+
 rule seurat_gs:
     input:
-	    f"{OUTDIR}/seurat/{{sample}}/4_degs/seurat_degs.rds"
+        f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds"
     output:
         data=f"{OUTDIR}/seurat/{{sample}}/5_gs/seurat_complete.rds"
     log:
@@ -106,7 +125,7 @@ rule seurat_gs:
     benchmark:
         f"{LOGDIR}/seurat/{{sample}}/5_gs/{{sample}}.seurat_complete.bmk"
     params:
-        input_dir = lambda wc: "{}/star/{}".format(OUTDIR, wc.sample),
+        input_data = f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds",
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
         gs_collection = config["rules"]["seurat_gs"]["params"]["geneset_collection"]
     conda: "../envs/seurat.yaml"
