@@ -53,7 +53,7 @@ rules:
         params:
             project_name: "Test"
         res:
-            mem: 8000
+            mem: 3000
     seurat_postqc:
         params:
             min_genes: 500
@@ -61,17 +61,17 @@ rules:
             mit_pct: 5 
             ribo_pct: 20
         res:
-            mem: 8000
+            mem: 4000
     seurat_filter:
         params:
             gene: 
             threshold:
             filter_out:
         res:
-            mem: 8000
+            mem: 4000
     seurat_normalization:
         res:
-            mem: 8000
+            mem: 12000
     seurat_find_clusters:
         params:
             random_seed: 8458
@@ -83,9 +83,9 @@ rules:
         params:
             selected_res: 0.2
         res:
-            mem: 64000
+            mem: 12000
     seurat_gs:
         params:
             geneset_collection: "c2.cp.kegg.v6.2.symbols.gmt"
         res:
-            mem: 8000
+            mem: 10000
