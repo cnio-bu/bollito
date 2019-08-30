@@ -48,4 +48,44 @@ rules:
         res:
             mem: 24000
     multiqc:
-        params: "--config ../res/config/multiqc_config.yaml"
+        params: "--config res/config/multiqc_config.yaml"
+    seurat_qc:
+        params:
+            project_name: "Test"
+        res:
+            mem: 3000
+    seurat_postqc:
+        params:
+            min_genes: 500
+            max_genes: 4000
+            mit_pct: 5 
+            ribo_pct: 20
+        res:
+            mem: 4000
+    seurat_filter:
+        params:
+            gene: 
+            threshold:
+            filter_out:
+        res:
+            mem: 4000
+    seurat_normalization:
+        res:
+            mem: 12000
+    seurat_find_clusters:
+        params:
+            random_seed: 8458
+            principal_components: 50
+            resolutions: [0.2, 0.4, 0.8, 1.2]
+        res:
+            mem: 8000
+    seurat_degs:
+        params:
+            selected_res: 0.2
+        res:
+            mem: 12000
+    seurat_gs:
+        params:
+            geneset_collection: "c2.cp.kegg.v6.2.symbols.gmt"
+        res:
+            mem: 10000
