@@ -3,7 +3,6 @@ from snakemake.utils import min_version
 ##### set minimum snakemake version #####
 min_version("5.1.2")
 
-
 ##### load config and sample sheets #####
 
 configfile: "config.yaml"
@@ -22,11 +21,28 @@ def get_resource(rule,resource):
     except KeyError:
         return config["rules"]["default"]["res"][resource]
 
-##### target rules #####
+## get rule all inputs depending on the enabled fields ## 
+def get_input_degs(wc):
+    if config["rules"]["seurat_degs"]["params"]["selected_res"]:
+        file = expand("{OUTDIR}/seurat/{unit.sample}/4_degs/seurat_degs.rds", unit=units.itertuples(),OUTDIR=OUTDIR)
+        print(file)
+    else:
+        file = []
+    return file
+
+def get_input_gs(wc):
+    if config["rules"]["seurat_gs"]["params"]["geneset_collection"]:
+        file = expand("{OUTDIR}/seurat/{unit.sample}/5_gs/seurat_complete.rds", unit=units.itertuples(),OUTDIR=OUTDIR)
+        print(file)
+    else:
+        file = []
+    return file
 
 rule all:
     input:
-        "{}/qc/multiqc_report.html".format(OUTDIR),
+        f"{OUTDIR}/qc/multiqc_report.html",
+        get_input_degs, 
+        get_input_gs
 
 
 ##### setup singularity #####
@@ -46,3 +62,4 @@ report: "report/workflow.rst"
 include: "rules/trim.smk"
 include: "rules/align.smk"
 include: "rules/qc.smk"
+include: "rules/analyse.smk"

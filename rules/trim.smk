@@ -35,4 +35,4 @@ rule cutadapt:
     resources:
         mem=get_resource("cutadapt","mem")
     wrapper:
-        "0.32.0/bio/cutadapt/pe"
+        "0.35.0/bio/cutadapt/pe"

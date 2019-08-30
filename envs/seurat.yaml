@@ -1,0 +1,19 @@
+channels:
+    - conda-forge
+    - bioconda
+    - bu_cnio
+
+dependencies:
+    - r-seurat=3.0.1
+    - r-dplyr=0.8.1
+    - r-reticulate=1.12
+    - umap-learn=0.3.9
+    - r-tidyverse=1.2.1
+    - nomkl
+    - r-ggplot2=3.1.1
+    - bioconductor-biocparallel=1.18.0
+    - bioconductor-qusage=2.16.1
+    - r-cowplot=1.0.0
+    - r-egg=0.4.5
+    - r-clustree=0.4.0
+    - r-stringr=1.4.0
