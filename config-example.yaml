@@ -52,17 +52,19 @@ rules:
 
 # Seurat analysis
 # step 1. Examine your results with the most commonly used single-cell QC metrics. 
+# Parameters:
+# project_name: define the name of your project.
     seurat_qc:
         params:
-            # Define the name of your project 
             project_name: "Test"
         res:
             mem: 3000
-# step 2. Implement your filters in order to get quality cells using the information gathered in step 1. 
-# These quality filters are the following: 
-# minimum (min_genes) and maximum (max_genes) number of unique genes detected per cell;
-# minimum percentaje of reads mapping to the mitochondrial genome (mit_pct, recommended 5);
-# minimum percentaje of reads mapping to the ribosomal genome (ribo_pct, recommended 40)
+# step 2. Implement your filters in order to get good quality cells using the information gathered in step 1. 
+# Parameters: 
+# min_genes: filtering by the min number of detected genes (per cell) ensures the elimination of broken cells or ambiance.
+# max_genes: eliminates possible doubles or triplets.  
+# mit_pct: minimum percentaje of reads mapping to the mitochondrial genome (recommended 5).
+# ribo_pct: minimum percentaje of reads mapping to the ribosomal genome (recommended 40).
     seurat_postqc:
         params:
             min_genes: 500
@@ -75,7 +77,8 @@ rules:
 # Parameters: 
 # gene: input a gene or list of genes (i.e. "Epcam")
 # threshold: expression-based filtering criteria (i.e. 0)
-# filter_out: if true, cells will be filtered out based on the specified threshold; cells with higher expression values will be kept. If false, cells with the will be kept. 
+# filter_out: if true, cells will be filtered out based on the specified threshold; cells with higher expression values will be kept. 
+# if false, cells with the specified (or less) expression will be kept. 
     seurat_filter:
         params:
             gene: 
@@ -83,13 +86,14 @@ rules:
             filter_out:
         res:
             mem: 4000
-# step 3. After normalization, generates a Jackstrawplot as well as an elbow plot.
+# step 3. Normalization. 
+# Generates a Jackstrawplot as well as an elbow plot.
 # Examine these plots in order to select the number of principal components used in the next steps.
     seurat_normalization:
         res:
             mem: 12000
 # step 4. Clustering of your data. 
-# Paramters:
+# Parameters:
 # random_seed: ensures the reproducibility of your analysis.
 # principal_components: number of components used.
 # resolutions: the resolution(s) values will set the granularity of the clustering (typicaly between 0.4-1.2). 
@@ -110,7 +114,7 @@ rules:
             mem: 12000
 # step 6. Gene set scoring will calculate the average expression levels of each specified regulatory program.
 # Parameters:
-# geneset_collection: input a .gmt file with the  gene set or gene set collections to evaluate. 
+# geneset_collection: input a .gmt file containing the gene set or gene set collections to evaluate. 
     seurat_gs:
         params:
             geneset_collection: "c2.cp.kegg.v6.2.symbols.gmt"
