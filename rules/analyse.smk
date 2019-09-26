@@ -13,7 +13,8 @@ rule seurat_qc:
         project_name = config["rules"]["seurat_qc"]["params"]["project_name"]
     conda: "../envs/seurat.yaml"
     resources:
-        mem=get_resource("seurat_qc","mem")
+        mem=get_resource("seurat_qc","mem"),
+        walltime=get_resource("seurat_qc","walltime")
     script: 
         "../scripts/step1_qc.R"
 
@@ -34,7 +35,8 @@ rule seurat_post_qc:
         ribo = config["rules"]["seurat_postqc"]["params"]["ribo_pct"]
     conda: "../envs/seurat.yaml"
     resources:
-        mem=get_resource("seurat_postqc","mem")
+        mem=get_resource("seurat_postqc","mem"),
+        walltime=get_resource("seurat_postqc","walltime")
     script:
         "../scripts/step2_postqc.R"
 
@@ -54,7 +56,8 @@ rule seurat_filter:
         threshold = config["rules"]["seurat_filter"]["params"]["threshold"]
     conda: "../envs/seurat.yaml"
     resources:
-        mem=get_resource("seurat_filter", "mem")
+        mem=get_resource("seurat_filter", "mem"),
+        walltime=get_resource("seurat_filter", "walltime")
     script:
         "../scripts/step2.1_filter.R"
 
@@ -72,7 +75,8 @@ rule seurat_normalization:
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
     conda: "../envs/seurat.yaml"
     resources:
-        mem=get_resource("seurat_normalization","mem")
+        mem=get_resource("seurat_normalization","mem"),
+        walltime=get_resource("seurat_normalization","walltime")
     script:
         "../scripts/step3_normalization.R"
 
@@ -92,7 +96,8 @@ rule seurat_find_clusters:
         res = config["rules"]["seurat_find_clusters"]["params"]["resolutions"],
     conda: "../envs/seurat.yaml"
     resources:
-        mem=get_resource("seurat_find_clusters","mem")
+        mem=get_resource("seurat_find_clusters","mem"),
+        walltime=get_resource("seurat_find_clusters","walltime")
     script:
         "../scripts/step4_find-clusters.R"
 
@@ -111,7 +116,8 @@ rule seurat_degs:
         selected_res = config["rules"]["seurat_degs"]["params"]["selected_res"]
     conda: "../envs/seurat.yaml"
     resources:
-        mem=get_resource("seurat_degs","mem")
+        mem=get_resource("seurat_degs","mem"),
+        walltime=get_resource("seurat_degs","walltime")
     script:
         "../scripts/step5_degs.R"
 
@@ -130,7 +136,8 @@ rule seurat_gs:
         gs_collection = config["rules"]["seurat_gs"]["params"]["geneset_collection"]
     conda: "../envs/seurat.yaml"
     resources:
-        mem=get_resource("seurat_gs","mem")
+        mem=get_resource("seurat_gs","mem"),
+        walltime=get_resource("seurat_gs","walltime")
     script:
         "../scripts/step6_gs-scoring.R"
 
