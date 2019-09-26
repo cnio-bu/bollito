@@ -20,6 +20,7 @@ rules:
         res:
             threads: 1
             mem: 2000
+            walltime: 120
     cutadapt:
         disabled: true
         params: "-G GCAGTGGTATCAACGCAGAGTACATGGG -m 16"
