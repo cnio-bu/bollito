@@ -43,7 +43,7 @@ rules:
         res:
             threads: 6
             mem: 64000
-# Quality control. 
+# Quality control.
     fastqc:
         res:
             threads: 4
@@ -57,15 +57,15 @@ rules:
     multiqc:
         params: "--config res/config/multiqc_config.yaml"
 # Seurat analysis
-# step 1. Examine your results with the most commonly used single-cell QC metrics. 
+# step 1. Examine your results with the most commonly used single-cell QC metrics.
     seurat_qc:
         params:
-            # Define the name of your project 
+            # Define the name of your project
             project_name: "Test"
         res:
             mem: 3000
-# step 2. Implement your filters in order to get quality cells using the information gathered in step 1. 
-# These quality filters are the following: 
+# step 2. Implement your filters in order to get quality cells using the information gathered in step 1.
+# These quality filters are the following:
 # minimum (min_genes) and maximum (max_genes) number of unique genes detected per cell;
 # minimum percentaje of reads mapping to the mitochondrial genome (mit_pct, recommended 5);
 # minimum percentaje of reads mapping to the ribosomal genome (ribo_pct, recommended 40)
@@ -73,18 +73,18 @@ rules:
         params:
             min_genes: 500
             max_genes: 4000
-            mit_pct: 5 
+            mit_pct: 5
             ribo_pct: 20
         res:
             mem: 4000
 # step 2.1. Bollito allows you to filter out cells based on positive or negative marker gene(s).
-# Parameters: 
+# Parameters:
 # gene: input a gene or list of genes (i.e. "Epcam")
 # threshold: expression-based filtering criteria (i.e. 0)
-# filter_out: if true, cells will be filtered out based on the specified threshold; cells with higher expression values will be kept. If false, cells with the will be kept. 
+# filter_out: if true, cells will be filtered out based on the specified threshold; cells with higher expression values will be kept. If false, cells with the will be kept.
     seurat_filter:
         params:
-            gene: 
+            gene:
             threshold:
             filter_out:
         res:
@@ -94,11 +94,11 @@ rules:
     seurat_normalization:
         res:
             mem: 12000
-# step 4. Clustering of your data. 
+# step 4. Clustering of your data.
 # Paramters:
 # random_seed: ensures the reproducibility of your analysis.
 # principal_components: number of components used.
-# resolutions: the resolution(s) values will set the granularity of the clustering (typicaly between 0.4-1.2). 
+# resolutions: the resolution(s) values will set the granularity of the clustering (typicaly between 0.4-1.2).
     seurat_find_clusters:
         params:
             random_seed: 8458
@@ -107,8 +107,8 @@ rules:
         res:
             mem: 8000
 # step 5. Marker and Differentially expressed genes calculation.
-# Parameters: 
-# res: sets the resolution to be used in the downstream analysis. 
+# Parameters:
+# res: sets the resolution to be used in the downstream analysis.
     seurat_degs:
         params:
             selected_res: 0.2
@@ -116,7 +116,7 @@ rules:
             mem: 12000
 # step 6. Gene set scoring will calculate the average expression levels of each specified regulatory program.
 # Parameters:
-# geneset_collection: input a .gmt file with the  gene set or gene set collections to evaluate. 
+# geneset_collection: input a .gmt file with the  gene set or gene set collections to evaluate.
     seurat_gs:
         params:
             geneset_collection: "c2.cp.kegg.v6.2.symbols.gmt"
