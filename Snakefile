@@ -25,7 +25,6 @@ def get_resource(rule,resource):
 def get_input_degs(wc):
     if config["rules"]["seurat_degs"]["params"]["selected_res"]:
         file = expand("{OUTDIR}/seurat/{unit.sample}/4_degs/seurat_degs.rds", unit=units.itertuples(),OUTDIR=OUTDIR)
-        print(file)
     else:
         file = []
     return file
@@ -33,7 +32,6 @@ def get_input_degs(wc):
 def get_input_gs(wc):
     if config["rules"]["seurat_gs"]["params"]["geneset_collection"]:
         file = expand("{OUTDIR}/seurat/{unit.sample}/5_gs/seurat_complete.rds", unit=units.itertuples(),OUTDIR=OUTDIR)
-        print(file)
     else:
         file = []
     return file

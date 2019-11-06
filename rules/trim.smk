@@ -12,7 +12,8 @@ rule merge:
         "{}/merge/{{sample}}.r{{group}}.bmk".format(LOGDIR)
     threads: get_resource("merge","threads")
     resources:
-        mem=get_resource("merge","mem")
+        mem=get_resource("merge","mem"),
+        walltime=get_resource("merge","walltime")
     shell:"""
         cat {input} > {output} 2> {log}
     """
@@ -33,6 +34,7 @@ rule cutadapt:
         "{}/cutadapt/{{sample}}.bmk".format(LOGDIR)
     threads: get_resource("cutadapt","threads")
     resources:
-        mem=get_resource("cutadapt","mem")
+        mem=get_resource("cutadapt","mem"),
+        walltime=get_resource("cutadapt","walltime")
     wrapper:
         "0.35.0/bio/cutadapt/pe"
