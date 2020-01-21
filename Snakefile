@@ -34,7 +34,6 @@ def get_resource(rule,resource):
 def get_input_degs(wc):
     if config["rules"]["seurat_degs"]["params"]["selected_res"]:
         samples = [u.sample for u in units.itertuples()] + ['integrated']
-        print(samples)
         file = expand("{OUTDIR}/seurat/{sample}/4_degs/seurat_degs.rds", sample=samples,OUTDIR=OUTDIR)
     else:
         file = []
@@ -111,7 +110,6 @@ report: "report/workflow.rst"
 
 ##### load rules #####
 
-include: "rules/trim.smk"
 include: "rules/align.smk"
 include: "rules/qc.smk"
 include: "rules/analyse.smk"
