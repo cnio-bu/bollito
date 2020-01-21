@@ -5,14 +5,23 @@ min_version("5.1.2")
 
 ##### load config and sample sheets #####
 
-configfile: "config.yaml"
+try:
+    configfile: "config.yaml"
+except WorkflowError:
+    quit(f"ERROR: the config file config.yaml does not exist. Please see the README file for details.")
 
 OUTDIR = config["outdir"]
 LOGDIR = config["logdir"]
 
-samples = pd.read_csv(config["samples"], sep="\t").set_index("sample", drop=False)
+try:
+    samples = pd.read_csv(config["samples"], sep="\t").set_index("sample", drop=False)
+except FileNotFoundError:
+    quit(f"ERROR: the samples file ({config['samples']}) does not exist. Please see the README file for details.")
 
-units = pd.read_csv(config["units"], dtype=str, sep="\t").set_index(["sample", "unit"], drop=False)
+try:
+    units = pd.read_csv(config["units"], dtype=str, sep="\t").set_index(["sample", "unit"], drop=False)
+except FileNotFoundError:
+    quit(f"ERROR: the units file ({config['units']}) does not exist. Please see the README file for details.")
 units.index = units.index.set_levels([i.astype(str) for i in units.index.levels])  # enforce str in index
 
 def get_resource(rule,resource):
@@ -99,7 +108,6 @@ singularity: "docker://continuumio/miniconda3"
 ##### setup report #####
 
 report: "report/workflow.rst"
-
 
 ##### load rules #####
 
