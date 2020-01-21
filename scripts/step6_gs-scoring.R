@@ -8,7 +8,7 @@ suppressMessages(library("qusage"))
 # A. Parameters: folder configuration 
 dir.name = snakemake@params[["output_dir"]]
 input_data = snakemake@params[["input_data"]]
-folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs")
+folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs", "6_traj_in", "7_func_analysis")
 
 # B. Parameters: analysis configuration 
 geneset_collection = snakemake@params[["gs_collection"]]

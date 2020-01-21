@@ -7,25 +7,45 @@ suppressMessages(library("ggplot2"))
 # A. Parameters: folder configuration 
 dir.name = snakemake@params[["output_dir"]]
 input_data = snakemake@params[["input_data"]]
+normalization = snakemake@params[["normalization"]] # "sct" or "standard"
+regress_out = snakemake@params[["regress_out"]] # true or false
+vars_to_regress = c(snakemake@params[["vars_to_regress"]]) # check if null 
+
 folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs")
 # B. Parameters: analysis configuration 
 # C. Analysis
 seurat = readRDS(input_data)
-# 5. Normalize data
-seurat <- NormalizeData(seurat, normalization.method = "LogNormalize", scale.factor = 10000)
 
-# 6. Find Variable Genes
-seurat <- FindVariableFeatures(seurat, selection.method = "vst", nfeatures = 2500)
-# Identify the 10 most highly variable genes
-top10 <- head(VariableFeatures(seurat), 15)
-plot1 <- VariableFeaturePlot(seurat) + theme(legend.position="bottom") 
-LabelPoints(plot = plot1, points = top10, repel = TRUE) + theme(legend.position="bottom") 
-ggsave(paste0(dir.name, "/",folders[1], "/6_variable_features.pdf"))
+if(normalization == "standard"){
+	# 5. Normalize data
+	seurat <- NormalizeData(seurat, normalization.method = "LogNormalize", scale.factor = 10000)
 
-# 7. Start of Identifying Cell Types
-# 7.1. Scale the data
-all.genes <- rownames(seurat)
-seurat <- ScaleData(seurat, features = all.genes)
+	# 6. Find Variable Genes
+	seurat <- FindVariableFeatures(seurat, selection.method = "vst", nfeatures = 2500)
+	# Identify the 10 most highly variable genes
+	top10 <- head(VariableFeatures(seurat), 15)
+	plot1 <- VariableFeaturePlot(seurat) + theme(legend.position="bottom") 
+	LabelPoints(plot = plot1, points = top10, repel = TRUE) + theme(legend.position="bottom") 
+	ggsave(paste0(dir.name, "/",folders[1], "/6_variable_features.pdf"))
+
+	# 7. Start of Identifying Cell Types
+	# 7.1. Scale the data
+	all.genes <- rownames(seurat)
+	if(regress_out == TRUE){
+		seurat <- ScaleData(seurat, features = all.genes, vars.to.regress = vars_to_regress)
+	} else {
+                seurat <- ScaleData(seurat, features = all.genes)			
+	}
+} else if (normalization == "SCT"){
+	if(regress_out == TRUE){
+                seurat <- SCTransform(seurat, vars.to.regress = vars_to_regress, verbose = FALSE)		
+	} else {
+                seurat <- SCTransform(seurat, verbose = FALSE)		
+	}
+} else {
+	message("Normalization method not found.")
+}
+
 ## 7.2. Run PCA
 seurat <- RunPCA(seurat, features = VariableFeatures(object = seurat), npcs = 100) # This result could all be saved in a table. 
 # Visualizing PCA in Different Ways: elbow plot most variable genes 

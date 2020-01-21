@@ -6,7 +6,7 @@ suppressMessages(library("ggplot2"))
 
 # A. Parameters: folder configuration 
 dir.name = snakemake@params[["output_dir"]]
-folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs")
+folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs", "6_traj_in", "7_func_analysis")
 
 # B. Parameters: analysis configuration 
 gene.filter = c(snakemake@params[["gene"]]) # Gene or list of genes.

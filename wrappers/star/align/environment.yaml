@@ -3,4 +3,4 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - star ==2.7.0f
+  - star = 2.7.3a

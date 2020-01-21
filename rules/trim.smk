@@ -1,15 +1,15 @@
-def get_fastq(wildcards):
+def get_fastq(wildcards):  
     return list(units.loc[(wildcards.sample), "fq" + wildcards.group])
 
 rule merge:
     input:
         get_fastq
     output:
-        "{}/merged/{{sample}}.r{{group}}.fastq.gz".format(OUTDIR)
+        f"{OUTDIR}/merged/{{sample}}.r{{group}}.fastq.gz"
     log:
-        "{}/merge/{{sample}}.r{{group}}.log".format(LOGDIR)
+        f"{OUTDIR}/merge/{{sample}}.r{{group}}.log"
     benchmark:
-        "{}/merge/{{sample}}.r{{group}}.bmk".format(LOGDIR)
+        f"{OUTDIR}/merge/{{sample}}.r{{group}}.bmk"
     threads: get_resource("merge","threads")
     resources:
         mem=get_resource("merge","mem"),
@@ -20,18 +20,18 @@ rule merge:
 
 rule cutadapt:
     input:
-        fastq1="{}/merged/{{sample}}.r1.fastq.gz".format(OUTDIR),
-        fastq2="{}/merged/{{sample}}.r2.fastq.gz".format(OUTDIR)
+        fastq1=f"{OUTDIR}/merged/{{sample}}.r1.fastq.gz",
+        fastq2=f"{OUTDIR}/merged/{{sample}}.r2.fastq.gz"
     output:
-        fastq1="{}/trimmed/{{sample}}.r1.fastq.gz".format(OUTDIR),
-        fastq2="{}/trimmed/{{sample}}.r2.fastq.gz".format(OUTDIR),
-        qc="{}/cutadapt/{{sample}}.out".format(LOGDIR)
+        fastq1=f"{OUTDIR}/trimmed/{{sample}}.r1.fastq.gz",
+        fastq2=f"{OUTDIR}/trimmed/{{sample}}.r2.fastq.gz",
+        qc=f"{OUTDIR}/cutadapt/{{sample}}.out"
     params:
         config["rules"]["cutadapt"]["params"]
     log:
-        "{}/cutadapt/{{sample}}.err".format(LOGDIR)
+        f"{LOGDIR}/cutadapt/{{sample}}.err"
     benchmark:
-        "{}/cutadapt/{{sample}}.bmk".format(LOGDIR)
+        f"{LOGDIR}/cutadapt/{{sample}}.bmk"
     threads: get_resource("cutadapt","threads")
     resources:
         mem=get_resource("cutadapt","mem"),

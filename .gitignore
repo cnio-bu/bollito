@@ -15,3 +15,5 @@ res/FastQ_Screen_Genomes/*
 units.tsv
 samples.tsv
 config.yaml
+metadata.tsv
+Rplots.pdf

@@ -28,6 +28,7 @@ else:
 
 outprefix = os.path.dirname(snakemake.output[0]) + "/"
 
+
 shell(
     "STAR "
     "{extra} "

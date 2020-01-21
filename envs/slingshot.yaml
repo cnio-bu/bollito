@@ -1,0 +1,12 @@
+channels:
+    - conda-forge
+    - bioconda
+    - bu_cnio
+
+dependencies:
+    - r-seurat=3.1.2
+    - bioconductor-slingshot=1.4.0
+    - r-rgl=0.100.30
+    - r-rmarkdown=1.12
+    - r-gam=1.16.1
+    - r-pheatmap=1.0.12

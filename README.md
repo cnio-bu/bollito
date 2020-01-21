@@ -2,6 +2,17 @@
 
 [![pipeline status](https://gitlab.com/bu_cnio/bollito/badges/master/pipeline.svg)](https://gitlab.com/bu_cnio/bollito/commits/master)
 
+## Introduction
+Bollito is a Snakemake pipeline that performs the main steps of a single-cell RNA-seq analysis (QC, alignment, quantification and cell specific QC) and other kind of single-cell related analysis (clustering, diferential expresion, trajectory inference and functional analysis).
+
+This pipeline uses some state-of-the-art tools in single-cell RNA-seq field like Seurat, STARsolo, Vision or Slingshot. Most of the Snakemake rules are executed through Conda environments so complex dependences are not a problem. 
+
+## Requirements
+
+## Usage 
+
+## Pipeline steps
+
 ## Test data
 
 The system is pre-configured to run an example based on sample data available from 10X Genomics. The required datasets can be found at these URLS. Please update the "units.tsv" file to point at the data as needed.

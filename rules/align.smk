@@ -21,4 +21,4 @@ rule star:
         mem=get_resource("star","mem"),
         walltime=get_resource("star","walltime")
     wrapper: 
-        "68ce581/bio/star/align"
+        "file:/home/lgjimeno/pipelines/rna_vel_bollito/bollito-new_modules/wrappers/star/align"

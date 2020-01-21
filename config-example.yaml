@@ -1,27 +1,30 @@
-# path or URL to sample sheet (TSV format, columns: sample, condition, ...)
+
+# path or URL to sample sheet (TSV format, columns: sample, condition, ...).
 samples: samples.tsv
-# path or URL to sequencing unit sheet (TSV format, columns: sample, unit, fq1, fq2)
-# Units are technical replicates (e.g. lanes, or resequencing of the same biological
+# path or URL to sequencing unit sheet (TSV format, columns: sample, unit, fq1, fq2).
+# Units are technical replicates (e.g. lanes, or resequencing of the same biological.
 # sample).
 units: units.tsv
 
-outdir: 'out/test'
-logdir: 'log/test'
+outdir: "/test/out"
+logdir: "/test/log"
 
-# Genomic references
+# Genomic references (gtf and STAR index).
 ref:
     annotation: "/scratch/resources/annotations/m_musculus/gencode.vM20.annotation.gtf"
-    idx: "/scratch/resources/genomes/m_musculus/GRCm38.primary_assembly.genome_idx_star_2.7.1a"
+    idx: "/scratch/resources/genomes/m_musculus/GRCm38.primary_assembly.genome_idx_star_2.7.3a"
 
-# barcodes whitelist
-whitelist: "res/whitelists/3M-february-2018.txt"
+# Barcodes whitelist
+# This depends on the 10X chemist (V1, V2 or V3).
+whitelist: "/opt/bioinfo/cellranger/software/3.0.2/cellranger-cs/3.0.2/lib/python/cellranger/barcodes/737K-august-2016.txt"  
 
+#Default computational parameters per rule.
 rules:
     default:
         res:
             threads: 1
-            mem: 2000
-            walltime: 120
+            mem: 8000
+            walltime: 480
 # Cut adaptors
     cutadapt:
         disabled: true
@@ -33,15 +36,20 @@ rules:
     fastq_screen:
         threads: 8
         disabled: true
- # STAR alignment
+    merge:
+        res:
+            mem: 32000
+# STAR alignment
+# UMI length is related to 10X chemist.
+# Other parameters might be modified depending on the user needs.
     star_index:
         res:
-            threads: 6
+            threads: 8
             mem: 64000
     star:
-        params: "--soloType Droplet --soloFeatures Gene --outFilterMultimapNmax 50 --winAnchorMultimapNmax 50 --alignEndsType EndToEnd --outReadsUnmapped Fastx --soloUMIlen 12 --outSAMtype BAM SortedByCoordinate"
+        params: "--soloType Droplet --soloFeatures Gene Velocyto Transcript3p --outFilterMultimapNmax 50 --winAnchorMultimapNmax 50 --alignEndsType EndToEnd --outReadsUnmapped Fastx --soloUMIlen 10 --outSAMtype BAM SortedByCoordinate --outSAMattributes NH HI nM AS CR UR CB UB GX GN sS sQ sM"
         res:
-            threads: 6
+            threads: 8
             mem: 64000
 # Quality control.
     fastqc:
@@ -53,47 +61,78 @@ rules:
     rseqc_readdup:
         res:
             mem: 24000
- # MultiQC. Aggregate results from FastQC and Rseqc analyses into a single report
+ # MultiQC. Aggregate results from FastQC and Rseqc analyses into a single report.
     multiqc:
         params: "--config res/config/multiqc_config.yaml"
 # Seurat analysis
 # step 1. Examine your results with the most commonly used single-cell QC metrics.
+# project_name: define the name of your project.
+# meta_path: absolute path to meta information for each sample.
+# min_cell_filters: True or False depending if you want to filters genes by cell apearence (default value = 3).
     seurat_qc:
         params:
-            # Define the name of your project
-            project_name: "Test"
+            project_name: "451LU"
+            meta_path: "/home/lgjimeno/2500K_451LU/bollito_files/metadata.tsv"
+            min_cells_filter: False
         res:
             mem: 3000
 # step 2. Implement your filters in order to get quality cells using the information gathered in step 1.
 # These quality filters are the following:
-# minimum (min_genes) and maximum (max_genes) number of unique genes detected per cell;
-# minimum percentaje of reads mapping to the mitochondrial genome (mit_pct, recommended 5);
-# minimum percentaje of reads mapping to the ribosomal genome (ribo_pct, recommended 40)
+# Minimum (min_feat) and maximum (max_feat) number of unique genes detected per cell.
+# Minimum (min_count) and maximum (max_count) number of counts detected per cell.
+# Minimum percentaje of reads mapping to the mitochondrial genome (mit_pct, recommended 5).
+# Minimum percentaje of reads mapping to the ribosomal genome (ribo_pct, recommended 40).
+# Leave empty variables in case you do not want to filter.
+# Empty "min_feat" and "min_count" indicate not to perform the filter. Use 0 is no bottom threshold is desired.
+# Empty "max_feat" and "max_count" indicate no upper threshold.
     seurat_postqc:
         params:
-            min_genes: 500
-            max_genes: 4000
-            mit_pct: 5
-            ribo_pct: 20
+            min_feat: 500
+            max_feat: 2500 
+            min_count: 
+            max_count:  
+            mit_pct: 10
+            ribo_pct: 40
         res:
             mem: 4000
+
 # step 2.1. Bollito allows you to filter out cells based on positive or negative marker gene(s).
 # Parameters:
-# gene: input a gene or list of genes (i.e. "Epcam")
-# threshold: expression-based filtering criteria (i.e. 0)
+# gene: input a gene or list of genes (i.e. "Epcam").
+# threshold: expression-based filtering criteria (i.e. 0).
 # filter_out: if true, cells will be filtered out based on the specified threshold; cells with higher expression values will be kept. If false, cells with the will be kept.
     seurat_filter:
         params:
-            gene:
-            threshold:
-            filter_out:
+            gene: 
+            threshold: 
+            filter_out: 
         res:
             mem: 4000
 # step 3. After normalization, generates a Jackstrawplot as well as an elbow plot.
 # Examine these plots in order to select the number of principal components used in the next steps.
+# Parameters:
+# normalization: type of normalization performed ("SCT" or "standard").
+# regress_out: True or False depending if you want to regress out biological or technical effects stored in the metadata table (from Seurat object).
+# vars_to_regress: string (var = 1) or list (vars => 2) of varibles you want to regress. It / they must be stored in the metadata table. 
     seurat_normalization:
+        params:
+            normalization: "SCT"
+            regress_out: True
+            vars_to_regress: "percent.mt"
         res:
-            mem: 12000
+            mem: 16000
+# step 3B Integration. This rule is equivalent to the normalization, but it creates the integrated object. 
+# OPTIONAL step.
+# Parameters:
+# norm_type: this integration depends on the normalization applied (standard or SCT).
+# vars_to_regress: some variables can be regressed out to minimize their effect on the samples. It needs to be written in a python list format (more than one variable).
+    seurat_integration:
+        params:
+            perform: True
+            norm_type: "SCT"
+            vars_to_regress: "percent.mt"
+        res:
+            mem: 32000
 # step 4. Clustering of your data.
 # Paramters:
 # random_seed: ensures the reproducibility of your analysis.
@@ -102,23 +141,68 @@ rules:
     seurat_find_clusters:
         params:
             random_seed: 8458
-            principal_components: 50
-            resolutions: [0.2, 0.4, 0.8, 1.2]
+            principal_components: 10
+            resolutions: [0.2, 0.4, 0.8, 1.2, 1.6]
         res:
             mem: 8000
 # step 5. Marker and Differentially expressed genes calculation.
 # Parameters:
-# res: sets the resolution to be used in the downstream analysis.
+# selected_res: sets the resolution to be used in the downstream analysis.
     seurat_degs:
         params:
-            selected_res: 0.2
+            selected_res: 0.4
         res:
-            mem: 12000
+            mem: 64000
 # step 6. Gene set scoring will calculate the average expression levels of each specified regulatory program.
 # Parameters:
 # geneset_collection: input a .gmt file with the  gene set or gene set collections to evaluate.
     seurat_gs:
         params:
-            geneset_collection: "c2.cp.kegg.v6.2.symbols.gmt"
+            geneset_collection:
         res:
             mem: 10000
+# step 7. Slingshot. Trajectory inference step. Lineages and curves that goes through the clusters are calculated.
+# OPTIONAL step.
+# Parameters:
+# selected_res: resolution (number of clusters) chosen from Seurat object to perform the trajectory analysis. 
+# start_clus: cluster from where the curve or lineage starts (optional).
+# start_clus: last cluster of the curve or lienage (optional).
+# n_var_genes: n top variable genes selected to fit the model.
+# n_plotted_genes: n top variable genes to plot in the heatmap.
+    slingshot:
+        params:
+            perform: True
+            selected_res: 0.4
+            start_clus: False
+            end_clus: False 
+            n_var_genes: 1000
+            n_plotted_genes: 50
+        res: 
+            mem: 8000
+# step 8. Vision. Cell and cluster functional analysis based on molecular signatures.
+# OPTIONAL step.
+# Parameters:
+# mol_signatures: path to molecular signatures gmt file 
+# meta_columns: metadata information that is kept from Seurat object. It needs to be written in a python list format (more than one variable).
+# selected_res: resolution (number of clusters) chosen from Seurat object to be added as metadata.
+# n_cores: cores given for the analysis.
+# use_integrated: set True if integration is perform, False if not. 
+    vision:
+        params:
+            perform: True
+            mol_signatures: "/home/lgjimeno/resources/h.all.v7.0.symbols.gmt"
+            meta_columns: ["nCount_RNA", "nFeature_RNA", "percent.mt", "percent.ribo"]
+            n_cores: 12
+            selected_res: 0.4
+            use_integrated: False
+        res:
+            mem: 16000 
+# step 9. Velocyto. RNA velocity plots over single experiments samples.
+# OPTIONAL step.
+# selected_res: resolution (number of clusters) chosen to represent in the velocity plot.
+    velocyto:
+        params:
+            perform: True
+            selected_res: 0.4
+        res: 
+            mem: 16000

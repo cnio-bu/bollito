@@ -7,18 +7,24 @@ suppressMessages(library("BiocParallel"))
 
 # A. Parameters: folder configuration 
 dir.name = snakemake@params[["output_dir"]]
-input_data = snakemake@params[["input_data"]]
-folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs")
+input_data = snakemake@input[["data"]]
+folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs", "6_traj_in", "7_func_analysis")
 
 # B. Parameters: analysis configuration 
 selected_res = snakemake@params[["selected_res"]]
 
 # C. Analysis
 seurat <- readRDS(input_data)
+assay_type <- seurat@active.assay
+cluster_res <- paste0(assay_type, "_snn_res.", selected_res)
+if (!(cluster_res %in% colnames(seurat@meta.data))){
+  stop("Specified resolution is not available.")
+}
+
 # 9 Differentially expressed genes between clusters. 
 # dir.create(paste0(dir.name, "/", folders[4]))
 # After checking out all results with the calculated resolutions, the rest of the analysis will be done using the specified one.
-Idents(seurat) <- paste0("RNA_snn_res.",selected_res)
+Idents(seurat) <- paste0(assay_type, "_snn_res.",selected_res)
 # 9.1. Table on differentially expressed genes - using basic filterings
 for (i in 1:length(unique(Idents(seurat)))){
   clusterX.markers <- FindMarkers(seurat, ident.1 = unique(Idents(seurat))[i], min.pct = 0.25) #min expressed

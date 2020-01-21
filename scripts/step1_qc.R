@@ -6,19 +6,35 @@ suppressMessages(library("ggplot2"))
 suppressMessages(library("stringr"))
 
 # A. Parameters: folder configuration 
-data_dir = paste0(snakemake@params[["input_dir"]],"/","Solo.out")
+data_dir = paste0(snakemake@params[["input_dir"]],"/Solo.out/Gene/filtered")
 dir.name = snakemake@params[["output_dir"]]
-folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs")
+folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs", "6_traj_in", "7_func_analysis")
 
 # B. Parameters: analysis configuration 
 project_name = snakemake@params[["project_name"]]
+meta_path = snakemake@params[["meta_path"]]
+min_cells_filter =  snakemake@params[["min_cells_filter"]]
 # C. Analysis
 # Read STARSolo output
+file.rename(paste0(data_dir,"/features.tsv"), paste0(data_dir,"/genes.tsv"))
 expression_matrix <- Read10X(data.dir = data_dir)
 rownames(expression_matrix) = stringr::str_to_title(rownames(expression_matrix))
+
 # Create Analysis folder
 # 1. Creating a seurat object 
-seurat = CreateSeuratObject(expression_matrix, project = project_name, min.features = 200)
+if (min_cells_filter) {
+  seurat = CreateSeuratObject(expression_matrix, project = project_name, min.features = 200, min.cells = 3)
+} else if (min_cells_filter == FALSE) {
+  seurat = CreateSeuratObject(expression_matrix, project = project_name, min.features = 200)
+} else {
+  stop("Write True or False in config.yaml file please.")
+}
+# 1.1 Add metadata
+metadata = read.csv(meta_path, sep = "\t", row.names = 1)
+sample_name <- head(tail(unlist(strsplit(data_dir, "/")), n = 2), n= 1)
+for (i in 1:length(colnames(metadata))) {
+  seurat <- AddMetaData(seurat, metadata[sample_name, i], col.name = colnames(metadata)[i])
+}
 
 # 2. Preprocessing: Filter out low-quality cells
 # 2.1. Mitochondrial genes - check levels of expression for mt genes 
