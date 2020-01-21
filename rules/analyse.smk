@@ -12,7 +12,7 @@ rule seurat_qc:
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
         project_name = config["rules"]["seurat_qc"]["params"]["project_name"],
         meta_path = config["rules"]["seurat_qc"]["params"]["meta_path"],
-        min_cells_filter = config["rules"]["seurat_qc"]["params"]["min_cells_filter"]
+        min_cells_per_gene = config["rules"]["seurat_qc"]["params"]["min_cells_per_gene"]
     conda: "../envs/seurat.yaml"
     resources:
         mem=get_resource("seurat_qc","mem"),

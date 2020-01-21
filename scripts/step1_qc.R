@@ -13,7 +13,7 @@ folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_g
 # B. Parameters: analysis configuration 
 project_name = snakemake@params[["project_name"]]
 meta_path = snakemake@params[["meta_path"]]
-min_cells_filter =  snakemake@params[["min_cells_filter"]]
+min_cells_per_gene =  snakemake@params[["min_cells_per_gene"]]
 # C. Analysis
 # Read STARSolo output
 file.rename(paste0(data_dir,"/features.tsv"), paste0(data_dir,"/genes.tsv"))
@@ -22,13 +22,8 @@ rownames(expression_matrix) = stringr::str_to_title(rownames(expression_matrix))
 
 # Create Analysis folder
 # 1. Creating a seurat object 
-if (min_cells_filter) {
-  seurat = CreateSeuratObject(expression_matrix, project = project_name, min.features = 200, min.cells = 3)
-} else if (min_cells_filter == FALSE) {
-  seurat = CreateSeuratObject(expression_matrix, project = project_name, min.features = 200)
-} else {
-  stop("Write True or False in config.yaml file please.")
-}
+seurat = CreateSeuratObject(expression_matrix, project = project_name, min.features = 200, min.cells = min_cells_per_gene)
+
 # 1.1 Add metadata
 metadata = read.csv(meta_path, sep = "\t", row.names = 1)
 sample_name <- head(tail(unlist(strsplit(data_dir, "/")), n = 2), n= 1)
