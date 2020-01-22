@@ -71,12 +71,11 @@ rules:
 # step 1. Examine your results with the most commonly used single-cell QC metrics.
 # project_name: define the name of your project.
 # meta_path: absolute path to meta information for each sample.
-# min_cell_filters: True or False depending if you want to filters genes by cell apearence (default value = 3).
+# min_cell_per_gene: number of cells that must express a gene for the gene to pass the filter.
     seurat_qc:
         params:
             project_name: "451LU"
-            meta_path: "/home/lgjimeno/2500K_451LU/bollito_files/metadata.tsv"
-            min_cells_filter: False
+            meta_path: metadata.tsv
             min_cells_per_gene: 1
         res:
             mem: 3000
@@ -198,7 +197,6 @@ rules:
             meta_columns: ["nCount_RNA", "nFeature_RNA", "percent.mt", "percent.ribo"]
             n_cores: 12
             selected_res: 0.4
-            use_integrated: False
         res:
             mem: 16000 
 # step 9. Velocyto. RNA velocity plots over single experiments samples.

@@ -4,6 +4,7 @@ suppressMessages(library("data.table"))
 suppressMessages(library("reticulate"))
 suppressMessages(library("ggplot2"))
 suppressMessages(library("stringr"))
+suppressMessages(library("Matrix"))
 
 # A. Parameters: folder configuration 
 data_dir = paste0(snakemake@params[["input_dir"]],"/Solo.out/Gene/filtered")
@@ -13,22 +14,41 @@ folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_g
 # B. Parameters: analysis configuration 
 project_name = snakemake@params[["project_name"]]
 meta_path = snakemake@params[["meta_path"]]
-min_cells_per_gene =  snakemake@params[["min_cells_per_gene"]]
-# C. Analysis
-# Read STARSolo output
-file.rename(paste0(data_dir,"/features.tsv"), paste0(data_dir,"/genes.tsv"))
-expression_matrix <- Read10X(data.dir = data_dir)
-rownames(expression_matrix) = stringr::str_to_title(rownames(expression_matrix))
+min_cells_per_gene = snakemake@params[["min_cells_per_gene"]]
+input_type = snakemake@params[["input_type"]]
+units_path = snakemake@params[["units_path"]]
+sample = snakemake@params[["sample"]]
 
-# Create Analysis folder
+# C. Analysis
+# Read input and create the expression matrix object.
+# If the input file is a fastq file (STARsolo input)
+if (input_type == "fastq") {
+  file.rename(paste0(data_dir,"/features.tsv"), paste0(data_dir,"/genes.tsv"))
+  expression_matrix <- Read10X(data.dir = data_dir)
+  rownames(expression_matrix) = stringr::str_to_title(rownames(expression_matrix))
+#If the input file are matrices (directly read from units.tsv)
+} else if (input_type == "matrix") { # units.tsv is loaded
+  units <- read.csv(units_path, header = TRUE, sep = "\t", row.names = 1)
+  if (units[sample,"unit"] == "10X") { #if input files are in 10X format (matrix, barcodes and genes files)
+    expression_matrix <- readMM(toString(units[sample,"matrix"]))
+    colnames(expression_matrix) <- read.table(toString(units[sample,"cell_names"]))[,1]
+    row.names(expression_matrix) <- read.table(toString(units[sample,"genes"]))[,1]
+  } else if (units[sample,"unit"] == "standard") { #if input file is a standard matris (genes as row names and cells as column names)
+    expression_matrix = read.csv(toString(units[sample,"matrix"]), sep = "\t", header = TRUE, row.names = 1)
+  } else {
+    message("Please specify a correct unit input.")
+  }
+} else {
+  message("Please specify a correct input type.")
+}
+
 # 1. Creating a seurat object 
 seurat = CreateSeuratObject(expression_matrix, project = project_name, min.features = 200, min.cells = min_cells_per_gene)
 
 # 1.1 Add metadata
 metadata = read.csv(meta_path, sep = "\t", row.names = 1)
-sample_name <- head(tail(unlist(strsplit(data_dir, "/")), n = 2), n= 1)
 for (i in 1:length(colnames(metadata))) {
-  seurat <- AddMetaData(seurat, metadata[sample_name, i], col.name = colnames(metadata)[i])
+  seurat <- AddMetaData(seurat, metadata[sample, i], col.name = colnames(metadata)[i])
 }
 
 # 2. Preprocessing: Filter out low-quality cells

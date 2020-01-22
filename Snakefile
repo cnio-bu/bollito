@@ -24,6 +24,8 @@ except FileNotFoundError:
     quit(f"ERROR: the units file ({config['units']}) does not exist. Please see the README file for details.")
 units.index = units.index.set_levels([i.astype(str) for i in units.index.levels])  # enforce str in index
 
+
+
 def get_resource(rule,resource):
     try:
         return config["rules"][rule]["res"][resource]
@@ -33,7 +35,9 @@ def get_resource(rule,resource):
 ## get rule all inputs depending on the enabled fields ## 
 def get_input_degs(wc):
     if config["rules"]["seurat_degs"]["params"]["selected_res"]:
-        samples = [u.sample for u in units.itertuples()] + ['integrated']
+        samples = [u.sample for u in units.itertuples()] 
+        if config["rules"]["seurat_integration"]["params"]["perform"] == True:
+            samples = samples + ['integrated']
         file = expand("{OUTDIR}/seurat/{sample}/4_degs/seurat_degs.rds", sample=samples,OUTDIR=OUTDIR)
     else:
         file = []
@@ -41,7 +45,9 @@ def get_input_degs(wc):
 
 def get_input_gs(wc):
     if config["rules"]["seurat_gs"]["params"]["geneset_collection"]:
-        samples = [u.sample for u in units.itertuples()] + ['integrated']
+        samples = [u.sample for u in units.itertuples()]
+        if config["rules"]["seurat_integration"]["params"]["perform"] == True:
+            samples = samples + ['integrated']
         file = expand("{OUTDIR}/seurat/{sample}/5_gs/seurat_complete.rds", sample=samples,OUTDIR=OUTDIR)
     else:
         file = []
@@ -49,7 +55,9 @@ def get_input_gs(wc):
 
 def get_input_ti(wc):
     if config["rules"]["slingshot"]["params"]["perform"] == True:
-        samples = [u.sample for u in units.itertuples()] + ['integrated']
+        samples = [u.sample for u in units.itertuples()] 
+        if config["rules"]["seurat_integration"]["params"]["perform"] == True:
+            samples = samples + ['integrated']
         file = expand("{OUTDIR}/slingshot/{sample}/6_traj_in/slingshot_sce.rds", sample=samples,OUTDIR=OUTDIR)
     else:
         file = []
@@ -57,7 +65,9 @@ def get_input_ti(wc):
 
 def get_input_fa(wc):
     if config["rules"]["vision"]["params"]["perform"] == True:
-        samples = [u.sample for u in units.itertuples()] + ['integrated']
+        samples = [u.sample for u in units.itertuples()] 
+        if config["rules"]["seurat_integration"]["params"]["perform"] == True:
+            samples = samples + ['integrated']
         file = expand("{OUTDIR}/vision/{sample}/7_func_analysis/vision_object.rds", sample=samples,OUTDIR=OUTDIR)
     else:
         file = []
@@ -76,19 +86,41 @@ def get_integration_input_sm(wc):
     return file
 
 def get_velocity_matrices(wc):
+    if config["input_type"] == "matrix":
+        file = []
     if config["rules"]["velocyto"]["params"]["perform"] == True:
         file = expand("{OUTDIR}/star/{unit.sample}/Solo.out/Velocyto/raw/spliced/matrix.mtx", unit=units.itertuples(),OUTDIR=OUTDIR)
+    else:
+        file = []
     return file 
 
 def do_velocity(wc):
-    if config["rules"]["velocyto"]["params"]["perform"] == True:
-        samples = [u.sample for u in units.itertuples()]+['integrated']
+    if config["input_type"] == "matrix":
+        file = []
+    elif config["rules"]["velocyto"]["params"]["perform"] == True:
+        samples = [u.sample for u in units.itertuples()]
         file = expand("{OUTDIR}/velocyto/{sample}/8_RNA_velocity/seurat_velocity.rds", sample=samples,OUTDIR=OUTDIR)
+    else: 
+        file = []
     return file 
+
+def get_multiqc(wc):
+    if config["input_type"] == "fastq": 
+        file = f"{OUTDIR}/qc/multiqc_report.html"
+    else: 
+        file = []
+    return file
+    
+def seurat_input(wc): 
+    if config["input_type"] == "matrix": 
+        file = []
+    elif config["input_type"] == "fastq":
+        file = f"{OUTDIR}/star/{{sample}}/Aligned.sortedByCoord.out.bam"  
+    return file
 
 rule all:
     input:
-        f"{OUTDIR}/qc/multiqc_report.html",
+        get_multiqc,
         get_input_degs, 
         get_input_gs,
         get_input_ti,

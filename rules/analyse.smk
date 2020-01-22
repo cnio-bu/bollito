@@ -1,6 +1,6 @@
 rule seurat_qc:
-    input:
-        f"{OUTDIR}/star/{{sample}}/Aligned.sortedByCoord.out.bam"
+    input: 
+        seurat_input
     output:
         data=f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_pre-qc.rds"
     log:
@@ -12,6 +12,9 @@ rule seurat_qc:
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
         project_name = config["rules"]["seurat_qc"]["params"]["project_name"],
         meta_path = config["rules"]["seurat_qc"]["params"]["meta_path"],
+        units_path = config["units"],
+        input_type = config["input_type"],
+        sample = f"{{sample}}",
         min_cells_per_gene = config["rules"]["seurat_qc"]["params"]["min_cells_per_gene"]
     conda: "../envs/seurat.yaml"
     resources:

@@ -18,3 +18,4 @@ dependencies:
     - r-clustree=0.4.0
     - r-stringr=1.4.0
     - r-xlsx
+    - R-matrix=1.2-18
