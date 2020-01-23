@@ -1,0 +1,10 @@
+# Units.tsv example for matrices input.
+# 10X like input
+sample	unit	matrix	cell_names	barcodes
+heart	10X	data/matrices/heart/matrix.mtx	data/matrices/heart/cell_names.tsv	data/matrices/heart/barcodes.tsv
+brain	10X	data/matrices/brain/matrix.mtx	data/matrices/brain/cell_names.tsv	data/matrices/brain/barcodes.tsv
+
+# standard matrix input
+sample	unit	matrix
+heart	standard	data/matrices/heart/expresion_matrix.txt
+brain	standard	data/matrices/brain/expression_matrix.txt

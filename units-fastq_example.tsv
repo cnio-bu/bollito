@@ -1,0 +1,8 @@
+# Units.tsv example for fastq input.
+sample	unit	fq1	fq2
+brain	r1	data/reads/brain.chr19_1.r1.fastq.gz	data/reads/brain.chr19_1.r2.fastq.gz
+brain	r2	data/reads/brain.chr19_2.r1.fastq.gz	data/reads/brain.chr19_2.r2.fastq.gz
+heart	r1	data/reads/heart.chr19_1.r1.fastq.gz	data/reads/heart.chr19_1.r2.fastq.gz
+heart	r2	data/reads/heart.chr19_2.r1.fastq.gz	data/reads/heart.chr19_2.r2.fastq.gz
+
+

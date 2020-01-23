@@ -1,11 +1,17 @@
-
-# path or URL to sample sheet (TSV format, columns: sample, condition, ...).
+## Input files and information required: samples.tsv, units.tsv and input_type.
+# Samples.tsv: path or URL to sample sheet (TSV format, columns: sample, condition, ...).
 samples: samples.tsv
-# path or URL to sequencing unit sheet (TSV format, columns: sample, unit, fq1, fq2).
-# Units are technical replicates (e.g. lanes, or resequencing of the same biological.
-# sample).
+
+# Units.tsv: path or URL to sequencing unit sheet (TSV format, 2 different formats.
+# Units for fastq files (TSV format, columns: sample, unit, fq1, fq2).
+# Units for matrices (TSV format, columns: sample, unit, matrix, (cell_names), (genes)).
+# Unit column mean technical replicates (e.g. lanes, or resequencing of the same biological sample).
 units: units.tsv
 
+#input type: this variable is used to specify the input files nature ("matrix" or "fastq"). 
+input_type: "matrix"
+
+# Output and log files paths.
 outdir: "/test/out"
 logdir: "/test/log"
 
@@ -28,10 +34,7 @@ rules:
             threads: 1
             mem: 8000
             walltime: 480
-# Cut adaptors
-    cutadapt:
-        disabled: true
-        params: "-G GCAGTGGTATCAACGCAGAGTACATGGG -m 16"
+
 # Fastq screen. Screen a library of sequences in fastq format against a set of sequence DBs (of other organisms) to check its composition.
     fastq_screen_indexes:
         threads: 8
@@ -42,6 +45,7 @@ rules:
     merge:
         res:
             mem: 32000
+
 # STAR alignment
 # UMI length is related to 10X chemist.
 # Other parameters might be modified depending on the user needs.
@@ -54,6 +58,7 @@ rules:
         res:
             threads: 8
             mem: 64000
+
 # Quality control.
     fastqc:
         res:
@@ -64,18 +69,19 @@ rules:
     rseqc_readdup:
         res:
             mem: 24000
- # MultiQC. Aggregate results from FastQC and Rseqc analyses into a single report.
+# MultiQC. Aggregate results from FastQC and Rseqc analyses into a single report.
     multiqc:
         params: "--config res/config/multiqc_config.yaml"
+
 # Seurat analysis
 # step 1. Examine your results with the most commonly used single-cell QC metrics.
 # project_name: define the name of your project.
 # meta_path: absolute path to meta information for each sample.
-# min_cell_per_gene: number of cells that must express a gene for the gene to pass the filter.
+# min_cell_filters: True or False depending if you want to filters genes by cell apearence (default value = 3).
     seurat_qc:
         params:
             project_name: "451LU"
-            meta_path: metadata.tsv
+            meta_path: "/home/lgjimeno/2500K_451LU/bollito_files/metadata.tsv"
             min_cells_per_gene: 1
         res:
             mem: 3000
@@ -185,7 +191,7 @@ rules:
 # step 8. Vision. Cell and cluster functional analysis based on molecular signatures.
 # OPTIONAL step.
 # Parameters:
-# mol_signatures: path to molecular signatures gmt file 
+# mol_signatures: path to molecular signatures gmt file.
 # meta_columns: metadata information that is kept from Seurat object. It needs to be written in a python list format (more than one variable).
 # selected_res: resolution (number of clusters) chosen from Seurat object to be added as metadata.
 # n_cores: cores given for the analysis.
