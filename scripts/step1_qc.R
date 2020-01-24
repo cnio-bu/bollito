@@ -13,7 +13,7 @@ folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_g
 
 # B. Parameters: analysis configuration 
 project_name = snakemake@params[["project_name"]]
-meta_path = snakemake@params[["meta_path"]]
+samples_path = snakemake@params[["samples_path"]]
 min_cells_per_gene = snakemake@params[["min_cells_per_gene"]]
 input_type = snakemake@params[["input_type"]]
 units_path = snakemake@params[["units_path"]]
@@ -45,10 +45,21 @@ if (input_type == "fastq") {
 # 1. Creating a seurat object 
 seurat = CreateSeuratObject(expression_matrix, project = project_name, min.features = 200, min.cells = min_cells_per_gene)
 
-# 1.1 Add metadata
-metadata = read.csv(meta_path, sep = "\t", row.names = 1)
-for (i in 1:length(colnames(metadata))) {
-  seurat <- AddMetaData(seurat, metadata[sample, i], col.name = colnames(metadata)[i])
+# 1.1 Add metadata  
+samples_file = read.table(samples_path, sep = "\t", row.names = 1, header = TRUE)
+for (i in 1:length(colnames(samples_file))) {
+  seurat <- AddMetaData(seurat, samples_file[sample, i], col.name = colnames(samples_file)[i])
+}
+
+# 1.1.1 Add specific cell metadata.
+if (input_type == "matrix" & file.exists(toString(units[sample,"metadata"]))){
+  meta_file = read.table(toString(units[sample,"metadata"]), sep = "\t", row.names = 1, header = TRUE)
+  meta_file <- subset(meta_file, row.names(meta_file) %in% row.names(seurat@meta.data))
+  for (i in 1:length(colnames(meta_file))) {
+    seurat <- AddMetaData(seurat, meta_file[,i], col.name = colnames(meta_file)[i])
+  } 
+} else {
+  message("No metadata found.")
 }
 
 # 2. Preprocessing: Filter out low-quality cells

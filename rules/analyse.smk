@@ -11,7 +11,7 @@ rule seurat_qc:
         input_dir = lambda wc: "{}/star/{}".format(OUTDIR,wc.sample),
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
         project_name = config["rules"]["seurat_qc"]["params"]["project_name"],
-        meta_path = config["rules"]["seurat_qc"]["params"]["meta_path"],
+        samples_path = config["samples"],
         units_path = config["units"],
         input_type = config["input_type"],
         sample = f"{{sample}}",

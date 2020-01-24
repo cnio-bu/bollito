@@ -8,7 +8,7 @@ samples: samples.tsv
 # Unit column mean technical replicates (e.g. lanes, or resequencing of the same biological sample).
 units: units.tsv
 
-#input type: this variable is used to specify the input files nature ("matrix" or "fastq"). 
+# input type: this variable is used to specify the input files nature ("matrix" or "fastq"). 
 input_type: "matrix"
 
 # Output and log files paths.
@@ -81,7 +81,6 @@ rules:
     seurat_qc:
         params:
             project_name: "451LU"
-            meta_path: "/home/lgjimeno/2500K_451LU/bollito_files/metadata.tsv"
             min_cells_per_gene: 1
         res:
             mem: 3000
