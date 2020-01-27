@@ -1,9 +1,9 @@
 channels:
+    - bu_cnio
     - conda-forge
     - bioconda
-    - bu_cnio
 
 dependencies:
-    - r-seurat=3.1.1
+    - r-seurat
     - r-seuratwrappers
     - r-velocyto.r
