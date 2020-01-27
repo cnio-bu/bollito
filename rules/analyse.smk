@@ -79,7 +79,7 @@ def norm_input(wc):
 
 rule seurat_normalization:
     input:
-        norm_input
+        data = norm_input
     output:
         data=f"{OUTDIR}/seurat/{{sample}}/2_normalization/seurat_normalized-pcs.rds"
     log:
@@ -87,7 +87,6 @@ rule seurat_normalization:
     benchmark:
         f"{LOGDIR}/seurat/{{sample}}/2_normalization/{{sample}}.normalization.bmk"
     params:
-        input_data= f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_post-qc-filtered.rds" if config["rules"]["seurat_filter"]["params"]["gene"] else f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_post-qc.rds",
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
         normalization = config["rules"]["seurat_normalization"]["params"]["normalization"],
         regress_out = config["rules"]["seurat_normalization"]["params"]["regress_out"],
@@ -151,7 +150,6 @@ rule seurat_degs:
     benchmark:
         f"{LOGDIR}/seurat/{{sample}}/4_degs/{{sample}}.seurat_degs.bmk"
     params:
-        input_data = f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds",
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
         selected_res = config["rules"]["seurat_degs"]["params"]["selected_res"]
     conda: "../envs/seurat.yaml"
@@ -163,7 +161,7 @@ rule seurat_degs:
 
 rule seurat_gs:
     input:
-        f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds"
+        data=f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds"
     output:
         data=f"{OUTDIR}/seurat/{{sample}}/5_gs/seurat_complete.rds"
     log:
@@ -171,7 +169,6 @@ rule seurat_gs:
     benchmark:
         f"{LOGDIR}/seurat/{{sample}}/5_gs/{{sample}}.seurat_complete.bmk"
     params:
-        input_data = f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds",
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
         gs_collection = config["rules"]["seurat_gs"]["params"]["geneset_collection"]
     conda: "../envs/seurat.yaml"
@@ -181,10 +178,9 @@ rule seurat_gs:
     script:
         "../scripts/step6_gs-scoring.R"
 
-
 rule slingshot:
     input:
-        f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds"
+        data=f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds"
     output:
         data=f"{OUTDIR}/slingshot/{{sample}}/6_traj_in/slingshot_sce.rds"
     log:
@@ -192,7 +188,6 @@ rule slingshot:
     benchmark:
         f"{LOGDIR}/slingshot/{{sample}}/6_traj_in/{{sample}}.slingshot.bmk"
     params:
-        input_data = f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds",
         output_dir = f"{OUTDIR}/slingshot/{{sample}}",
         selected_res = config["rules"]["slingshot"]["params"]["selected_res"],
         start_clus = config["rules"]["slingshot"]["params"]["start_clus"],
@@ -207,10 +202,9 @@ rule slingshot:
     script:
         "../scripts/step7_traj_in.R"
 
-
 rule vision:
     input:
-        f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds"
+        data=f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds"
     output:
         data=f"{OUTDIR}/vision/{{sample}}/7_func_analysis/vision_object.rds"
     log:
@@ -218,58 +212,15 @@ rule vision:
     benchmark:
         f"{LOGDIR}/vision/{{sample}}/7_func_analysis/{{sample}}.vision.bmk"
     params:
-        input_data = f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds",
         output_dir = f"{OUTDIR}/vision/{{sample}}",
         selected_res = config["rules"]["vision"]["params"]["selected_res"],
         mol_signatures = config["rules"]["vision"]["params"]["mol_signatures"],
         meta_columns = config["rules"]["vision"]["params"]["meta_columns"],
         n_cores = config["rules"]["vision"]["params"]["n_cores"],
         use_integrated = config["rules"]["vision"]["params"]["use_integrated"]
-
-
     conda: "../envs/vision.yaml"
     resources:
         mem=get_resource("vision","mem"),
         walltime=get_resource("vision","walltime")
     script:
         "../scripts/step8_func_analysis.R"
-
-'''
-rule STAR_to_velocyto:
-    input:
-        f"{OUTDIR}/star/{{sample}}/Aligned.sortedByCoord.out.bam"
-    output: 
-        f"{OUTDIR}/star/{{sample}}/Solo.out/Velocyto/raw/spliced/matrix.mtx"
-    log:
-        f"{LOGDIR}/star/{{sample}}/Solo.out/Velocyto/raw/spliced/{{sample}}.STAR_to_velocyto.log"
-    benchmark:
-        f"{LOGDIR}/star/{{sample}}/Solo.out/Velocyto/raw/spliced/{{sample}}.STAR_to_velocyto.bmk"
-    params:
-        input_dir= lambda wc: "{}/star/{}/Solo.out/Velocyto/raw".format(OUTDIR,wc.sample)
-    conda: "../envs/seurat.yaml"
-    resources:
-        mem=get_resource("STAR_to_velocyto","mem"),
-        walltime=get_resource("STAR_to_velocyto","walltime")
-    shell:"""
-        head -n 2 {params.input_dir}/matrix.mtx > {params.input_dir}/mtx_header.txt
-        head -n 3 {params.input_dir}/matrix.mtx | tail -n 1 > {params.input_dir}/mtx_summary.txt
-
-        tail -n +4 {params.input_dir}/matrix.mtx | cut -d " " -f 1-3 > {params.input_dir}/ms.txt
-        tail -n +4 {params.input_dir}/matrix.mtx | cut -d " " -f 1-2,4 > {params.input_dir}/mu.txt
-        tail -n +4 {params.input_dir}/matrix.mtx | cut -d " " -f 1-2,5 > {params.input_dir}/ma.txt
-
-        #rm -r {params.input_dir}/spliced {params.input_dir}/unspliced {params.input_dir}/ambiguous
-        mkdir -p {params.input_dir}/spliced {params.input_dir}/unspliced {params.input_dir}/ambiguous
-
-        cat {params.input_dir}/mtx_header.txt {params.input_dir}/mtx_summary.txt {params.input_dir}/ms.txt > {params.input_dir}/spliced/matrix.mtx
-        cat {params.input_dir}/mtx_header.txt {params.input_dir}/mtx_summary.txt {params.input_dir}/mu.txt > {params.input_dir}/unspliced/matrix.mtx
-        cat {params.input_dir}/mtx_header.txt {params.input_dir}/mtx_summary.txt {params.input_dir}/ma.txt > {params.input_dir}/ambiguous/matrix.mtx
-
-        cp {params.input_dir}/features.tsv {params.input_dir}/genes.tsv
-        cp {params.input_dir}/genes.tsv {params.input_dir}/barcodes.tsv {params.input_dir}/spliced/
-        cp {params.input_dir}/genes.tsv {params.input_dir}/barcodes.tsv {params.input_dir}/unspliced/
-        cp {params.input_dir}/genes.tsv {params.input_dir}/barcodes.tsv {params.input_dir}/ambiguous/
-
-        rm {params.input_dir}/*.txt
-    """
-'''

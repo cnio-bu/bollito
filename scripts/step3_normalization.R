@@ -6,7 +6,7 @@ suppressMessages(library("ggplot2"))
 
 # A. Parameters: folder configuration 
 dir.name = snakemake@params[["output_dir"]]
-input_data = snakemake@params[["input_data"]]
+input_data = snakemake@input[["data"]]
 normalization = snakemake@params[["normalization"]] # "sct" or "standard"
 regress_out = snakemake@params[["regress_out"]] # true or false
 vars_to_regress = c(snakemake@params[["vars_to_regress"]]) # check if null 

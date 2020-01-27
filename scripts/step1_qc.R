@@ -52,12 +52,14 @@ for (i in 1:length(colnames(samples_file))) {
 }
 
 # 1.1.1 Add specific cell metadata.
-if (input_type == "matrix" & file.exists(toString(units[sample,"metadata"]))){
-  meta_file = read.table(toString(units[sample,"metadata"]), sep = "\t", row.names = 1, header = TRUE)
-  meta_file <- subset(meta_file, row.names(meta_file) %in% row.names(seurat@meta.data))
-  for (i in 1:length(colnames(meta_file))) {
-    seurat <- AddMetaData(seurat, meta_file[,i], col.name = colnames(meta_file)[i])
-  } 
+if (input_type == "matrix") {
+  if (file.exists(toString(units[sample,"metadata"]))){
+    meta_file = read.table(toString(units[sample,"metadata"]), sep = "\t", row.names = 1, header = TRUE)
+    meta_file <- subset(meta_file, row.names(meta_file) %in% row.names(seurat@meta.data))
+    for (i in 1:length(colnames(meta_file))) {
+        seurat <- AddMetaData(seurat, meta_file[,i], col.name = colnames(meta_file)[i])
+    }
+  }
 } else {
   message("No metadata found.")
 }
