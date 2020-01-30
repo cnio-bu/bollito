@@ -11,12 +11,12 @@ rule star_index:
     wrapper:
         "0.49.0/bio/star/index"
 
-def get_fastq(wildcards):  
+def input_merge(wildcards):  
     return list(units.loc[(wildcards.sample), "fq" + wildcards.group])
 
 rule merge:
     input:
-        get_fastq
+        input_merge
     output:
         f"{OUTDIR}/merged/{{sample}}.r{{group}}.fastq.gz"
     log:
@@ -31,11 +31,19 @@ rule merge:
         cat {input} > {output} 2> {log}
     """
 
+def input_star(sample,group):
+    '''call the merge rule if there's more than one fastq, otherwise return the fastq directly'''
+    fastqs = list(units.loc[(sample), f"fq{group}"])
+    if len(fastqs) == 1:
+        return fastqs[0]
+    else:
+        return f"{OUTDIR}/merged/{sample}.r{group}.fastq.gz"
+        
 rule star:
     input:
         #star needs the barcoding read (read 1) to be in the second position
-        fq1=f"{OUTDIR}/merged/{{sample}}.r2.fastq.gz",
-        fq2=f"{OUTDIR}/merged/{{sample}}.r1.fastq.gz",
+        fq1=lambda wc: input_star(wc.sample,2),
+        fq2=lambda wc: input_star(wc.sample,1),
         whitelist=config["whitelist"],
         index=config["ref"]["idx"]
     output:
