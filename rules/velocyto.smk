@@ -54,6 +54,7 @@ rule velocyto:
     params:
         velocyto_dir = f"{OUTDIR}/star/{{sample}}/Solo.out/Velocyto/raw/",
         output_dir = f"{OUTDIR}/velocyto/{{sample}}",
+        random_seed = config["random_seed"],
         selected_res = config["rules"]["velocyto"]["params"]["selected_res"] 
     conda: "../envs/velocyto.yaml"
     resources:

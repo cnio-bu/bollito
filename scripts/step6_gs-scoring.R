@@ -12,13 +12,18 @@ folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_g
 
 # B. Parameters: analysis configuration 
 geneset_collection = snakemake@params[["gs_collection"]]
+random_seed = snakemake@params[["random_seed"]]
 
 # C. Analysis
+if (is.numeric(random_seed)) {
+  set.seed(random_seed)
+}
+# Load seurat object
 seurat <- readRDS(input_data)
 
 dir.create(paste0(dir.name, "/", folders[5]))
 
-# 10. GS scoring
+# 9. GS scoring
 genesets <- read.gmt(geneset_collection) #should be a tab file, each column = pathway.
 seurat <- AddModuleScore(object = seurat, features= genesets, name = names(genesets))
 

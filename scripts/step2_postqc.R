@@ -17,9 +17,12 @@ min_count = snakemake@params[["min_count"]]
 max_count = snakemake@params[["max_count"]]
 mit = snakemake@params[["mit"]]
 ribo = snakemake@params[["ribo"]]
-
+random_seed = snakemake@params[["random_seed"]]
 
 # C. Analysis
+if (is.numeric(random_seed)) {
+  set.seed(random_seed)
+}
 # Read RDS file from previous step
 seurat = readRDS(paste0(dir.name, "/", folders[1], "/seurat_pre-qc.rds"))
 # 3.1 We should apply the filterings once the QC plots (GenePlot and Violin plots) have been checked.

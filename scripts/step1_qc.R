@@ -18,8 +18,12 @@ min_cells_per_gene = snakemake@params[["min_cells_per_gene"]]
 input_type = snakemake@params[["input_type"]]
 units_path = snakemake@params[["units_path"]]
 sample = snakemake@params[["sample"]]
+random_seed = snakemake@params[["random_seed"]]
 
 # C. Analysis
+if (is.numeric(random_seed)) {
+  set.seed(random_seed)
+}
 # Read input and create the expression matrix object.
 # If the input file is a fastq file (STARsolo input)
 if (input_type == "fastq") {

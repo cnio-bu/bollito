@@ -15,6 +15,9 @@ input_type: "matrix"
 outdir: "/test/out"
 logdir: "/test/log"
 
+# Seed that will be used in some scripts
+random_seed:  4848
+
 # Genomic references (gtf and STAR index).
 ref:
     annotation: "/scratch/resources/annotations/m_musculus/gencode.vM20.annotation.gtf"
@@ -148,7 +151,6 @@ rules:
 # resolutions: the resolution(s) values will set the granularity of the clustering (typicaly between 0.4-1.2).
     seurat_find_clusters:
         params:
-            random_seed: 8458
             principal_components: 10
             resolutions: [0.2, 0.4, 0.8, 1.2, 1.6]
         res:

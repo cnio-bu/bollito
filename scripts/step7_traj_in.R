@@ -18,11 +18,14 @@ start.clus = snakemake@params[["start_clus"]]
 end.clus = snakemake@params[["end_clus"]]
 n_var_genes = snakemake@params[["n_var_genes"]]
 n_plotted_genes = snakemake@params[["n_plotted_genes"]]
-
+random_seed = snakemake@params[["random_seed"]]
 
 # C. Analysis
-# 11. Trajectory inference analysis using slingshot
-# 11.1 Seurat object to SingleCellExperiment object (required by slingshot) & cluster cluster_res 
+if (is.numeric(random_seed)) {
+  set.seed(random_seed)
+}
+# 10. Trajectory inference analysis using slingshot
+# 10.1 Seurat object to SingleCellExperiment object (required by slingshot) & cluster cluster_res 
 seurat <- readRDS(input_data)
 assay_type <- seurat@active.assay
 cluster_res <- paste0(assay_type,"_snn_res.",selected_res)
@@ -32,7 +35,7 @@ if (!(cluster_res %in% colnames(seurat@meta.data))){
 seurat.sim <- as.SingleCellExperiment(seurat)
 
 
-# 11.2 Slingshot algorithm (dimensions = UMAP). There are 4 options depending of the start and end cluster in the following trajectory:
+# 10.2 Slingshot algorithm (dimensions = UMAP). There are 4 options depending of the start and end cluster in the following trajectory:
 if(is.numeric(start.clus) == FALSE && is.numeric(end.clus) == FALSE){
   seurat.sim <- slingshot(seurat.sim, clusterLabels=cluster_res, reducedDim="UMAP")
   const = FALSE
@@ -47,28 +50,28 @@ if(is.numeric(start.clus) == FALSE && is.numeric(end.clus) == FALSE){
   const = TRUE
 }
 
-# 11.3 Plots
+# 10.3 Plots
 
-# 11.3.1 Set the number of colours from the palette and extend it.
+# 10.3.1 Set the number of colours from the palette and extend it.
 n_col <- length(levels(seurat.sim@colData[, cluster_res]))
 getPalette <- colorRampPalette(brewer.pal(9,'Set1'))
 
-# 11.3.2 Set a good window size for the 3D plots.
+# 10.3.2 Set a good window size for the 3D plots.
 r3dDefaults$windowRect <- c(0,50, 1024, 720) 
 
-# 11.3.3 Curves 3D plot with legend --> HTML output.
+# 10.3.3 Curves 3D plot with legend --> HTML output.
 plot3d(reducedDims(seurat.sim)$UMAP[,1:3], col = getPalette(n_col)[seurat.sim@colData[, cluster_res]])
 plot3d(SlingshotDataSet(seurat.sim), lwd = 3, add = TRUE)
 legend3d("topright", legend=paste0("Cluster - ", levels(seurat.sim@colData[, cluster_res])), pch=16, col=getPalette(n_col), inset=c(0.001))
 writeWebGL(dir = paste0(dir.name, "/", folders[6]), filename = file.path(paste0(dir.name, "/", folders[6]), paste0("3D_curves_", selected_res, "_res.html")),  width = 1024)
 
-# 11.3.4 Lineage 3D plot with legend --> HTML output.
+# 10.3.4 Lineage 3D plot with legend --> HTML output.
 plot3d(reducedDims(seurat.sim)$UMAP[,1:3], col = getPalette(n_col)[seurat.sim@colData[, cluster_res]]) 
 plot3d(SlingshotDataSet(seurat.sim), lwd = 3, type = "lineages", add = TRUE, show.constraints = const)
 legend3d("topright", legend=paste0("Cluster - ", levels(seurat.sim@colData[, cluster_res])), pch=16, col=getPalette(n_col), inset=c(0.001))
 writeWebGL(dir = paste0(dir.name, "/", folders[6]), filename = file.path(paste0(dir.name, "/", folders[6]), paste0("3D_lineages_", selected_res, "_res.html")),  width = 1024)
 
-# 11.3.5 Curves 2D plot with legend --> png output. 
+# 10.3.5 Curves 2D plot with legend --> png output. 
 png(paste0(dir.name, "/", folders[6], "/2D_curves_", selected_res, "_res.png"), width = 900, height = 900)
 plot(reducedDims(seurat.sim)$UMAP, col = getPalette(n_col)[seurat.sim@colData[, cluster_res]],
      pch=16, asp = 1, main = "2D curves - Clusters Trajectories")
@@ -76,7 +79,7 @@ legend("topright", legend=paste0("Cluster - ", levels(seurat.sim@colData[, clust
 lines(SlingshotDataSet(seurat.sim), lwd=2, col = 'black')
 dev.off()
 
-# 11.3.6 Lineage 2D plot with legend --> png output.
+# 10.3.6 Lineage 2D plot with legend --> png output.
 png(paste0(dir.name, "/", folders[6], "/2D_lineages_", selected_res, "_res.png"), width = 900, height = 900)
 plot(reducedDims(seurat.sim)$UMAP, col = getPalette(n_col)[seurat.sim@colData[, cluster_res]],
      pch=16, asp = 1, main = "2D lineages - Clusters Trajectories")
@@ -84,16 +87,16 @@ legend("topright", legend=paste0("Cluster - ", levels(seurat.sim@colData[, clust
 lines(SlingshotDataSet(seurat.sim), lwd=2, type = 'lineages', col = 'black', show.constraints = const)
 dev.off()
 
-# 11.4 Temporally expressed genes heatmap
-# 11.4.1 Pseudotime is obtained
+# 10.4 Temporally expressed genes heatmap
+# 10.4.1 Pseudotime is obtained
 t <- seurat.sim$slingPseudotime_1
 
-# 11.4.2 Get the n variable genes.
+# 10.4.2 Get the n variable genes.
 Y <- assays(seurat.sim)$logcounts
 var_genes <- names(sort(apply(Y,1,var),decreasing = TRUE))[1:n_var_genes]
 Y <- Y[var_genes,]
 
-# 11.4.3 Fitting a gam model
+# 10.4.3 Fitting a gam model
 gam.pval <- apply(Y,1,function(z){
   d <- data.frame(z=z, t=t)
   suppressWarnings({
@@ -103,14 +106,14 @@ gam.pval <- apply(Y,1,function(z){
   p
 })
 
-# 11.4.4 Get the top genes selected by p-val and plot the heatmap.
+# 10.4.4 Get the top genes selected by p-val and plot the heatmap.
 topgenes <- names(sort(gam.pval, decreasing = FALSE))[1:n_plotted_genes]
 heatdata <- assays(seurat.sim)$logcounts[topgenes, order(t, na.last = NA)]
 heatclus <- seurat.sim@colData[,cluster_res][order(t, na.last = NA)]
 annotation <- data.frame("Cluster" = heatclus, row.names = colnames(heatdata))
 ann_colors <- list("Cluster" = setNames(getPalette(n_col),
                                         levels(heatclus)))
-# 11.4.5 Plot the genes.
+# 10.4.5 Plot the genes.
 pheatmap(heatdata, cluster_cols = FALSE, 
          color =  colorRampPalette(c("yellow", "red"))(100),
          annotation_col = annotation, annotation_colors = ann_colors,

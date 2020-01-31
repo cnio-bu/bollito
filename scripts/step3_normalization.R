@@ -7,29 +7,34 @@ suppressMessages(library("ggplot2"))
 # A. Parameters: folder configuration 
 dir.name = snakemake@params[["output_dir"]]
 input_data = snakemake@input[["data"]]
+folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs")
+
+# B. Parameters: analysis configuration 
 normalization = snakemake@params[["normalization"]] # "sct" or "standard"
 regress_out = snakemake@params[["regress_out"]] # true or false
 vars_to_regress = c(snakemake@params[["vars_to_regress"]]) # check if null 
+random_seed = snakemake@params[["random_seed"]]
 
-folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs")
-# B. Parameters: analysis configuration 
 # C. Analysis
+if (is.numeric(random_seed)) {
+  set.seed(random_seed)
+}
+#Load seurat object 
 seurat = readRDS(input_data)
 
+# 5 Normalization
+# 5.1 Normalize data depending of the method.
 if(normalization == "standard"){
-	# 5. Normalize data
 	seurat <- NormalizeData(seurat, normalization.method = "LogNormalize", scale.factor = 10000)
-
-	# 6. Find Variable Genes
 	seurat <- FindVariableFeatures(seurat, selection.method = "vst", nfeatures = 2500)
+	
 	# Identify the 10 most highly variable genes
 	top10 <- head(VariableFeatures(seurat), 15)
 	plot1 <- VariableFeaturePlot(seurat) + theme(legend.position="bottom") 
 	LabelPoints(plot = plot1, points = top10, repel = TRUE) + theme(legend.position="bottom") 
 	ggsave(paste0(dir.name, "/",folders[1], "/6_variable_features.pdf"))
-
-	# 7. Start of Identifying Cell Types
-	# 7.1. Scale the data
+	
+	# Scaling
 	all.genes <- rownames(seurat)
 	if(regress_out == TRUE){
 		seurat <- ScaleData(seurat, features = all.genes, vars.to.regress = vars_to_regress)
@@ -46,14 +51,14 @@ if(normalization == "standard"){
 	message("Normalization method not found.")
 }
 
-## 7.2. Run PCA
+## 5.2 Run PCA
 seurat <- RunPCA(seurat, features = VariableFeatures(object = seurat), npcs = 100) # This result could all be saved in a table. 
 # Visualizing PCA in Different Ways: elbow plot most variable genes 
 VizDimLoadings(seurat, dims = 1:2, reduction = "pca") + theme(legend.position="bottom") 
 ggsave(paste0(dir.name, "/",folders[2], "/1_viz_dim_loadings.png"), scale = 1.5)#, height = height, width = height * aspect_ratio)
 DimPlot(seurat, reduction = "pca", pt.size = 0.5) + theme(legend.position="bottom") 
 ggsave(paste0(dir.name, "/",folders[2], "/2_dimplot.png"), scale = 1.5)
-# 7.3. Determine the dimensionality of the dataset
+# 5.3. Determine the dimensionality of the dataset
 seurat <- JackStraw(seurat, num.replicate = 100, dims = 100)
 seurat <- ScoreJackStraw(seurat, dims = 1:100)
 ElbowPlot(seurat, ndims = 100) + theme(legend.position="bottom") 

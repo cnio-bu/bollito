@@ -10,11 +10,12 @@ rule seurat_qc:
     params:
         input_dir = lambda wc: "{}/star/{}".format(OUTDIR,wc.sample),
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
-        project_name = config["rules"]["seurat_qc"]["params"]["project_name"],
         samples_path = config["samples"],
         units_path = config["units"],
         input_type = config["input_type"],
+        random_seed = config["random_seed"],
         sample = f"{{sample}}",
+        project_name = config["rules"]["seurat_qc"]["params"]["project_name"],
         min_cells_per_gene = config["rules"]["seurat_qc"]["params"]["min_cells_per_gene"]
     conda: "../envs/seurat.yaml"
     resources:
@@ -34,6 +35,7 @@ rule seurat_post_qc:
         f"{LOGDIR}/seurat/{{sample}}/1_preprocessing/{{sample}}.postqc.bmk"
     params:
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
+        random_seed = config["random_seed"],
         min_feat = config["rules"]["seurat_postqc"]["params"]["min_feat"],
         max_feat = config["rules"]["seurat_postqc"]["params"]["max_feat"],
         min_count = config["rules"]["seurat_postqc"]["params"]["min_count"],
@@ -58,6 +60,7 @@ rule seurat_filter:
         f"{LOGDIR}/seurat/{{sample}}/1_preprocessing/{{sample}}.filter.bmk"
     params: 
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
+        random_seed = config["random_seed"],
         gene = config["rules"]["seurat_filter"]["params"]["gene"],
         filter_out = config["rules"]["seurat_filter"]["params"]["filter_out"],
         threshold = config["rules"]["seurat_filter"]["params"]["threshold"]
@@ -88,6 +91,7 @@ rule seurat_normalization:
         f"{LOGDIR}/seurat/{{sample}}/2_normalization/{{sample}}.normalization.bmk"
     params:
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
+        random_seed = config["random_seed"],
         normalization = config["rules"]["seurat_normalization"]["params"]["normalization"],
         regress_out = config["rules"]["seurat_normalization"]["params"]["regress_out"],
         vars_to_regress = config["rules"]["seurat_normalization"]["params"]["vars_to_regress"]
@@ -109,6 +113,7 @@ rule seurat_integration:
         f"{LOGDIR}/seurat/integrated/2_normalization/integrated.normalization.bmk"
     params:
         output_dir = f"{OUTDIR}/seurat/integrated",
+        random_seed = config["random_seed"],
         norm_type = config["rules"]["seurat_integration"]["params"]["norm_type"],
         vars_to_regress = config["rules"]["seurat_integration"]["params"]["vars_to_regress"]
     
@@ -130,7 +135,7 @@ rule seurat_find_clusters:
         f"{LOGDIR}/seurat/{{sample}}/3_clustering/{{sample}}.find-clusters.bmk"
     params:
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
-        seed =  config["rules"]["seurat_find_clusters"]["params"]["random_seed"],
+        random_seed = config["random_seed"],
         pc = config["rules"]["seurat_find_clusters"]["params"]["principal_components"],
         res = config["rules"]["seurat_find_clusters"]["params"]["resolutions"],
     conda: "../envs/seurat.yaml"
@@ -151,6 +156,7 @@ rule seurat_degs:
         f"{LOGDIR}/seurat/{{sample}}/4_degs/{{sample}}.seurat_degs.bmk"
     params:
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
+        random_seed = config["random_seed"],
         selected_res = config["rules"]["seurat_degs"]["params"]["selected_res"]
     conda: "../envs/seurat.yaml"
     resources:
@@ -170,6 +176,7 @@ rule seurat_gs:
         f"{LOGDIR}/seurat/{{sample}}/5_gs/{{sample}}.seurat_complete.bmk"
     params:
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
+        random_seed = config["random_seed"],
         gs_collection = config["rules"]["seurat_gs"]["params"]["geneset_collection"]
     conda: "../envs/seurat.yaml"
     resources:
@@ -189,6 +196,7 @@ rule slingshot:
         f"{LOGDIR}/slingshot/{{sample}}/6_traj_in/{{sample}}.slingshot.bmk"
     params:
         output_dir = f"{OUTDIR}/slingshot/{{sample}}",
+        random_seed = config["random_seed"],
         selected_res = config["rules"]["slingshot"]["params"]["selected_res"],
         start_clus = config["rules"]["slingshot"]["params"]["start_clus"],
         end_clus = config["rules"]["slingshot"]["params"]["end_clus"],
@@ -213,6 +221,7 @@ rule vision:
         f"{LOGDIR}/vision/{{sample}}/7_func_analysis/{{sample}}.vision.bmk"
     params:
         output_dir = f"{OUTDIR}/vision/{{sample}}",
+        random_seed = config["random_seed"],
         selected_res = config["rules"]["vision"]["params"]["selected_res"],
         mol_signatures = config["rules"]["vision"]["params"]["mol_signatures"],
         meta_columns = config["rules"]["vision"]["params"]["meta_columns"],

@@ -12,8 +12,13 @@ folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_g
 
 # B. Parameters: analysis configuration 
 selected_res = snakemake@params[["selected_res"]]
+random_seed = snakemake@params[["random_seed"]]
 
 # C. Analysis
+if (is.numeric(random_seed)) {
+  set.seed(random_seed)
+}
+#Load seurat object
 seurat <- readRDS(input_data)
 assay_type <- seurat@active.assay
 cluster_res <- paste0(assay_type, "_snn_res.", selected_res)
@@ -21,17 +26,17 @@ if (!(cluster_res %in% colnames(seurat@meta.data))){
   stop("Specified resolution is not available.")
 }
 
-# 9 Differentially expressed genes between clusters. 
+# 8 Differentially expressed genes between clusters. 
 # dir.create(paste0(dir.name, "/", folders[4]))
 # After checking out all results with the calculated resolutions, the rest of the analysis will be done using the specified one.
 Idents(seurat) <- paste0(assay_type, "_snn_res.",selected_res)
-# 9.1. Table on differentially expressed genes - using basic filterings
+# 8.1. Table on differentially expressed genes - using basic filterings
 for (i in 1:length(unique(Idents(seurat)))){
   clusterX.markers <- FindMarkers(seurat, ident.1 = unique(Idents(seurat))[i], min.pct = 0.25) #min expressed
   print(x = head(x = clusterX.markers, n = 5))
   write.table(clusterX.markers, file=paste0(dir.name, "/", folders[4], "/cluster",unique(Idents(seurat))[i],".markers.txt"), sep="\t", col.names = NA)
 }
-# 9.2. DE includying all genes - needed for a GSEA analysis. 
+# 8.2. DE includying all genes - needed for a GSEA analysis. 
 for (i in 1:length(unique(Idents(seurat)))){
   clusterX.markers <- FindMarkers(seurat, ident.1 = unique(Idents(seurat))[i], min.pct = 0, logfc.threshold = 0) #min expressed
   print(x = head(x = clusterX.markers, n = 5))
@@ -42,7 +47,7 @@ for (i in 1:length(unique(Idents(seurat)))){
   rownames(rnk)= toupper(row.names(clusterX.markers))
   write.table(rnk, file=paste0(dir.name, "/", folders[4], "/cluster",unique(Idents(seurat))[i],".rnk"), sep="\t", col.names = FALSE)
 }
-# 9.3. Find TOP markers
+# 8.3. Find TOP markers
 seurat.markers <- FindAllMarkers(object = seurat, only.pos = TRUE, min.pct = 0.25, thresh.use = 0.25)
 groupedby.clusters.markers = seurat.markers %>% group_by(cluster) %>% top_n(10, avg_logFC)
 # HeatMap top10
