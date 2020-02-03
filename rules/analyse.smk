@@ -225,8 +225,7 @@ rule vision:
         selected_res = config["rules"]["vision"]["params"]["selected_res"],
         mol_signatures = config["rules"]["vision"]["params"]["mol_signatures"],
         meta_columns = config["rules"]["vision"]["params"]["meta_columns"],
-        n_cores = config["rules"]["vision"]["params"]["n_cores"],
-        use_integrated = config["rules"]["vision"]["params"]["use_integrated"]
+        n_cores = config["rules"]["vision"]["params"]["n_cores"]
     conda: "../envs/vision.yaml"
     resources:
         mem=get_resource("vision","mem"),

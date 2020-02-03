@@ -14,12 +14,12 @@ OUTDIR = config["outdir"]
 LOGDIR = config["logdir"]
 
 try:
-    samples = pd.read_csv(config["samples"], sep="\t").set_index("sample", drop=False)
+    samples = pd.read_csv(config["samples"], sep="\t", comment="#").set_index("sample", drop=False)
 except FileNotFoundError:
     quit(f"ERROR: the samples file ({config['samples']}) does not exist. Please see the README file for details.")
 
 try:
-    units = pd.read_csv(config["units"], dtype=str, sep="\t").set_index(["sample", "unit"], drop=False)
+    units = pd.read_csv(config["units"], dtype=str, sep="\t", comment="#").set_index(["sample", "unit"], drop=False)
 except FileNotFoundError:
     quit(f"ERROR: the units file ({config['units']}) does not exist. Please see the README file for details.")
 units.index = units.index.set_levels([i.astype(str) for i in units.index.levels])  # enforce str in index
