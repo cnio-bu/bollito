@@ -52,18 +52,18 @@ if(normalization == "standard"){
 }
 
 ## 5.2 Run PCA
-seurat <- RunPCA(seurat, features = VariableFeatures(object = seurat), npcs = 100) # This result could all be saved in a table. 
+seurat <- RunPCA(seurat, features = VariableFeatures(object = seurat), npcs = 50) # This result could all be saved in a table. 
 # Visualizing PCA in Different Ways: elbow plot most variable genes 
 VizDimLoadings(seurat, dims = 1:2, reduction = "pca") + theme(legend.position="bottom") 
 ggsave(paste0(dir.name, "/",folders[2], "/1_viz_dim_loadings.png"), scale = 1.5)#, height = height, width = height * aspect_ratio)
 DimPlot(seurat, reduction = "pca", pt.size = 0.5) + theme(legend.position="bottom") 
 ggsave(paste0(dir.name, "/",folders[2], "/2_dimplot.png"), scale = 1.5)
 # 5.3. Determine the dimensionality of the dataset
-seurat <- JackStraw(seurat, num.replicate = 100, dims = 100)
-seurat <- ScoreJackStraw(seurat, dims = 1:100)
-ElbowPlot(seurat, ndims = 100) + theme(legend.position="bottom") 
+seurat <- JackStraw(seurat, num.replicate = 100, dims = 50)
+seurat <- ScoreJackStraw(seurat, dims = 1:50)
+ElbowPlot(seurat, ndims = 50) + theme(legend.position="bottom") 
 ggsave(paste0(dir.name, "/",folders[2], "/3_elbowplot.png"), scale = 1.5)
-JackStrawPlot(seurat, dims = 1:100) + theme(legend.position="bottom") + guides(fill=guide_legend(nrow=2, byrow=TRUE)) 
+JackStrawPlot(seurat, dims = 1:50) + theme(legend.position="bottom") + guides(fill=guide_legend(nrow=2, byrow=TRUE)) 
 ggsave(paste0(dir.name, "/",folders[2], "/4_jackstrawplot.png"), scale = 2)
 
 # Save RDS: we can use this object to generate all the rest of the data
