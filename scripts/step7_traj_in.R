@@ -71,16 +71,16 @@ plot3d(SlingshotDataSet(seurat.sim), lwd = 3, type = "lineages", add = TRUE, sho
 legend3d("topright", legend=paste0("Cluster - ", levels(seurat.sim@colData[, cluster_res])), pch=16, col=getPalette(n_col), inset=c(0.001))
 writeWebGL(dir = paste0(dir.name, "/", folders[6]), filename = file.path(paste0(dir.name, "/", folders[6]), paste0("3D_lineages_", selected_res, "_res.html")),  width = 1024)
 
-# 10.3.5 Curves 2D plot with legend --> png output. 
-png(paste0(dir.name, "/", folders[6], "/2D_curves_", selected_res, "_res.png"), width = 900, height = 900)
+# 10.3.5 Curves 2D plot with legend --> pdf output. 
+pdf(paste0(dir.name, "/", folders[6], "/2D_curves_", selected_res, "_res.pdf"), width = 900, height = 900)
 plot(reducedDims(seurat.sim)$UMAP, col = getPalette(n_col)[seurat.sim@colData[, cluster_res]],
      pch=16, asp = 1, main = "2D curves - Clusters Trajectories")
 legend("topright", legend=paste0("Cluster - ", levels(seurat.sim@colData[, cluster_res])), pch=16, col=getPalette(n_col))
 lines(SlingshotDataSet(seurat.sim), lwd=2, col = 'black')
 dev.off()
 
-# 10.3.6 Lineage 2D plot with legend --> png output.
-png(paste0(dir.name, "/", folders[6], "/2D_lineages_", selected_res, "_res.png"), width = 900, height = 900)
+# 10.3.6 Lineage 2D plot with legend --> pdf output.
+pdf(paste0(dir.name, "/", folders[6], "/2D_lineages_", selected_res, "_res.pdf"), width = 900, height = 900)
 plot(reducedDims(seurat.sim)$UMAP, col = getPalette(n_col)[seurat.sim@colData[, cluster_res]],
      pch=16, asp = 1, main = "2D lineages - Clusters Trajectories")
 legend("topright", legend=paste0("Cluster - ", levels(seurat.sim@colData[, cluster_res])), pch=16, col=getPalette(n_col))
@@ -117,6 +117,6 @@ ann_colors <- list("Cluster" = setNames(getPalette(n_col),
 pheatmap(heatdata, cluster_cols = FALSE, 
          color =  colorRampPalette(c("yellow", "red"))(100),
          annotation_col = annotation, annotation_colors = ann_colors,
-         show_colnames = FALSE, filename = paste0(dir.name, "/", folders[6], "/Temporally_expressed_heatmaps_", selected_res, "_res.png"))
+         show_colnames = FALSE, filename = paste0(dir.name, "/", folders[6], "/Temporally_expressed_heatmaps_", selected_res, "_res.pdf"))
 
 saveRDS(seurat.sim, file = paste0(dir.name, "/", folders[6], "/slingshot_sce.rds"))

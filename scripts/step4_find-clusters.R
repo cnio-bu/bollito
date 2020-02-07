@@ -76,7 +76,7 @@ ggsave(paste0(dir.name, "/", folders[3], "/7_g2mscore_featureplot.pdf"), scale =
 
 # 7.6 Visualize no - Umap
 DimPlot(seurat, reduction = "pca", pt.size = 0.5, label = TRUE, label.size = 5) + RotatedAxis() #+ theme(legend.position    ="bottom") 
-ggsave(paste0(dir.name, "/", folders[3], "/5_no_umap_pca.png"), scale = 1.5)
+ggsave(paste0(dir.name, "/", folders[3], "/5_no_umap_pca.pdf"), scale = 1.5)
 
 # Save RDS: we can use this object to generate all the rest of the data
 saveRDS(seurat, file = paste0(dir.name, "/",folders[3], "/seurat_find-clusters.rds"))

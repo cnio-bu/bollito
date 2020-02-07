@@ -67,20 +67,20 @@ if (norm_type == "SCT") {
 # 6.5 PCA and Visualize Dimensional Reduction genes.
 seurat.integrated <- RunPCA(seurat.integrated, ncps = 100, verbose = FALSE)
 VizDimLoadings(seurat.integrated, dims = 1:2, reduction = "pca") + theme(legend.position="bottom") 
-ggsave(paste0(dir.name, "/",folders[2], "/1_viz_dim_loadings.png"), scale = 1.5)
+ggsave(paste0(dir.name, "/",folders[2], "/1_viz_dim_loadings.pdf"), scale = 1.5)
 
 # 6.6 UMAP projection and integration visualization plot.
 getPalette <- colorRampPalette(brewer.pal(9,'Set1'))
 seurat.integrated <- RunUMAP(seurat.integrated, dims = 1:30, verbose = FALSE)
 DimPlot(seurat.integrated, reduction = "umap", group.by = "assay_name", cols=getPalette(length(levels(as.factor(seurat.integrated$assay_name)))))
-ggsave(paste0(dir.name, "/", folders[2], "/2_dimplot_UMAP.png"), plot = last_plot(), device = "png")
+ggsave(paste0(dir.name, "/", folders[2], "/2_dimplot_UMAP.pdf"), plot = last_plot())
 
 # 6.7 Principal component study using Elbow plot and Jack Straw Plot
 seurat.integrated <- JackStraw(seurat.integrated, num.replicate = 100, dims = 30)
 seurat.integrated <- ScoreJackStraw(seurat.integrated, dims = 1:30)
 ElbowPlot(seurat.integrated, ndims = 30) + theme(legend.position="bottom") 
-ggsave(paste0(dir.name, "/",folders[2], "/3_elbowplot.png"), scale = 1.5)
+ggsave(paste0(dir.name, "/",folders[2], "/3_elbowplot.pdf"), scale = 1.5)
 JackStrawPlot(seurat.integrated, dims = 1:30) + theme(legend.position="bottom") + guides(fill=guide_legend(nrow=2, byrow=TRUE)) 
-ggsave(paste0(dir.name, "/",folders[2], "/4_jackstrawplot.png"), scale = 2)
+ggsave(paste0(dir.name, "/",folders[2], "/4_jackstrawplot.pdf"), scale = 2)
 
 saveRDS(object = seurat.integrated, file = paste0(dir.name, "/", folders[2], "/seurat_normalized-pcs.rds"))
