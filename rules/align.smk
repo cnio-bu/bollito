@@ -38,13 +38,23 @@ def input_star(sample,group):
         return fastqs[0]
     else:
         return f"{OUTDIR}/merged/{sample}.r{group}.fastq.gz"
-        
+
+
+def extra_params(wc):
+    if config["technology"] == "10X":
+        extra="--sjdbGTFfile {} --soloCBwhitelist {} {}".format(config["ref"]["annotation"], config["whitelist"], config["rules"]["star"]["params"])
+        return extra
+    elif config["technology"] == "Drop-seq":
+        extra = "--sjdbGTFfile {} --soloCBwhitelist None {}".format(config["ref"]["annotation"], config["rules"]["star"]["params"])
+        return extra
+    else:
+        raise ValueError('Specified technology is not valid.')
+
 rule star:
     input:
         #star needs the barcoding read (read 1) to be in the second position
         fq1=lambda wc: input_star(wc.sample,2),
         fq2=lambda wc: input_star(wc.sample,1),
-        whitelist=config["whitelist"],
         index=config["ref"]["idx"]
     output:
         f"{OUTDIR}/star/{{sample}}/Aligned.sortedByCoord.out.bam"
@@ -54,7 +64,7 @@ rule star:
         f"{LOGDIR}/star/{{sample}}.bmk"
     params:
         index=config["ref"]["idx"],
-        extra="--sjdbGTFfile {} --soloCBwhitelist {} {}".format(config["ref"]["annotation"], config["whitelist"], config["rules"]["star"]["params"])
+        extra=extra_params
     threads: get_resource("star","threads")
     resources:
         mem=get_resource("star","mem"),
