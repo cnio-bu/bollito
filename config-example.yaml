@@ -1,3 +1,9 @@
+######################################################
+##----------------Bollito config file---------------##
+######################################################
+
+##-------------General pipeline parameters-----------##
+
 ## Input files and information required: samples.tsv, units.tsv and input_type.
 # Samples.tsv: path or URL to sample sheet (TSV format, columns: sample, condition, ...).
 samples: samples.tsv
@@ -10,6 +16,9 @@ units: units.tsv
 
 # input type: this variable is used to specify the input files nature ("matrix" or "fastq"). 
 input_type: "matrix"
+
+# technology: technology used to get the reads files (10X or Drop-seq)
+technology: "Drop-seq"
 
 # Output and log files paths.
 outdir: "/test/out"
@@ -27,7 +36,8 @@ ref:
     idx: "/scratch/resources/genomes/m_musculus/GRCm38.primary_assembly.genome_idx_star_2.7.3a"
 
 # Barcodes whitelist
-# This depends on the 10X chemist (V1, V2 or V3).
+# Necessary in 10X technology. This depends on the 10X chemist (V1, V2 or V3).
+# Drop-seq technology does not use barcode lists, so leave empty this field.
 whitelist: "/opt/bioinfo/cellranger/software/3.0.2/cellranger-cs/3.0.2/lib/python/cellranger/barcodes/737K-august-2016.txt"  
 
 #Default computational parameters per rule.
@@ -37,6 +47,9 @@ rules:
             threads: 1
             mem: 8000
             walltime: 480
+
+
+#----------Specific rules parameters--------#
 
 # Fastq screen. Screen a library of sequences in fastq format against a set of sequence DBs (of other organisms) to check its composition.
     fastq_screen_indexes:
@@ -56,6 +69,11 @@ rules:
         res:
             threads: 8
             mem: 64000
+
+#STAR params are technology related so:
+### -> For 10X v2 and v1 chemistry we recommend "--soloType Droplet --soloFeatures Gene Velocyto --outFilterMultimapNmax 50 --winAnchorMultimapNmax 50 --alignEndsType EndToEnd --outReadsUnmapped Fastx --soloUMIlen 10 --outSAMtype BAM SortedByCoordinate --outSAMattributes NH HI nM AS CR UR CB UB GX GN sS sQ sM"
+### -> For 10X v3 chemistry we recommend "--soloType Droplet --soloFeatures Gene Velocyto --outFilterMultimapNmax 50 --winAnchorMultimapNmax 50 --alignEndsType EndToEnd --outReadsUnmapped Fastx --soloUMIlen 12 --outSAMtype BAM SortedByCoordinate --outSAMattributes NH HI nM AS CR UR CB UB GX GN sS sQ sM"
+### -> For Drop-seq technology we recommed "--soloType Droplet --soloFeatures Gene Velocyto --outFilterMultimapNmax 50 --winAnchorMultimapNmax 50 --alignEndsType EndToEnd --outReadsUnmapped Fastx --soloUMIlen 8 --soloCBlen 12 --outSAMtype BAM SortedByCoordinate --outSAMattributes NH HI nM AS CR UR CB UB GX GN sS sQ sM" 
     star:
         params: "--soloType Droplet --soloFeatures Gene Velocyto Transcript3p --outFilterMultimapNmax 50 --winAnchorMultimapNmax 50 --alignEndsType EndToEnd --outReadsUnmapped Fastx --soloUMIlen 10 --outSAMtype BAM SortedByCoordinate --outSAMattributes NH HI nM AS CR UR CB UB GX GN sS sQ sM"
         res:
