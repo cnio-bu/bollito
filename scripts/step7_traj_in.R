@@ -19,6 +19,7 @@ end.clus = snakemake@params[["end_clus"]]
 n_var_genes = snakemake@params[["n_var_genes"]]
 n_plotted_genes = snakemake@params[["n_plotted_genes"]]
 random_seed = snakemake@params[["random_seed"]]
+pc = snakemake@params[["pc"]]
 
 # C. Analysis
 if (is.numeric(random_seed)) {
@@ -32,21 +33,28 @@ cluster_res <- paste0(assay_type,"_snn_res.",selected_res)
 if (!(cluster_res %in% colnames(seurat@meta.data))){
   stop("Specified resolution is not available.")
 }
+
+#Running UMAP tom get 3 dimensions.
+seurat3D <- RunUMAP(seurat,dims = 1:pc, n.components = 3, verbose = FALSE)
 seurat.sim <- as.SingleCellExperiment(seurat)
+seurat3D.sim <- as.SingleCellExperiment(seurat3D)
 
-
-# 10.2 Slingshot algorithm (dimensions = UMAP). There are 4 options depending of the start and end cluster in the following trajectory:
+# 10.2 Slingshot algorithm (dimensions = PCA). There are 4 options depending of the start and end cluster in the following trajectory:
 if(is.numeric(start.clus) == FALSE && is.numeric(end.clus) == FALSE){
   seurat.sim <- slingshot(seurat.sim, clusterLabels=cluster_res, reducedDim="UMAP")
+  seurat3D.sim <- slingshot(seurat3D.sim, clusterLabels=cluster_res, reducedDim="UMAP")
   const = FALSE
 } else if(is.numeric(start.clus) == TRUE && is.numeric(end.clus) == FALSE){
   seurat.sim <- slingshot(seurat.sim, clusterLabels=cluster_res, reducedDim="UMAP", start.clus = start.clus)
+  seurat3D.sim <- slingshot(seurat3D.sim, clusterLabels=cluster_res, reducedDim="UMAP", start.clus = start.clus)
   const = TRUE
 } else if(is.numeric(start.clus) == FALSE && is.numeric(end.clus) == TRUE){
   seurat.sim <- slingshot(seurat.sim, clusterLabels=cluster_res, reducedDim="UMAP", end.clus = end.clus)
+  seurat3D.sim <- slingshot(seurat3D.sim, clusterLabels=cluster_res, reducedDim="UMAP", end.clus = end.clus)
   const = TRUE
 } else if(is.numeric(start.clus) == TRUE && is.numeric(end.clus) == TRUE){
   seurat.sim <- slingshot(seurat.sim, clusterLabels=cluster_res, reducedDim="UMAP", start.clus = start.clus, end.clus=end.clus)
+  seurat3D.sim <- slingshot(seurat3D.sim, clusterLabels=cluster_res, reducedDim="UMAP", start.clus = start.clus, end.clus=end.clus)
   const = TRUE
 }
 
@@ -59,33 +67,34 @@ getPalette <- colorRampPalette(brewer.pal(9,'Set1'))
 # 10.3.2 Set a good window size for the 3D plots.
 r3dDefaults$windowRect <- c(0,50, 1024, 720) 
 
-# 10.3.3 Curves 3D plot with legend --> HTML output.
-plot3d(reducedDims(seurat.sim)$UMAP[,1:3], col = getPalette(n_col)[seurat.sim@colData[, cluster_res]])
-plot3d(SlingshotDataSet(seurat.sim), lwd = 3, add = TRUE)
-legend3d("topright", legend=paste0("Cluster - ", levels(seurat.sim@colData[, cluster_res])), pch=16, col=getPalette(n_col), inset=c(0.001))
+# 10.3.4 Curves 3D plot with legend --> HTML output.
+plot3d(reducedDims(seurat3D.sim)$UMAP[,1:3],, col = getPalette(n_col)[seurat3D.sim@colData[, cluster_res]])
+plot3d(SlingshotDataSet(seurat3D.sim), lwd = 3, add = TRUE)
+legend3d("topright", legend=paste0("Cluster - ", levels(seurat3D.sim@colData[, cluster_res])), pch=16, col=getPalette(n_col), inset=c(0.001))
 writeWebGL(dir = paste0(dir.name, "/", folders[6]), filename = file.path(paste0(dir.name, "/", folders[6]), paste0("3D_curves_", selected_res, "_res.html")),  width = 1024)
 
-# 10.3.4 Lineage 3D plot with legend --> HTML output.
-plot3d(reducedDims(seurat.sim)$UMAP[,1:3], col = getPalette(n_col)[seurat.sim@colData[, cluster_res]]) 
-plot3d(SlingshotDataSet(seurat.sim), lwd = 3, type = "lineages", add = TRUE, show.constraints = const)
-legend3d("topright", legend=paste0("Cluster - ", levels(seurat.sim@colData[, cluster_res])), pch=16, col=getPalette(n_col), inset=c(0.001))
+# 10.3.5 Lineage 3D plot with legend --> HTML output.
+plot3d(reducedDims(seurat3D.sim)$UMAP[,1:3], col = getPalette(n_col)[seurat3D.sim@colData[, cluster_res]]) 
+plot3d(SlingshotDataSet(seurat3D.sim), lwd = 3, type = "lineages", add = TRUE, show.constraints = const)
+legend3d("topright", legend=paste0("Cluster - ", levels(seurat3D.sim@colData[, cluster_res])), pch=16, col=getPalette(n_col), inset=c(0.001))
 writeWebGL(dir = paste0(dir.name, "/", folders[6]), filename = file.path(paste0(dir.name, "/", folders[6]), paste0("3D_lineages_", selected_res, "_res.html")),  width = 1024)
 
-# 10.3.5 Curves 2D plot with legend --> pdf output. 
-pdf(paste0(dir.name, "/", folders[6], "/2D_curves_", selected_res, "_res.pdf"), width = 900, height = 900)
+# 10.3.6 Curves 2D plot with legend --> pdf output. 
+pdf(paste0(dir.name, "/", folders[6], "/2D_curves_", selected_res, "_res.pdf"), width = 11, height = 11)
 plot(reducedDims(seurat.sim)$UMAP, col = getPalette(n_col)[seurat.sim@colData[, cluster_res]],
      pch=16, asp = 1, main = "2D curves - Clusters Trajectories")
 legend("topright", legend=paste0("Cluster - ", levels(seurat.sim@colData[, cluster_res])), pch=16, col=getPalette(n_col))
 lines(SlingshotDataSet(seurat.sim), lwd=2, col = 'black')
 dev.off()
 
-# 10.3.6 Lineage 2D plot with legend --> pdf output.
-pdf(paste0(dir.name, "/", folders[6], "/2D_lineages_", selected_res, "_res.pdf"), width = 900, height = 900)
+# 10.3.7 Lineage 2D plot with legend --> pdf output.
+pdf(paste0(dir.name, "/", folders[6], "/2D_lineages_", selected_res, "_res.pdf"), width = 11, height = 11)
 plot(reducedDims(seurat.sim)$UMAP, col = getPalette(n_col)[seurat.sim@colData[, cluster_res]],
      pch=16, asp = 1, main = "2D lineages - Clusters Trajectories")
 legend("topright", legend=paste0("Cluster - ", levels(seurat.sim@colData[, cluster_res])), pch=16, col=getPalette(n_col))
 lines(SlingshotDataSet(seurat.sim), lwd=2, type = 'lineages', col = 'black', show.constraints = const)
 dev.off()
+
 
 # 10.4 Temporally expressed genes heatmap
 # 10.4.1 Pseudotime is obtained
@@ -117,6 +126,6 @@ ann_colors <- list("Cluster" = setNames(getPalette(n_col),
 pheatmap(heatdata, cluster_cols = FALSE, 
          color =  colorRampPalette(c("yellow", "red"))(100),
          annotation_col = annotation, annotation_colors = ann_colors,
-         show_colnames = FALSE, filename = paste0(dir.name, "/", folders[6], "/Temporally_expressed_heatmaps_", selected_res, "_res.pdf"))
+         show_colnames = FALSE, filename = paste0(dir.name, "/", folders[6], "/temporally_expressed_heatmaps_", selected_res, "_res.pdf"))
 
-saveRDS(seurat.sim, file = paste0(dir.name, "/", folders[6], "/slingshot_sce.rds"))
+save(seurat.sim, seurat3D.sim, file = paste0(dir.name, "/", folders[6], "/slingshot_sce_objects.RData"))

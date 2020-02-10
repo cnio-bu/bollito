@@ -93,7 +93,8 @@ rule seurat_normalization:
         random_seed = config["random_seed"],
         normalization = config["rules"]["seurat_normalization"]["params"]["normalization"],
         regress_out = config["rules"]["seurat_normalization"]["params"]["regress_out"],
-        vars_to_regress = config["rules"]["seurat_normalization"]["params"]["vars_to_regress"]
+        vars_to_regress = config["rules"]["seurat_normalization"]["params"]["vars_to_regress"],
+        regress_cell_cycle = config["rules"]["seurat_normalization"]["params"]["regress_cell_cycle"]
     conda: "../envs/seurat.yaml"
     resources:
         mem=get_resource("seurat_normalization","mem"),
@@ -188,7 +189,7 @@ rule slingshot:
     input:
         data=f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds"
     output:
-        data=f"{OUTDIR}/slingshot/{{sample}}/6_traj_in/slingshot_sce.rds"
+        data=f"{OUTDIR}/slingshot/{{sample}}/6_traj_in/slingshot_sce_objects.RData"
     log:
         f"{LOGDIR}/slingshot/{{sample}}/6_traj_in/{{sample}}.slingshot.log"
     benchmark:
@@ -200,8 +201,8 @@ rule slingshot:
         start_clus = config["rules"]["slingshot"]["params"]["start_clus"],
         end_clus = config["rules"]["slingshot"]["params"]["end_clus"],
         n_var_genes = config["rules"]["slingshot"]["params"]["n_var_genes"],
-        n_plotted_genes = config["rules"]["slingshot"]["params"]["n_plotted_genes"]
-
+        n_plotted_genes = config["rules"]["slingshot"]["params"]["n_plotted_genes"],
+        pc = config["rules"]["seurat_find_clusters"]["params"]["principal_components"]
     conda: "../envs/slingshot.yaml"
     resources:
         mem=get_resource("slingshot","mem"),

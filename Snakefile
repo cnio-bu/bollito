@@ -58,7 +58,7 @@ def get_input_ti(wc):
         samples = [u.sample for u in units.itertuples()] 
         if config["rules"]["seurat_integration"]["params"]["perform"] == True:
             samples = samples + ['integrated']
-        file = expand("{OUTDIR}/slingshot/{sample}/6_traj_in/slingshot_sce.rds", sample=samples,OUTDIR=OUTDIR)
+        file = expand("{OUTDIR}/slingshot/{sample}/6_traj_in/slingshot_sce_objects.RData", sample=samples,OUTDIR=OUTDIR)
     else:
         file = []
     return file

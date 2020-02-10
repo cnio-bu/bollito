@@ -141,11 +141,13 @@ rules:
 # normalization: type of normalization performed ("SCT" or "standard").
 # regress_out: True or False depending if you want to regress out biological or technical effects stored in the metadata table (from Seurat object).
 # vars_to_regress: string (var = 1) or list (vars => 2) of varibles you want to regress. It / they must be stored in the metadata table. 
+# regress_cell_cycle: True or False depending if you want to regress out the cell cycle effect (check out the cell cycle plot first).
     seurat_normalization:
         params:
             normalization: "SCT"
             regress_out: True
             vars_to_regress: "percent.mt"
+            regress_cell_cycle: False
         res:
             mem: 16000
 # step 3B Integration. This rule is equivalent to the normalization, but it creates the integrated object. 

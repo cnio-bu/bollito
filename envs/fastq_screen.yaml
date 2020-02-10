@@ -1,4 +1,5 @@
 channels:
+    - bu_cnio
     - conda-forge
     - bioconda
 

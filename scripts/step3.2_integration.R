@@ -71,9 +71,8 @@ ggsave(paste0(dir.name, "/",folders[2], "/1_viz_dim_loadings.pdf"), plot = p1, s
 
 # 6.6 UMAP projection and integration visualization plot.
 getPalette <- colorRampPalette(brewer.pal(9,'Set1'))
-seurat.integrated <- RunUMAP(seurat.integrated, dims = 1:30, verbose = FALSE)
-p2 <- DimPlot(seurat.integrated, reduction = "umap", group.by = "assay_name", cols=getPalette(length(levels(as.factor(seurat.integrated$assay_name)))))
-ggsave(paste0(dir.name, "/", folders[2], "/2_dimplot_UMAP.pdf"), plot = p2)
+p2 <- DimPlot(seurat.integrated, reduction = "pca", group.by = "assay_name", cols=getPalette(length(levels(as.factor(seurat.integrated$assay_name)))))
+ggsave(paste0(dir.name, "/", folders[2], "/2_dimplot_PCA.pdf"), plot = p2)
 
 # 6.7 Principal component study using Elbow plot and Jack Straw Plot
 seurat.integrated <- JackStraw(seurat.integrated, num.replicate = 100, dims = 30)
