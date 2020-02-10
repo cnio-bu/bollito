@@ -67,13 +67,13 @@ if (seurat@active.assay != "integrated"){
 # 11.4.2 Cluster plot in UMAP projection
 getPalette <- colorRampPalette(brewer.pal(9,'Set1'))
 
-ggplot() + aes(x=projections[, 1], y=projections[, 2], color=vis@metaData[,cluster_res]) + geom_point(alpha=0.5) + xlab("UMAP_1") + ylab("UMAP_2") + ggtitle("Clusters representation UMAP") + labs(color='clusters') + scale_color_manual(values = getPalette(nlevels(vis@metaData[,cluster_res])))
-suppressMessages(ggsave(paste0(dir.name, "/", folders[7], "/CLUSTERS_REPRESENTATION_UMAP_set1.pdf"), plot = last_plot()))
+p1 <- ggplot() + aes(x=projections[, 1], y=projections[, 2], color=vis@metaData[,cluster_res]) + geom_point(alpha=0.5) + xlab("UMAP_1") + ylab("UMAP_2") + ggtitle("Clusters representation UMAP") + labs(color='clusters') + scale_color_manual(values = getPalette(nlevels(vis@metaData[,cluster_res])))
+suppressMessages(ggsave(paste0(dir.name, "/", folders[7], "/CLUSTERS_REPRESENTATION_UMAP_set1.pdf"), plot = p1))
 
 # 11.4.3 Integration plot in UMAP projection
 if (seurat@active.assay == "integrated"){
-  ggplot() + aes(x=projections[, 1], y=projections[, 2], color=vis@metaData[,"assay_name"]) + geom_point(alpha=0.5) + xlab("UMAP_1") + ylab("UMAP_2") + ggtitle("Integration representation UMAP") + labs(color='Assay') + scale_color_manual(values = getPalette(nlevels(vis@metaData[,"assay_name"])))
-  suppressMessages(ggsave(paste0(dir.name, "/", folders[7], "/INTEGRATION_REPRESENTATION_UMAP_set1.pdf"), plot = last_plot()))
+  p2 <- ggplot() + aes(x=projections[, 1], y=projections[, 2], color=vis@metaData[,"assay_name"]) + geom_point(alpha=0.5) + xlab("UMAP_1") + ylab("UMAP_2") + ggtitle("Integration representation UMAP") + labs(color='Assay') + scale_color_manual(values = getPalette(nlevels(vis@metaData[,"assay_name"])))
+  suppressMessages(ggsave(paste0(dir.name, "/", folders[7], "/INTEGRATION_REPRESENTATION_UMAP_set1.pdf"), plot = p2))
 }
 
 # 11.4.4 Clusters vs Molecular Signatures statistics values 
@@ -91,8 +91,8 @@ write.table(stats_DF, file = paste0(dir.name, "/", folders[7], "/vision_param_va
 # 11.4.6 Molecular signatures scores in UMAP projection.
 for (genesig in colnames(vis@SigScores)){
   if (stats_DF[genesig,"FDR"] < 0.05) {
-    ggplot() + aes(x=projections[, 1], y=projections[, 2],  color=vis@SigScores[, genesig]) + geom_point() + ggtitle(genesig) +   scale_color_viridis(option = "D") + xlab("UMAP_1") + ylab("UMAP_2") + ggtitle(paste0(genesig, " - UMAP")) +  labs(color='vision score')
-    suppressMessages(ggsave(paste0(dir.name, "/", folders[7], "/", genesig, "_UMAP.pdf"), plot = last_plot()))
+    p3 <- ggplot() + aes(x=projections[, 1], y=projections[, 2],  color=vis@SigScores[, genesig]) + geom_point() + ggtitle(genesig) +   scale_color_viridis(option = "D") + xlab("UMAP_1") + ylab("UMAP_2") + ggtitle(paste0(genesig, " - UMAP")) +  labs(color='vision score')
+    suppressMessages(ggsave(paste0(dir.name, "/", folders[7], "/", genesig, "_UMAP.pdf"), plot = p3))
   }
 }
 

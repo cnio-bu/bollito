@@ -29,8 +29,8 @@ seurat <- AddModuleScore(object = seurat, features= genesets, name = names(genes
 
 for (i in 1:length(genesets)){
 	module_name = colnames(seurat@meta.data)[grep(names(genesets)[i], colnames(seurat@meta.data))]
-	FeaturePlot(object = seurat, features = module_name) #+ theme(legend.position="bottom") 
-	ggsave(paste0(dir.name, "/", folders[5], "/", names(genesets)[i], "_featureplot.pdf"), scale = 1.5)
+	p1 <- FeaturePlot(object = seurat, features = module_name) #+ theme(legend.position="bottom") 
+	ggsave(paste0(dir.name, "/", folders[5], "/", names(genesets)[i], "_featureplot.pdf"), plot = p1, scale = 1.5)
 }
 
 saveRDS(seurat, file = paste0(dir.name, "/",folders[5], "/seurat_complete.rds"))

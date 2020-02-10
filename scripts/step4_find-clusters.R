@@ -33,8 +33,8 @@ seurat <- RunUMAP(seurat,dims = 1:3, n.components = pc, verbose = FALSE)
 
 # 7.2 Clustree
 #clustree(seurat, prefix = "{assay_type}_snn_res.")
-clustree(seurat, prefix = paste0(assay_type,"_snn_res."))
-ggsave(paste0(dir.name, "/", folders[3], "/1_Clustree.pdf"), scale = 1.5)
+p1 <- clustree(seurat, prefix = paste0(assay_type,"_snn_res."))
+ggsave(paste0(dir.name, "/", folders[3], "/1_Clustree.pdf"), plot = p1, scale = 1.5)
 
 # 7.3 Clustering plots and silhouette parameters calculus.
 # we create a empty lsit to store silhouette values.
@@ -44,8 +44,8 @@ silhouette_scores <- vector(mode = "list", length = length(res))
 for(i in 1:length(which(grepl(paste0(assay_type,"_snn_"),colnames(seurat@meta.data))))){
   full_res = colnames(seurat@meta.data[which(grepl(paste0(assay_type,"_snn_"),colnames(seurat@meta.data)))][i])
   Idents(seurat) <- full_res 
-  DimPlot(seurat, reduction = "umap", label = TRUE, label.size = 5) + theme_minimal() #+ theme(legend.position="bottom") 
-  ggsave(paste0(dir.name, "/", folders[3], "/2_umap_",full_res,".pdf"), scale = 1.5)
+  p2 <- DimPlot(seurat, reduction = "umap", label = TRUE, label.size = 5) + theme_minimal() #+ theme(legend.position="bottom") 
+  ggsave(paste0(dir.name, "/", folders[3], "/2_umap_",full_res,".pdf"), plot = p2, scale = 1.5)
  
   #Silhhouettes calculation
   dist.matrix <- dist(x = Embeddings(object = seurat[["pca"]])[, 1:pc])
@@ -58,8 +58,8 @@ for(i in 1:length(which(grepl(paste0(assay_type,"_snn_"),colnames(seurat@meta.da
 write_xlsx(silhouette_scores, path = paste0(dir.name, "/", folders[3], "/3_silhouette_score.xlsx"),col_names = TRUE, format_headers = TRUE )
 
 # 7.4 Feature plot
-FeaturePlot(seurat, 'nFeature_RNA', pt.size =  0.75) #+ theme(legend.position="bottom") 
-ggsave(paste0(dir.name, "/", folders[3], "/4_featureplot.pdf"), scale = 1.5)
+p3 <- FeaturePlot(seurat, 'nFeature_RNA', pt.size =  0.75) #+ theme(legend.position="bottom") 
+ggsave(paste0(dir.name, "/", folders[3], "/4_featureplot.pdf"), plot = p3, scale = 1.5)
 
 # 7.5 Cell cycle
 # Read in a list of cell cycle markers, from Tirosh et al, 2015.
@@ -69,14 +69,14 @@ s.genes <- cc.genes[1:43]
 g2m.genes <- cc.genes[44:97]
 
 seurat <- CellCycleScoring(object = seurat, s.features = s.genes, g2m.features = g2m.genes, set.ident = T)
-FeaturePlot(object = seurat, features ="S.Score") + theme(legend.position="bottom") 
-ggsave(paste0(dir.name, "/", folders[3], "/6_sscore_featureplot.pdf"), scale = 1.5)
-FeaturePlot(object = seurat, features ="G2M.Score") + theme(legend.position="bottom") 
-ggsave(paste0(dir.name, "/", folders[3], "/7_g2mscore_featureplot.pdf"), scale = 1.5)
+p4 <- FeaturePlot(object = seurat, features ="S.Score") + theme(legend.position="bottom") 
+ggsave(paste0(dir.name, "/", folders[3], "/6_sscore_featureplot.pdf"), plot = p4, scale = 1.5)
+p5 <- FeaturePlot(object = seurat, features ="G2M.Score") + theme(legend.position="bottom") 
+ggsave(paste0(dir.name, "/", folders[3], "/7_g2mscore_featureplot.pdf"), plot = p5, scale = 1.5)
 
 # 7.6 Visualize no - Umap
-DimPlot(seurat, reduction = "pca", pt.size = 0.5, label = TRUE, label.size = 5) + RotatedAxis() #+ theme(legend.position    ="bottom") 
-ggsave(paste0(dir.name, "/", folders[3], "/5_no_umap_pca.pdf"), scale = 1.5)
+p6 <- DimPlot(seurat, reduction = "pca", pt.size = 0.5, label = TRUE, label.size = 5) + RotatedAxis() #+ theme(legend.position    ="bottom") 
+ggsave(paste0(dir.name, "/", folders[3], "/5_no_umap_pca.pdf"), plot = p6, scale = 1.5)
 
 # Save RDS: we can use this object to generate all the rest of the data
 saveRDS(seurat, file = paste0(dir.name, "/",folders[3], "/seurat_find-clusters.rds"))
