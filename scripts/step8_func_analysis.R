@@ -78,7 +78,7 @@ if (seurat@active.assay == "integrated"){
 
 # 11.4.4 Clusters vs Molecular Signatures statistics values 
 for (i in 1:nlevels(vis@metaData[,cluster_res])){
-  write.table(vis@ClusterComparisons$Signatures[[cluster_res]][[i]], file = paste0(dir.name, "/", folders[7], "/vision_table_res_", selected_res, "_cluster_", (i-1), ".tsv"), quote = FALSE, sep = "\t")
+  write.table(vis@ClusterComparisons$Signatures[[cluster_res]][[i]], file = paste0(dir.name, "/", folders[7], "/vision_table_res_", selected_res, "_cluster_", (i-1), ".tsv"), col.names = NA, quote = FALSE, sep = "\t")
 }
 
 # 11.4.5 Molecular Signatures statistics values
@@ -86,7 +86,7 @@ stats_DF <- data.frame("Consistency" = vis@LocalAutocorrelation$Signatures$C,
                        "p-values" =  vis@LocalAutocorrelation$Signatures$pValue, "FDR" = vis@LocalAutocorrelation$Signatures$FDR)
 colnames(stats_DF) <- c("Consistency", "p-values", "FDR")
 rownames(stats_DF) <- rownames(vis@LocalAutocorrelation$Signatures) 
-write.table(stats_DF, file = paste0(dir.name, "/", folders[7], "/vision_param_values_per_geneset.txt"), quote = FALSE, sep = "\t" )
+write.table(stats_DF, file = paste0(dir.name, "/", folders[7], "/vision_param_values_per_geneset.txt"), col.names = NA, quote = FALSE, sep = "\t" )
 
 # 11.4.6 Molecular signatures scores in UMAP projection.
 for (genesig in colnames(vis@SigScores)){
