@@ -96,12 +96,10 @@ rules:
 
 # Seurat analysis
 # step 1. Examine your results with the most commonly used single-cell QC metrics.
-# project_name: define the name of your project.
 # meta_path: absolute path to meta information for each sample.
 # min_cell_filters: True or False depending if you want to filters genes by cell apearence (default value = 3).
     seurat_qc:
         params:
-            project_name: "451LU"
             min_cells_per_gene: 1
         res:
             mem: 3000

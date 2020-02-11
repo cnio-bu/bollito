@@ -15,7 +15,6 @@ rule seurat_qc:
         input_type = config["input_type"],
         random_seed = config["random_seed"],
         sample = f"{{sample}}",
-        project_name = config["rules"]["seurat_qc"]["params"]["project_name"],
         min_cells_per_gene = config["rules"]["seurat_qc"]["params"]["min_cells_per_gene"]
     conda: "../envs/seurat.yaml"
     resources:

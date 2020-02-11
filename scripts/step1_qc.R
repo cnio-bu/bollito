@@ -12,7 +12,6 @@ dir.name = snakemake@params[["output_dir"]]
 folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs", "6_traj_in", "7_func_analysis")
 
 # B. Parameters: analysis configuration 
-project_name = snakemake@params[["project_name"]]
 samples_path = snakemake@params[["samples_path"]]
 min_cells_per_gene = snakemake@params[["min_cells_per_gene"]]
 input_type = snakemake@params[["input_type"]]
@@ -47,7 +46,7 @@ if (input_type == "fastq") {
 }
 
 # 1. Creating a seurat object 
-seurat = CreateSeuratObject(expression_matrix, project = project_name, min.features = 200, min.cells = min_cells_per_gene)
+seurat = CreateSeuratObject(expression_matrix, project = sample, min.features = 200, min.cells = min_cells_per_gene)
 
 # 1.1 Add metadata  
 samples_file = read.table(samples_path, sep = "\t", row.names = 1, header = TRUE)
