@@ -34,18 +34,18 @@ Idents(seurat) <- paste0(assay_type, "_snn_res.",selected_res)
 for (i in 1:length(unique(Idents(seurat)))){
   clusterX.markers <- FindMarkers(seurat, ident.1 = unique(Idents(seurat))[i], min.pct = 0.25) #min expressed
   print(x = head(x = clusterX.markers, n = 5))
-  write.table(clusterX.markers, file=paste0(dir.name, "/", folders[4], "/cluster",unique(Idents(seurat))[i],".markers.txt"), sep="\t", col.names = NA)
+  write.table(clusterX.markers, file = paste0(dir.name, "/", folders[4], "/cluster", unique(Idents(seurat))[i],".markers.txt"), sep = "\t", col.names = NA, quote = FALSE)
 }
 # 8.2. DE includying all genes - needed for a GSEA analysis. 
 for (i in 1:length(unique(Idents(seurat)))){
   clusterX.markers <- FindMarkers(seurat, ident.1 = unique(Idents(seurat))[i], min.pct = 0, logfc.threshold = 0) #min expressed
   print(x = head(x = clusterX.markers, n = 5))
-  write.table(clusterX.markers, file=paste0(dir.name, "/", folders[4], "/cluster",unique(Idents(seurat))[i],".DE.txt"), sep="\t", col.names = NA)
+  write.table(clusterX.markers, file = paste0(dir.name, "/", folders[4], "/cluster", unique(Idents(seurat))[i],".DE.txt"), sep = "\t", col.names = NA, quote = FALSE)
   # Create RNK file 
   rnk = NULL
   rnk = as.matrix(clusterX.markers[,2])
   rownames(rnk)= toupper(row.names(clusterX.markers))
-  write.table(rnk, file=paste0(dir.name, "/", folders[4], "/cluster",unique(Idents(seurat))[i],".rnk"), sep="\t", col.names = FALSE)
+  write.table(rnk, file = paste0(dir.name, "/", folders[4], "/cluster", unique(Idents(seurat))[i],".rnk"), sep = "\t", col.names = FALSE, quote = FALSE)
 }
 # 8.3. Find TOP markers
 seurat.markers <- FindAllMarkers(object = seurat, only.pos = TRUE, min.pct = 0.25, thresh.use = 0.25)
