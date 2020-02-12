@@ -74,6 +74,9 @@ def get_input_fa(wc):
     return file
 
 def get_integration(wc):
+    samples =list(set([u.sample for u in units.itertuples()]))
+    if len(samples) == 1 and config["rules"]["seurat_integration"]["params"]["perform"] == True:
+        raise ValueError("\nATTENTION: Seurat integration must be deactivated when there is only one sample.\nChange integration perform value to 'False' in config.yaml file.")
     if config["rules"]["seurat_integration"]["params"]["perform"] == True:
         file = expand("{OUTDIR}/seurat/integrated/2_normalization/seurat_normalized-pcs.rds",OUTDIR=OUTDIR)
     else:
