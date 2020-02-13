@@ -1,5 +1,8 @@
-import gffutils
+import sys
+sys.stderr=open(snakemake.log[0], "a+")
+sys.stdout=open(snakemake.log[0], "a+")
 
+import gffutils
 db = gffutils.create_db(snakemake.input[0],
                         dbfn=snakemake.output.db,
                         force=True,
@@ -14,3 +17,7 @@ with open(snakemake.output.bed, 'w') as outfileobj:
         bed = [s.strip() for s in db.bed12(tx).split('\t')]
         bed[3] = tx.id
         outfileobj.write('{}\n'.format('\t'.join(bed)))
+
+sys.stderr.close()
+sys.stdout.close()
+

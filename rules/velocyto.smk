@@ -4,7 +4,7 @@ rule STAR_to_velocyto:
     output: 
         f"{OUTDIR}/star/{{sample}}/Solo.out/Velocyto/raw/spliced/matrix.mtx"
     log:
-        f"{LOGDIR}/star/{{sample}}/Solo.out/Velocyto/raw/spliced/{{sample}}.STAR_to_velocyto.log"
+        f"{LOGDIR}/star/{{sample}}/Solo.out/Velocyto/raw/{{sample}}.STAR_to_velocyto.log"
     benchmark:
         f"{LOGDIR}/star/{{sample}}/Solo.out/Velocyto/raw/spliced/{{sample}}.STAR_to_velocyto.bmk"
     params:
@@ -14,26 +14,7 @@ rule STAR_to_velocyto:
         mem=get_resource("STAR_to_velocyto","mem"),
         walltime=get_resource("STAR_to_velocyto","walltime")
     shell:"""
-        head -n 2 {params.input_dir}/matrix.mtx > {params.input_dir}/mtx_header.txt
-        head -n 3 {params.input_dir}/matrix.mtx | tail -n 1 > {params.input_dir}/mtx_summary.txt
-
-        tail -n +4 {params.input_dir}/matrix.mtx | cut -d " " -f 1-3 > {params.input_dir}/ms.txt
-        tail -n +4 {params.input_dir}/matrix.mtx | cut -d " " -f 1-2,4 > {params.input_dir}/mu.txt
-        tail -n +4 {params.input_dir}/matrix.mtx | cut -d " " -f 1-2,5 > {params.input_dir}/ma.txt
-
-        #rm -r {params.input_dir}/spliced {params.input_dir}/unspliced {params.input_dir}/ambiguous
-        mkdir -p {params.input_dir}/spliced {params.input_dir}/unspliced {params.input_dir}/ambiguous
-
-        cat {params.input_dir}/mtx_header.txt {params.input_dir}/mtx_summary.txt {params.input_dir}/ms.txt > {params.input_dir}/spliced/matrix.mtx
-        cat {params.input_dir}/mtx_header.txt {params.input_dir}/mtx_summary.txt {params.input_dir}/mu.txt > {params.input_dir}/unspliced/matrix.mtx
-        cat {params.input_dir}/mtx_header.txt {params.input_dir}/mtx_summary.txt {params.input_dir}/ma.txt > {params.input_dir}/ambiguous/matrix.mtx
-
-        cp {params.input_dir}/features.tsv {params.input_dir}/genes.tsv
-        cp {params.input_dir}/genes.tsv {params.input_dir}/barcodes.tsv {params.input_dir}/spliced/
-        cp {params.input_dir}/genes.tsv {params.input_dir}/barcodes.tsv {params.input_dir}/unspliced/
-        cp {params.input_dir}/genes.tsv {params.input_dir}/barcodes.tsv {params.input_dir}/ambiguous/
-
-        rm {params.input_dir}/*.txt
+        bash scripts/STAR_to_velocyto.sh {params.input_dir} 2> {log}
     """
 
 def get_velocyto_dirs(wc):
