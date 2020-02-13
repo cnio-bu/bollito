@@ -141,7 +141,7 @@ singularity: "docker://continuumio/miniconda3"
 
 ##### setup report #####
 
-report: "report/workflow.rst"
+report: "report/conf/report.rst"
 
 ##### load rules #####
 

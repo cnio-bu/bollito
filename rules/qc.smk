@@ -269,12 +269,12 @@ def multiqc_input(wc):
     except KeyError:
         print("FASTQ_SCREEN disabled by config file. Skipping...")
     return f
-        
+
 rule multiqc:
     input:
         multiqc_input
     output:
-        "{}/qc/multiqc_report.html".format(OUTDIR)
+        report(f"{OUTDIR}/qc/multiqc_report.html", caption="../report/conf/multiqc.rst", category="QC")
     params:
         config["rules"]["multiqc"]["params"]
     benchmark:
@@ -286,4 +286,4 @@ rule multiqc:
         mem=get_resource("multiqc","mem"),
         walltime=get_resource("multiqc","walltime")
     wrapper:
-        "0.35.0/bio/multiqc"
+        "0.49.0/bio/multiqc"
