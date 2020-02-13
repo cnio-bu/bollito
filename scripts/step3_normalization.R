@@ -49,12 +49,12 @@ if(normalization == "standard"){
   # Cell cycle scores and plots.
   seurat <- CellCycleScoring(object = seurat, s.features = s.genes, g2m.features = g2m.genes, set.ident 
 = T)
-  p4 <- FeaturePlot(object = seurat, features ="S.Score") + theme(legend.position="bottom")
+  p4 <- FeaturePlot(object = seurat, features ="S.Score")
   ggsave(paste0(dir.name, "/", folders[2], "/4_sscore_featureplot.pdf"), plot = p4, scale = 1.5)
-  p5 <- FeaturePlot(object = seurat, features ="G2M.Score") + theme(legend.position="bottom")
+  p5 <- FeaturePlot(object = seurat, features ="G2M.Score")
   ggsave(paste0(dir.name, "/", folders[2], "/5_g2mscore_featureplot.pdf"), plot = p5, scale = 1.5)
-  p4 <- DimPlot(seurat, reduction = "pca", pt.size = 0.5, label = TRUE, label.size = 5) + RotatedAxis() #+ theme(legend.position    ="bottom") 
-  ggsave(paste0(dir.name, "/", folders[2], "/6_no_umap_pca.pdf"), plot = p4, scale = 1.5)
+  p6 <- DimPlot(seurat, reduction = "pca", pt.size = 0.5, label = TRUE, label.size = 5) + RotatedAxis() #+ theme(legend.position    ="bottom") 
+  ggsave(paste0(dir.name, "/", folders[2], "/6_no_umap_pca.pdf"), plot = p6, scale = 1.5)
 
   # Scaling
   if(regress_out == TRUE){
@@ -73,14 +73,14 @@ if(normalization == "standard"){
   #PCA previous to cell cycle scoring.
   seurat <- RunPCA(seurat, features = VariableFeatures(object = seurat), npcs = 50) # This result could all be saved in a table.
   
-  #Cell cycle scorea and plots.
+  #Cell cycle scores and plots.
   seurat <- CellCycleScoring(object = seurat, s.features = s.genes, g2m.features = g2m.genes, set.ident = T)
-  p4 <- FeaturePlot(object = seurat, features ="S.Score") + theme(legend.position="bottom")
-  ggsave(paste0(dir.name, "/", folders[2], "/6_sscore_featureplot.pdf"), plot = p4, scale = 1.5)
-  p5 <- FeaturePlot(object = seurat, features ="G2M.Score") + theme(legend.position="bottom")
-  ggsave(paste0(dir.name, "/", folders[2], "/7_g2mscore_featureplot.pdf"), plot = p5, scale = 1.5)
-  p4 <- DimPlot(seurat, reduction = "pca", pt.size = 0.5, label = TRUE, label.size = 5) + RotatedAxis() #+ theme(legend.position    ="bottom") 
-  ggsave(paste0(dir.name, "/", folders[2], "/5_no_umap_pca.pdf"), plot = p4, scale = 1.5)
+  p4 <- FeaturePlot(object = seurat, features ="S.Score")
+  ggsave(paste0(dir.name, "/", folders[2], "/4_sscore_featureplot.pdf"), plot = p4, scale = 1.5)
+  p5 <- FeaturePlot(object = seurat, features ="G2M.Score")
+  ggsave(paste0(dir.name, "/", folders[2], "/5_g2mscore_featureplot.pdf"), plot = p5, scale = 1.5)
+  p6 <- DimPlot(seurat, reduction = "pca", pt.size = 0.5, label = TRUE, label.size = 5) + RotatedAxis() #+ theme(legend.position    ="bottom") 
+  ggsave(paste0(dir.name, "/", folders[2], "/6_no_umap_pca.pdf"), plot = p6, scale = 1.5)
 
 
   #If cell cycle regression is needed, a new SCT transformation is perform.
