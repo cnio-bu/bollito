@@ -58,7 +58,8 @@ rule star:
         index=config["ref"]["idx"]
     output:
         f"{OUTDIR}/star/{{sample}}/Aligned.sortedByCoord.out.bam",
-        f"{OUTDIR}/star/{{sample}}/Solo.out/Gene/Summary.csv"
+        f"{OUTDIR}/star/{{sample}}/Solo.out/Gene/Summary.csv",
+        f"{OUTDIR}/star/{{sample}}/Solo.out/Velocyto/Summary.csv"
     log:
         f"{LOGDIR}/star/{{sample}}.log"
     benchmark:

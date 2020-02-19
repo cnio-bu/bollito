@@ -1,6 +1,6 @@
 rule STAR_to_velocyto:
     input:
-        f"{OUTDIR}/star/{{sample}}/Aligned.sortedByCoord.out.bam"
+        f"{OUTDIR}/star/{{sample}}/Solo.out/Velocyto/Summary.csv"
     output: 
         f"{OUTDIR}/star/{{sample}}/Solo.out/Velocyto/raw/spliced/matrix.mtx"
     log:
