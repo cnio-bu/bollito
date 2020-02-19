@@ -16,18 +16,20 @@ folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_g
 pc = snakemake@params[["pc"]] # We should check the PCs using the Elbowplot
 res = as.vector(snakemake@params[["res"]])
 random_seed = snakemake@params[["random_seed"]]
+k_neighbors = snakemake@params[["k_neighbors"]]
 
 # C. Analysis
 if (is.numeric(random_seed)) {
   set.seed(random_seed)
 }
+
 #Load seurat object
 seurat <- readRDS(input_file)
 assay_type <- seurat@active.assay
 
 # 7. Post-processing
 # 7.1 FindClusters using UMAP projection. We keep the significant PC obtained from PCA.
-seurat <- FindNeighbors(seurat, reduction = "pca", dims = 1:pc)
+seurat <- FindNeighbors(seurat, reduction = "pca", dims = 1:pc, k.param = k_neighbors)
 seurat <- FindClusters(seurat, resolution = res)
 seurat <- RunUMAP(seurat,dims = 1:pc, n.components = 2, verbose = FALSE)
 

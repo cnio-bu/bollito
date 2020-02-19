@@ -68,7 +68,7 @@ getPalette <- colorRampPalette(brewer.pal(9,'Set1'))
 r3dDefaults$windowRect <- c(0,50, 1024, 720) 
 
 # 10.3.4 Curves 3D plot with legend --> HTML output.
-plot3d(reducedDims(seurat3D.sim)$UMAP[,1:3],, col = getPalette(n_col)[seurat3D.sim@colData[, cluster_res]])
+plot3d(reducedDims(seurat3D.sim)$UMAP[,1:3], col = getPalette(n_col)[seurat3D.sim@colData[, cluster_res]])
 plot3d(SlingshotDataSet(seurat3D.sim), lwd = 3, add = TRUE)
 legend3d("topright", legend=paste0("Cluster - ", levels(seurat3D.sim@colData[, cluster_res])), pch=16, col=getPalette(n_col), inset=c(0.001))
 writeWebGL(dir = paste0(dir.name, "/", folders[6]), filename = file.path(paste0(dir.name, "/", folders[6]), paste0("3D_curves_", selected_res, "_res.html")),  width = 1024)

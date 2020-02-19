@@ -57,7 +57,8 @@ rule star:
         fq2=lambda wc: input_star(wc.sample,1),
         index=config["ref"]["idx"]
     output:
-        f"{OUTDIR}/star/{{sample}}/Aligned.sortedByCoord.out.bam"
+        f"{OUTDIR}/star/{{sample}}/Aligned.sortedByCoord.out.bam",
+        f"{OUTDIR}/star/{{sample}}/Solo.out/Gene/Summary.csv"
     log:
         f"{LOGDIR}/star/{{sample}}.log"
     benchmark:

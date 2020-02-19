@@ -115,8 +115,7 @@ rule seurat_integration:
         output_dir = f"{OUTDIR}/seurat/integrated",
         random_seed = config["random_seed"],
         norm_type = config["rules"]["seurat_integration"]["params"]["norm_type"],
-        vars_to_regress = config["rules"]["seurat_integration"]["params"]["vars_to_regress"]
-    
+        vars_to_regress = config["rules"]["seurat_integration"]["params"]["vars_to_regress"]    
     conda: "../envs/seurat.yaml"
     resources:
         mem=get_resource("seurat_integration","mem"),
@@ -138,6 +137,7 @@ rule seurat_find_clusters:
         random_seed = config["random_seed"],
         pc = config["rules"]["seurat_find_clusters"]["params"]["principal_components"],
         res = config["rules"]["seurat_find_clusters"]["params"]["resolutions"],
+        k_neighbors = config["rules"]["seurat_find_clusters"]["params"]["k_neighbors"]
     conda: "../envs/seurat.yaml"
     resources:
         mem=get_resource("seurat_find_clusters","mem"),
@@ -157,7 +157,8 @@ rule seurat_degs:
     params:
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
         random_seed = config["random_seed"],
-        selected_res = config["rules"]["seurat_degs"]["params"]["selected_res"]
+        selected_res = config["rules"]["seurat_degs"]["params"]["selected_res"],
+        test = config["rules"]["seurat_degs"]["params"]["test"]
     conda: "../envs/seurat.yaml"
     resources:
         mem=get_resource("seurat_degs","mem"),

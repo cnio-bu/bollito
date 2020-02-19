@@ -167,18 +167,22 @@ rules:
 # random_seed: ensures the reproducibility of your analysis.
 # principal_components: number of components used.
 # resolutions: the resolution(s) values will set the granularity of the clustering (typicaly between 0.4-1.2).
+# k_neighbors: number of neighbors (k) used to generate the SNN graph (Default = 20).
     seurat_find_clusters:
         params:
             principal_components: 10
             resolutions: [0.2, 0.4, 0.8, 1.2, 1.6]
+            k_neighbors: 20
         res:
             mem: 8000
 # step 5. Marker and Differentially expressed genes calculation.
 # Parameters:
 # selected_res: sets the resolution to be used in the downstream analysis.
+# test: statistical test to use for the DE analysis (see Seurat's FindMarkers function options).
     seurat_degs:
         params:
             selected_res: 0.4
+            test: "wilcox"
         res:
             mem: 64000
 # step 6. Gene set scoring will calculate the average expression levels of each specified regulatory program.

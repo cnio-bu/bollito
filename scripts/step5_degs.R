@@ -13,6 +13,7 @@ folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_g
 # B. Parameters: analysis configuration 
 selected_res = snakemake@params[["selected_res"]]
 random_seed = snakemake@params[["random_seed"]]
+test = snakemake@params[["test"]]
 
 # C. Analysis
 if (is.numeric(random_seed)) {
@@ -27,35 +28,42 @@ if (!(cluster_res %in% colnames(seurat@meta.data))){
 }
 
 # 8 Differentially expressed genes between clusters. 
-# dir.create(paste0(dir.name, "/", folders[4]))
-# After checking out all results with the calculated resolutions, the rest of the analysis will be done using the specified one.
 Idents(seurat) <- paste0(assay_type, "_snn_res.",selected_res)
-# 8.1. Table on differentially expressed genes - using basic filterings
-for (i in 1:length(unique(Idents(seurat)))){
-  clusterX.markers <- FindMarkers(seurat, ident.1 = unique(Idents(seurat))[i], min.pct = 0.25) #min expressed
-  print(x = head(x = clusterX.markers, n = 5))
-  write.table(clusterX.markers, file = paste0(dir.name, "/", folders[4], "/cluster", unique(Idents(seurat))[i],".markers.txt"), sep = "\t", col.names = NA, quote = FALSE)
-}
-# 8.2. DE includying all genes - needed for a GSEA analysis. 
-for (i in 1:length(unique(Idents(seurat)))){
-  clusterX.markers <- FindMarkers(seurat, ident.1 = unique(Idents(seurat))[i], min.pct = 0, logfc.threshold = 0) #min expressed
-  print(x = head(x = clusterX.markers, n = 5))
-  write.table(clusterX.markers, file = paste0(dir.name, "/", folders[4], "/cluster", unique(Idents(seurat))[i],".DE.txt"), sep = "\t", col.names = NA, quote = FALSE)
-  # Create RNK file 
-  rnk = NULL
-  rnk = as.matrix(clusterX.markers[,2])
-  rownames(rnk)= toupper(row.names(clusterX.markers))
-  write.table(rnk, file = paste0(dir.name, "/", folders[4], "/cluster", unique(Idents(seurat))[i],".rnk"), sep = "\t", col.names = FALSE, quote = FALSE)
-}
-# 8.3. Find TOP markers
-seurat.markers <- FindAllMarkers(object = seurat, only.pos = TRUE, min.pct = 0.25, thresh.use = 0.25)
-groupedby.clusters.markers = seurat.markers %>% group_by(cluster) %>% top_n(10, avg_logFC)
-# HeatMap top10
-# setting slim.col.label to TRUE will print just the cluster IDS instead of every cell name
-p1 <- DoHeatmap(object = seurat, features = groupedby.clusters.markers$gene, cells = 1:1000, size = 8, angle = 45, 
-	  group.bar = TRUE, draw.lines = F, raster = FALSE) +
-scale_fill_gradientn(colors = c("blue", "white", "red")) + guides(color=FALSE) + theme(axis.text.y = element_text(size = 8)) + theme(legend.position="bottom") 
-ggsave(paste0(dir.name, "/", folders[4], "/1_heatmap_topmarkers.pdf"), plot = p1, scale = 3)
 
+#If the input seurat object is integrated we only perform the FindConservedMarkers
+if (seurat@active.assay == "integrated") {
+  # 8.1. Table on differentially expressed genes - using basic filterings
+  for (i in 1:length(unique(Idents(seurat)))){
+    clusterX.markers <- FindConservedMarkers(seurat, ident.1 = unique(Idents(seurat))[i], min.pct = 0.25, grouping.var = "assay_name", test.use = test) #min expressed
+    write.table(clusterX.markers, file = paste0(dir.name, "/", folders[4], "/cluster", unique(Idents(seurat))[i],".markers.txt"), sep = "\t", col.names = NA, quote = FALSE)
+  }
+# If the input seurat object is not integrated.
+} else {
+  # 8.1. Table on differentially expressed genes - using basic filterings
+  for (i in 1:length(unique(Idents(seurat)))){
+    clusterX.markers <- FindMarkers(seurat, ident.1 = unique(Idents(seurat))[i], min.pct = 0.25, test.use = test) #min expressed
+    write.table(clusterX.markers, file = paste0(dir.name, "/", folders[4], "/cluster", unique(Idents(seurat))[i],".markers.txt"), sep = "\t", col.names = NA, quote = FALSE)
+  }
+  # 8.2. DE includying all genes - needed for a GSEA analysis. 
+  for (i in 1:length(unique(Idents(seurat)))){
+    message(unique(Idents(seurat))[i])
+    clusterX.markers <- FindMarkers(seurat, ident.1 = unique(Idents(seurat))[i], min.pct = 0, logfc.threshold = 0, test.use = test) #min expressed
+    write.table(clusterX.markers, file = paste0(dir.name, "/", folders[4], "/cluster", unique(Idents(seurat))[i],".DE.txt"), sep = "\t", col.names = NA, quote = FALSE)
+    # 8.2.1 Create RNK file 
+    rnk = NULL
+    rnk = as.matrix(clusterX.markers[,2])
+    rownames(rnk)= toupper(row.names(clusterX.markers))
+    write.table(rnk, file = paste0(dir.name, "/", folders[4], "/cluster", unique(Idents(seurat))[i],".rnk"), sep = "\t", col.names = FALSE, quote = FALSE)
+  }
+  # 8.3. Find TOP markers
+  seurat.markers <- FindAllMarkers(object = seurat, only.pos = TRUE, min.pct = 0.25, thresh.use = 0.25, test.use = test)
+  groupedby.clusters.markers = seurat.markers %>% group_by(cluster) %>% top_n(10, avg_logFC)
+  # 8.3.1 HeatMap top10
+  # setting slim.col.label to TRUE will print just the cluster IDS instead of every cell name
+  p1 <- DoHeatmap(object = seurat, features = groupedby.clusters.markers$gene, cells = 1:1000, size = 8, angle = 45, 
+	    group.bar = TRUE, draw.lines = F, raster = FALSE) +
+  scale_fill_gradientn(colors = c("blue", "white", "red")) + guides(color=FALSE) + theme(axis.text.y = element_text(size = 8)) + theme(legend.position="bottom") 
+  ggsave(paste0(dir.name, "/", folders[4], "/1_heatmap_topmarkers.pdf"), plot = p1, scale = 3)
+}
 # Save RDS: we can use this object to generate all the rest of the data
 saveRDS(seurat, file = paste0(dir.name, "/",folders[4], "/seurat_degs.rds"))
