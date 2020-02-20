@@ -8,6 +8,7 @@ suppressMessages(library("data.table"))
 suppressMessages(library("reticulate"))
 suppressMessages(library("ggplot2"))
 suppressMessages(library("BiocParallel"))
+suppressMessages(library("openxlsx"))
 
 # A. Parameters: folder configuration 
 dir.name = snakemake@params[["output_dir"]]
@@ -31,6 +32,10 @@ if (!(cluster_res %in% colnames(seurat@meta.data))){
   stop("Specified resolution is not available.")
 }
 
+#Set styles for xlsx files.
+redStyle <- createStyle(fontColour = "#B60A1C", bgFill = "#FFF06A", textDecoration = c("BOLD"))
+greenStyle <- createStyle(fontColour = "#309143", bgFill = "#FFF06A", textDecoration = c("BOLD"))
+
 # 8 Differentially expressed genes between clusters. 
 Idents(seurat) <- paste0(assay_type, "_snn_res.",selected_res)
 
@@ -48,11 +53,23 @@ if (seurat@active.assay == "integrated") {
     clusterX.markers <- FindMarkers(seurat, ident.1 = unique(Idents(seurat))[i], min.pct = 0.25, test.use = test) #min expressed
     write.table(clusterX.markers, file = paste0(dir.name, "/", folders[4], "/cluster", unique(Idents(seurat))[i],".markers.txt"), sep = "\t", col.names = NA, quote = FALSE)
   }
+  
   # 8.2. DE includying all genes - needed for a GSEA analysis. 
   for (i in 1:length(unique(Idents(seurat)))){
-    message(unique(Idents(seurat))[i])
     clusterX.markers <- FindMarkers(seurat, ident.1 = unique(Idents(seurat))[i], min.pct = 0, logfc.threshold = 0, test.use = test) #min expressed
-    write.table(clusterX.markers, file = paste0(dir.name, "/", folders[4], "/cluster", unique(Idents(seurat))[i],".DE.txt"), sep = "\t", col.names = NA, quote = FALSE)
+    #write.table(clusterX.markers, file = paste0(dir.name, "/", folders[4], "/cluster", unique(Idents(seurat))[i],".DE.txt"), sep = "\t", col.names = NA, quote = FALSE)
+    wb <- createWorkbook()
+    addWorksheet(wb, "DE analysis")
+    writeData(wb, "DE analysis", clusterX.markers, rowNames = TRUE)
+    conditionalFormatting(wb, "DE analysis", cols = 1:(ncol(clusterX.markers)+1),
+                          rows = 2:(nrow(clusterX.markers) + 1), rule = "AND($C2<0, $F2<0.05)",
+                          style = greenStyle)
+    conditionalFormatting(wb, "DE analysis", cols = 1:(ncol(clusterX.markers)+1),
+                          rows = 2:(nrow(clusterX.markers) + 1), rule = "AND($C2>0, $F2<0.05)",
+                          style = redStyle)
+    legend <- createComment(comment = c("Red means a positive LogFold\n\n", "Green means a negative LogFold"), style = c(redStyle, greenStyle))
+    writeComment(wb, "DE analysis", col = 8, row = 2, comment = legend)
+    saveWorkbook(wb, paste0(dir.name, "/", folders[4], "/cluster", unique(Idents(seurat))[i],".DE.xlsx"), overwrite = TRUE)    
     # 8.2.1 Create RNK file 
     rnk = NULL
     rnk = as.matrix(clusterX.markers[,2])
