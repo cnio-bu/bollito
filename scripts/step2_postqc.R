@@ -29,6 +29,9 @@ if (is.numeric(random_seed)) {
 }
 # Read RDS file from previous step
 seurat = readRDS(paste0(dir.name, "/", folders[1], "/seurat_pre-qc.rds"))
+
+# 3.1 Pre-filtering stats calculus
+stats_pre <- c(length(colnames(seurat)), median(seurat@meta.data[["nCount_RNA"]]), median(seurat@meta.data[["nFeature_RNA"]]), median(seurat@meta.data[["percent.mt"]]), median(seurat@meta.data[["percent.ribo"]]))
 # 3.1 We should apply the filterings once the QC plots (GenePlot and Violin plots) have been checked.
 #seurat <- subset(seurat, subset = nFeature_RNA > min & nFeature_RNA < max & percent.mt < mit & percent.ribo < ribo )
 # 3.1.1 Feature filter
@@ -64,6 +67,15 @@ p1 <- VlnPlot(seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), 
 ggsave(paste0(dir.name, "/",folders[1], "/4_vlnplot_ngene_numi_pctmit_afterfilt.pdf"), plot = p1, scale = 1.5)
 p2 <- VlnPlot(seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.ribo"), ncol = 3, pt.size = 0.25) + theme(legend.position="bottom") 
 ggsave(paste0(dir.name, "/",folders[1], "/5_vlnplot_ngene_numi_pctribo_afterfilt.pdf"), plot = p2, scale = 1.5)
+
+# 3.4 Post-filter stats calculus.
+stats_post <- c(length(colnames(seurat)), median(seurat@meta.data[["nCount_RNA"]]), median(seurat@meta.data[["nFeature_RNA"]]), median(seurat@meta.data[["percent.mt"]]), median(seurat@meta.data[["percent.ribo"]]))
+
+# 3.5 Statistics table
+filtering_df <- data.frame("Number of cells" = c(stats_pre[1],stats_post[1]), "Count median" = c(stats_pre[2],stats_post[2]),"Expressed genes median" = c(stats_pre[3],stats_post[3]), "Mitochondrial percentage median" = c(stats_pre[4],stats_post[4]), "Ribosomal percentage median" = c(stats_pre[5],stats_post[5]))
+row.names(filtering_df) <- c("Pre-QC", "Post-QC")
+message(row.names(filtering_df))
+write.table(filtering_df, file = paste0(dir.name, "/", folders[1], "/6_pre_vs_post_stats.txt"), sep = "\t", col.names = NA, quote = FALSE)
 
 # Save RDS: we can use this object to generate all the rest of the data
 saveRDS(seurat, file = paste0(dir.name, "/",folders[1], "/seurat_post-qc.rds"))

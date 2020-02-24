@@ -96,6 +96,7 @@ if(normalization == "standard"){
 }
 
 ## 5.2 PCA metrics calculation.
+Idents(seurat) <- seurat@project.name
 seurat <- RunPCA(seurat, features = VariableFeatures(object = seurat), npcs = 50) # This result could all be saved in a table. 
 # Visualizing PCA in Different Ways: elbow plot most variable genes 
 p2 <- VizDimLoadings(seurat, dims = 1:2, reduction = "pca") + theme(legend.position="bottom") 

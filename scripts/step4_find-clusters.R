@@ -67,5 +67,30 @@ write_xlsx(silhouette_scores, path = paste0(dir.name, "/", folders[3], "/3_silho
 p3 <- FeaturePlot(seurat, 'nFeature_RNA', pt.size =  0.75) #+ theme(legend.position="bottom") 
 ggsave(paste0(dir.name, "/", folders[3], "/4_featureplot.pdf"), plot = p3, scale = 1.5)
 
+# 7.5 Statistics table per cluster
+# 7.5.1 Get the index of resolution columns.
+resolutions = grep("snn_res", colnames(seurat@meta.data))
+# 7.5.2 Set the highest number of clusters.
+number_clusters = length(unique(seurat@meta.data$seurat_clusters))
+# 7.5.3 Get the maximum cluster names vector.
+cluster_names = paste0("Cluster ", seq(number_clusters)) 
+
+# 7.5.4 Loop for each resolution and write table.
+for(j in 1:length(resolutions)){
+  # Set idents and levels.
+  Idents(seurat) <- seurat@meta.data[,resolutions[j]]
+  levels(Idents(seurat)) <- cluster_names[1:length(levels(Idents(seurat)))]
+  table(Idents(seurat))
+  # Proportion of cells per cluster
+  prop.table(x = table(Idents(seurat)))
+  # WhichCells(object = pbmc, ident = "0")
+  cluster.averages <- AverageExpression(object = seurat)
+  genes_per_cluster <- Matrix::colSums(cluster.averages$RNA>0)
+  # Generate a joint table
+  joint_stats = rbind(number_of_cells = table(Idents(seurat)), prop_per_cluster = prop.table(x = table(Idents(seurat))), genes_per_cluster = genes_per_cluster)
+  colnames(joint_stats) = names(table(Idents(seurat)))
+  write.table(t(joint_stats), file=paste0(dir.name, "/", folders[3], "/5_", colnames(seurat@meta.data)[resolutions[j]],"_stats.tsv"), sep="\t", col.names = NA, quote = FALSE)
+}
+
 # Save RDS: we can use this object to generate all the rest of the data
 saveRDS(seurat, file = paste0(dir.name, "/",folders[3], "/seurat_find-clusters.rds"))
