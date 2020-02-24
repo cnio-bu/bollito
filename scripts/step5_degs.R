@@ -24,12 +24,19 @@ test = snakemake@params[["test"]]
 if (is.numeric(random_seed)) {
   set.seed(random_seed)
 }
-#Load seurat object
+# Load seurat object
 seurat <- readRDS(input_data)
 assay_type <- seurat@active.assay
 cluster_res <- paste0(assay_type, "_snn_res.", selected_res)
 if (!(cluster_res %in% colnames(seurat@meta.data))){
   stop("Specified resolution is not available.")
+}
+
+# Check number of cells for the heatmap.
+if (length(colnames(seurat)) < 1000){
+  n_cells = length(colnames(seurat))
+} else {
+  n_cells = 1000
 }
 
 #Set styles for xlsx files.
@@ -81,7 +88,7 @@ if (seurat@active.assay == "integrated") {
   groupedby.clusters.markers = seurat.markers %>% group_by(cluster) %>% top_n(10, avg_logFC)
   # 8.3.1 HeatMap top10
   # setting slim.col.label to TRUE will print just the cluster IDS instead of every cell name
-  p1 <- DoHeatmap(object = seurat, features = groupedby.clusters.markers$gene, cells = 1:1000, size = 8, angle = 45, 
+  p1 <- DoHeatmap(object = seurat, features = groupedby.clusters.markers$gene, cells = 1:n_cells, size = 8, angle = 45, 
 	    group.bar = TRUE, draw.lines = F, raster = FALSE) +
   scale_fill_gradientn(colors = c("blue", "white", "red")) + guides(color=FALSE) + theme(axis.text.y = element_text(size = 8)) + theme(legend.position="bottom") 
   ggsave(paste0(dir.name, "/", folders[4], "/1_heatmap_topmarkers.pdf"), plot = p1, scale = 3)
