@@ -8,7 +8,7 @@ suppressMessages(library("SeuratWrappers"))
 suppressMessages(library("RColorBrewer"))
 
 # A. Parameters: folder configuration
-input_data = snakemake@input[["data"]]
+input_data = snakemake@input[["seurat_obj"]]
 velocyto_dir = snakemake@params[["velocyto_dir"]]
 dir.name = snakemake@params[["output_dir"]]
 folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs", "6_traj_in", "7_func_analysis", "8_RNA_velocity")

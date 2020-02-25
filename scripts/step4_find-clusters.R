@@ -12,7 +12,7 @@ suppressMessages(library("cluster"))
 suppressMessages(library("writexl"))
 
 # A. Parameters: folder configuration 
-input_file = snakemake@input[["data"]]
+input_file = snakemake@input[["seurat_obj"]]
 dir.name = snakemake@params[["output_dir"]]
 folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs", "6_traj_in", "7_func_analysis")
 

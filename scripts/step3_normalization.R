@@ -10,7 +10,7 @@ suppressMessages(library("ggplot2"))
 
 # A. Parameters: folder configuration 
 dir.name = snakemake@params[["output_dir"]]
-input_data = snakemake@input[["data"]]
+input_data = snakemake@input[["seurat_obj"]]
 folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs")
 
 # B. Parameters: analysis configuration 
@@ -84,7 +84,7 @@ if(normalization == "standard"){
   p5 <- FeaturePlot(object = seurat, features ="G2M.Score")
   ggsave(paste0(dir.name, "/", folders[2], "/5_g2mscore_featureplot.pdf"), plot = p5, scale = 1.5)
   p6 <- DimPlot(seurat, reduction = "pca", pt.size = 0.5, label = TRUE, label.size = 5) + RotatedAxis() #+ theme(legend.position    ="bottom") 
-  ggsave(paste0(dir.name, "/", folders[2], "/6_no_umap_pca.pdf"), plot = p6, scale = 1.5)
+  ggsave(paste0(dir.name, "/", folders[2], "/6_cell_cycle_dimplot.pdf"), plot = p6, scale = 1.5)
 
 
   #If cell cycle regression is needed, a new SCT transformation is perform.

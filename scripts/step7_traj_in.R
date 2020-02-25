@@ -13,7 +13,7 @@ suppressMessages(library("pheatmap"))
 
 # A. Parameters: folder configuration
 dir.name = snakemake@params[["output_dir"]]
-input_data = snakemake@input[["data"]]
+input_data = snakemake@input[["seurat_obj"]]
 folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs", "6_traj_in", "7_func_analysis")
 
 # B. Parameters: analysis configuration

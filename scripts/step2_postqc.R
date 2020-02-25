@@ -75,7 +75,7 @@ stats_post <- c(length(colnames(seurat)), median(seurat@meta.data[["nCount_RNA"]
 filtering_df <- data.frame("Number of cells" = c(stats_pre[1],stats_post[1]), "Count median" = c(stats_pre[2],stats_post[2]),"Expressed genes median" = c(stats_pre[3],stats_post[3]), "Mitochondrial percentage median" = c(stats_pre[4],stats_post[4]), "Ribosomal percentage median" = c(stats_pre[5],stats_post[5]))
 row.names(filtering_df) <- c("Pre-QC", "Post-QC")
 message(row.names(filtering_df))
-write.table(filtering_df, file = paste0(dir.name, "/", folders[1], "/6_pre_vs_post_stats.txt"), sep = "\t", col.names = NA, quote = FALSE)
+write.table(filtering_df, file = paste0(dir.name, "/", folders[1], "/6_pre_vs_post_stats.tsv"), sep = "\t", col.names = NA, quote = FALSE)
 
 # Save RDS: we can use this object to generate all the rest of the data
 saveRDS(seurat, file = paste0(dir.name, "/",folders[1], "/seurat_post-qc.rds"))

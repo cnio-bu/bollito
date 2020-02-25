@@ -274,7 +274,7 @@ rule multiqc:
     input:
         multiqc_input
     output:
-        report(f"{OUTDIR}/qc/multiqc_report.html", caption="../report/conf/multiqc.rst", category="QC")
+        report(f"{OUTDIR}/qc/multiqc_report.html", caption="../report/conf/multiqc.rst", category="1_QC")
     params:
         config["rules"]["multiqc"]["params"]
     benchmark:

@@ -2,7 +2,9 @@ rule seurat_qc:
     input: 
         seurat_input
     output:
-        data=f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_pre-qc.rds"
+        seurat_obj=f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_pre-qc.rds",
+        before_filt_plot=report(f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/1_vlnplot_ngene_numi_pctmit_beforefilt.pdf", caption="../report/conf/before_filt_plot.rst", category="2_Single-cell QC"),
+        gene_umi_plot=report(f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/3_geneplot_numi_vs_pctmit_ngene.pdf", caption="../report/conf/gene_umi_plot.rst", category="2_Single-cell QC")
     log:
         f"{LOGDIR}/seurat/{{sample}}/1_preprocessing/{{sample}}.preqc.log"
     benchmark:
@@ -25,9 +27,11 @@ rule seurat_qc:
 
 rule seurat_post_qc:
     input:
-        f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_pre-qc.rds"
+        seurat_obj=f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_pre-qc.rds"
     output:
-        data=f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_post-qc.rds"
+        seurat_obj=f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_post-qc.rds",
+        after_filt_plot=report(f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/4_vlnplot_ngene_numi_pctmit_afterfilt.pdf", caption="../report/conf/after_filt_plot.rst", category="2_Single-cell QC"),
+        stats_table=report(f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/6_pre_vs_post_stats.tsv", caption="../report/conf/stats_table.rst", category="2_Single-cell QC")
     log:
         f"{LOGDIR}/seurat/{{sample}}/1_preprocessing/{{sample}}.postqc.log"
     benchmark:
@@ -52,7 +56,7 @@ rule seurat_filter:
     input:
         lambda wc: f"{OUTDIR}/seurat/{wc.sample}/1_preprocessing/seurat_post-qc.rds"
     output:
-        data=f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_post-qc-filtered.rds"
+        seurat_obj=f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_post-qc-filtered.rds"
     log:
         f"{LOGDIR}/seurat/{{sample}}/1_preprocessing/{{sample}}.filter.log"
     benchmark:
@@ -81,9 +85,12 @@ def norm_input(wc):
 
 rule seurat_normalization:
     input:
-        data = norm_input
+        seurat_obj=norm_input
     output:
-        data=f"{OUTDIR}/seurat/{{sample}}/2_normalization/seurat_normalized-pcs.rds"
+        seurat_obj=f"{OUTDIR}/seurat/{{sample}}/2_normalization/seurat_normalized-pcs.rds",
+        elbow_plot=report(f"{OUTDIR}/seurat/{{sample}}/2_normalization/3_elbowplot.pdf", caption="../report/conf/elbow_plot.rst", category="3_Normalization"),
+        dimplot=report(f"{OUTDIR}/seurat/{{sample}}/2_normalization/2_dimplot.pdf", caption="../report/conf/dimplot.rst", category="3_Normalization"),
+        cellcycle_plot=report(f"{OUTDIR}/seurat/{{sample}}/2_normalization/6_cell_cycle_dimplot.pdf", caption="../report/conf/cellcycle_plot.rst", category="3_Normalization")
     log:
         f"{LOGDIR}/seurat/{{sample}}/2_normalization/{{sample}}.normalization.log"
     benchmark:
@@ -106,7 +113,7 @@ rule seurat_integration:
     input:
         data=get_integration_input_sm
     output:
-        data=f"{OUTDIR}/seurat/integrated/2_normalization/seurat_normalized-pcs.rds"
+        seurat_obj=f"{OUTDIR}/seurat/integrated/2_normalization/seurat_normalized-pcs.rds"
     log:
         f"{LOGDIR}/seurat/integrated/2_normalization/integrated.normalization.log"
     benchmark:
@@ -125,9 +132,9 @@ rule seurat_integration:
 
 rule seurat_find_clusters:
     input:
-        data=f"{OUTDIR}/seurat/{{sample}}/2_normalization/seurat_normalized-pcs.rds"
+        seurat_obj=f"{OUTDIR}/seurat/{{sample}}/2_normalization/seurat_normalized-pcs.rds"
     output:
-        data=f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds"
+        seurat_obj=f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds"
     log:
         f"{LOGDIR}/seurat/{{sample}}/3_clustering/{{sample}}.find-clusters.log"
     benchmark:
@@ -147,9 +154,9 @@ rule seurat_find_clusters:
 
 rule seurat_degs:
     input:
-        data=f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds"
+        seurat_obj=f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds"
     output:
-        data=f"{OUTDIR}/seurat/{{sample}}/4_degs/seurat_degs.rds"
+        seurat_obj=f"{OUTDIR}/seurat/{{sample}}/4_degs/seurat_degs.rds"
     log:
         f"{LOGDIR}/seurat/{{sample}}/4_degs/{{sample}}.seurat_degs.log"
     benchmark:
@@ -168,9 +175,9 @@ rule seurat_degs:
 
 rule seurat_gs:
     input:
-        data=f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds"
+        seurat_obj=f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds"
     output:
-        data=f"{OUTDIR}/seurat/{{sample}}/5_gs/seurat_complete.rds"
+        seurat_obj=f"{OUTDIR}/seurat/{{sample}}/5_gs/seurat_complete.rds"
     log:
         f"{LOGDIR}/seurat/{{sample}}/5_gs/{{sample}}.seurat_complete.log"
     benchmark:
@@ -188,9 +195,9 @@ rule seurat_gs:
 
 rule slingshot:
     input:
-        data=f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds"
+        seurat_obj=f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds"
     output:
-        data=f"{OUTDIR}/slingshot/{{sample}}/6_traj_in/slingshot_sce_objects.RData"
+        seurat_obj=f"{OUTDIR}/slingshot/{{sample}}/6_traj_in/slingshot_sce_objects.RData"
     log:
         f"{LOGDIR}/slingshot/{{sample}}/6_traj_in/{{sample}}.slingshot.log"
     benchmark:
@@ -213,9 +220,9 @@ rule slingshot:
 
 rule vision:
     input:
-        data=f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds"
+        seurat_obj=f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds"
     output:
-        data=f"{OUTDIR}/vision/{{sample}}/7_func_analysis/vision_object.rds"
+        seurat_obj=f"{OUTDIR}/vision/{{sample}}/7_func_analysis/vision_object.rds"
     log:
         f"{LOGDIR}/vision/{{sample}}/7_func_analysis/{{sample}}.vision.log"
     benchmark:
