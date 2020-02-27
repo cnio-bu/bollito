@@ -2,9 +2,11 @@ rule STAR_to_velocyto:
     input:
         f"{OUTDIR}/star/{{sample}}/Solo.out/Velocyto/Summary.csv"
     output: 
-        f"{OUTDIR}/star/{{sample}}/Solo.out/Velocyto/raw/spliced/matrix.mtx"
+        f"{OUTDIR}/star/{{sample}}/Solo.out/Velocyto/raw/spliced/matrix.mtx",
+        f"{OUTDIR}/star/{{sample}}/Solo.out/Velocyto/raw/unspliced/matrix.mtx",
+        f"{OUTDIR}/star/{{sample}}/Solo.out/Velocyto/raw/ambiguous/matrix.mtx"
     log:
-        f"{LOGDIR}/star/{{sample}}/Solo.out/Velocyto/raw/{{sample}}.STAR_to_velocyto.log"
+        f"{LOGDIR}/star/{{sample}}/Solo.out/Velocyto/raw/{{sample}}.STAR_to_velocyto.log" 
     benchmark:
         f"{LOGDIR}/star/{{sample}}/Solo.out/Velocyto/raw/spliced/{{sample}}.STAR_to_velocyto.bmk"
     params:
@@ -25,9 +27,10 @@ def get_velocyto_dirs(wc):
 
 rule velocyto:
     input:
-        data = f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds"
+        seurat_obj = f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds",
+        spliced_matrix=f"{OUTDIR}/star/{{sample}}/Solo.out/Velocyto/raw/spliced/matrix.mtx"
     output: 
-        f"{OUTDIR}/velocyto/{{sample}}/8_RNA_velocity/seurat_velocity.rds"
+        seurat_obj=f"{OUTDIR}/velocyto/{{sample}}/8_RNA_velocity/seurat_velocity.rds"
     log:
         f"{LOGDIR}/velocyto/{{sample}}/8_RNA_velocity/{{sample}}.velocyto.log"
     benchmark:

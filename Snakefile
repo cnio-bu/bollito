@@ -121,6 +121,13 @@ def seurat_input(wc):
         file = f"{OUTDIR}/star/{{sample}}/Aligned.sortedByCoord.out.bam"  
     return file
 
+def get_input_find_clus(wc):
+    samples = [u.sample for u in units.itertuples()] 
+    if config["rules"]["seurat_integration"]["params"]["perform"] == True:
+        samples = samples + ['integrated']
+    file = expand("{OUTDIR}/seurat/{sample}/2_normalization/seurat_normalized-pcs.rds", sample=samples,OUTDIR=OUTDIR)
+    return file
+
 rule all:
     input:
         get_multiqc,
@@ -131,6 +138,44 @@ rule all:
         get_integration,
         do_velocity,
         get_velocity_matrices
+
+rule expression_matrix:
+    input:
+        get_velocity_matrices,
+        get_multiqc
+
+rule normalized_expression_matrix:
+    input:
+        get_input_find_clus,
+        get_integration,
+        get_multiqc
+
+rule differential_expression:
+    input:
+        get_input_degs,
+        get_multiqc
+
+rule functional_analysis:
+    input:
+        get_input_fa,
+        get_multiqc
+
+rule trajectory_inference:
+    input:
+        get_input_ti,
+        get_multiqc
+
+rule geneset_analysis:
+    input:
+        get_input_gs,
+        get_multiqc
+
+rule RNA_velocity:
+    input:
+        do_velocity,
+        get_velocity_matrices,
+        get_multiqc
+
 
 ##### setup singularity #####
 
@@ -149,3 +194,4 @@ include: "rules/align.smk"
 include: "rules/qc.smk"
 include: "rules/analyse.smk"
 include: "rules/velocyto.smk"
+include: "rules/shortcuts.smk"
