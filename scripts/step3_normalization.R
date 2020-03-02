@@ -104,12 +104,12 @@ ggsave(paste0(dir.name, "/",folders[2], "/1_viz_dim_loadings.pdf"), plot = p2, s
 p3 <- DimPlot(seurat, reduction = "pca", pt.size = 0.5) + theme(legend.position="bottom") 
 ggsave(paste0(dir.name, "/",folders[2], "/2_dimplot.pdf"), plot = p3, scale = 1.5)
 # 5.3. Determine the dimensionality of the dataset
-#seurat <- JackStraw(seurat, num.replicate = 100, dims = 50)
-#seurat <- ScoreJackStraw(seurat, dims = 1:50)
+seurat <- JackStraw(seurat, num.replicate = 100, dims = 50)
+seurat <- ScoreJackStraw(seurat, dims = 1:50)
 p4 <- ElbowPlot(seurat, ndims = 50) + theme(legend.position="bottom") 
 ggsave(paste0(dir.name, "/",folders[2], "/3_elbowplot.pdf"), plot = p4, scale = 1.5)
-#p5 <- JackStrawPlot(seurat, dims = 1:50) + theme(legend.position="bottom") + guides(fill=guide_legend(nrow=2, byrow=TRUE)) 
-#ggsave(paste0(dir.name, "/",folders[2], "/4_jackstrawplot.pdf"), plot = p5, scale = 2)
+p5 <- JackStrawPlot(seurat, dims = 1:50) + theme(legend.position="bottom") + guides(fill=guide_legend(nrow=2, byrow=TRUE)) 
+ggsave(paste0(dir.name, "/",folders[2], "/4_jackstrawplot.pdf"), plot = p5, scale = 2)
 
 # Save RDS: we can use this object to generate all the rest of the data
 saveRDS(seurat, file = paste0(dir.name, "/",folders[2], "/seurat_normalized-pcs.rds"))
