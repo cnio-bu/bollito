@@ -40,7 +40,7 @@ seurat <- RunUMAP(seurat,dims = 1:pc, n.components = 2, verbose = FALSE)
 # 7.2 Clustree
 #clustree(seurat, prefix = "{assay_type}_snn_res.")
 p1 <- clustree(seurat, prefix = paste0(assay_type,"_snn_res."))
-ggsave(paste0(dir.name, "/", folders[3], "/1_Clustree.pdf"), plot = p1, scale = 1.5)
+ggsave(paste0(dir.name, "/", folders[3], "/1_clustree.pdf"), plot = p1, scale = 1.5)
 
 # 7.3 Clustering plots and silhouette parameters calculus.
 # we create a empty lsit to store silhouette values.
@@ -64,7 +64,7 @@ for(i in 1:length(which(grepl(paste0(assay_type,"_snn_"),colnames(seurat@meta.da
 write_xlsx(silhouette_scores, path = paste0(dir.name, "/", folders[3], "/3_silhouette_score.xlsx"),col_names = TRUE, format_headers = TRUE )
 
 # 7.4 Feature plot
-p3 <- FeaturePlot(seurat, 'nFeature_RNA', pt.size =  0.75) #+ theme(legend.position="bottom") 
+p3 <- FeaturePlot(seurat, 'nFeature_RNA', pt.size =  0.75) + labs(title = "Nº features") 
 ggsave(paste0(dir.name, "/", folders[3], "/4_featureplot.pdf"), plot = p3, scale = 1.5)
 
 # 7.5 Statistics table per cluster

@@ -63,10 +63,12 @@ ribo_seurat <- FetchData(object = seurat, vars = "percent.ribo")
 seurat <- seurat[, which(x = ribo_seurat < ribo)]
 }
 # 3.2 QC: violin plots - After
-p1 <- VlnPlot(seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3, pt.size = 0.25) + theme(legend.position="bottom") 
-ggsave(paste0(dir.name, "/",folders[1], "/4_vlnplot_ngene_numi_pctmit_afterfilt.pdf"), plot = p1, scale = 1.5)
-p2 <- VlnPlot(seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.ribo"), ncol = 3, pt.size = 0.25) + theme(legend.position="bottom") 
-ggsave(paste0(dir.name, "/",folders[1], "/5_vlnplot_ngene_numi_pctribo_afterfilt.pdf"), plot = p2, scale = 1.5)
+p1 <- VlnPlot(seurat, features = c("nFeature_RNA"), pt.size = 0.25, cols = "#9CCCD0") + ggtitle("Nº features") + theme(legend.position="bottom") 
+p2 <- VlnPlot(seurat, features = c("nCount_RNA"), pt.size = 0.25, cols = "#8ADD56")  + ggtitle("Nº counts") + theme(legend.position="bottom")
+p3 <- VlnPlot(seurat, features = c("percent.mt"), pt.size = 0.25, cols = "#F07800") + ggtitle("Mitochondrial %") + theme(legend.position="bottom")
+p4 <- VlnPlot(seurat, features = c("percent.ribo"), pt.size = 0.25, cols = "#E44631") + ggtitle("Ribosomal %") + theme(legend.position="bottom")
+p_comp <- CombinePlots(list(p1,p2,p3,p4), ncol = 4)
+ggsave(paste0(dir.name, "/", folders[1], "/3_vlnplot_QC_variables_postfilt.pdf"), plot = p_comp, scale = 1.2, width = 10, height = 8)
 
 # 3.4 Post-filter stats calculus.
 stats_post <- c(length(colnames(seurat)), median(seurat@meta.data[["nCount_RNA"]]), median(seurat@meta.data[["nFeature_RNA"]]), median(seurat@meta.data[["percent.mt"]]), median(seurat@meta.data[["percent.ribo"]]))
@@ -75,7 +77,7 @@ stats_post <- c(length(colnames(seurat)), median(seurat@meta.data[["nCount_RNA"]
 filtering_df <- data.frame("Number of cells" = c(stats_pre[1],stats_post[1]), "Count median" = c(stats_pre[2],stats_post[2]),"Expressed genes median" = c(stats_pre[3],stats_post[3]), "Mitochondrial percentage median" = c(stats_pre[4],stats_post[4]), "Ribosomal percentage median" = c(stats_pre[5],stats_post[5]))
 row.names(filtering_df) <- c("Pre-QC", "Post-QC")
 message(row.names(filtering_df))
-write.table(filtering_df, file = paste0(dir.name, "/", folders[1], "/6_pre_vs_post_stats.tsv"), sep = "\t", col.names = NA, quote = FALSE)
+write.table(filtering_df, file = paste0(dir.name, "/", folders[1], "/4_pre_vs_post_stats.tsv"), sep = "\t", col.names = NA, quote = FALSE)
 
 # Save RDS: we can use this object to generate all the rest of the data
 saveRDS(seurat, file = paste0(dir.name, "/",folders[1], "/seurat_post-qc.rds"))

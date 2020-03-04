@@ -77,15 +77,18 @@ seurat[["percent.mt"]] <- PercentageFeatureSet(seurat, pattern = "^Mt-")
 # 2.2. Ribosomal genes - check levels of expression for rb genes 
 seurat[["percent.ribo"]] <- PercentageFeatureSet(seurat, pattern = "^Rp[sl][[:digit:]]")
 # 2.3. QC: violin plots
-p1 <- VlnPlot(seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3, pt.size = 0.25) + theme(legend.position="bottom") 
-ggsave(paste0(dir.name, "/", folders[1], "/1_vlnplot_ngene_numi_pctmit_beforefilt.pdf"), plot = p1, scale = 1.5) 
-p2 <- VlnPlot(seurat, features = c("nFeature_RNA", "nCount_RNA", "percent.ribo"), ncol = 3, pt.size = 0.25) + theme(legend.position="bottom") 
-ggsave(paste0(dir.name, "/", folders[1], "/2_vlnplot_ngene_numi_pctribo_beforefilt.pdf"), plot = p2, scale = 1.5)
+p1 <- VlnPlot(seurat, features = c("nFeature_RNA"), pt.size = 0.25, cols = "#9CCCD0") + ggtitle("Nº features") + theme(legend.position="bottom") 
+p2 <- VlnPlot(seurat, features = c("nCount_RNA"), pt.size = 0.25, cols = "#8ADD56")  + ggtitle("Nº counts") + theme(legend.position="bottom")
+p3 <- VlnPlot(seurat, features = c("percent.mt"), pt.size = 0.25, cols = "#F07800") + ggtitle("Mitochondrial %") + theme(legend.position="bottom")
+p4 <- VlnPlot(seurat, features = c("percent.ribo"), pt.size = 0.25, cols = "#E44631") + ggtitle("Ribosomal %") + theme(legend.position="bottom")
+p_comp <- CombinePlots(list(p1,p2,p3,p4), ncol = 4)
+ggsave(paste0(dir.name, "/", folders[1], "/1_vlnplot_QC_variables_prefilt.pdf"), plot = p_comp, scale = 1.2, width = 10, height = 8)
 # 2.4. QC: GenePlot
-scatter1 <- FeatureScatter(seurat, feature1 = "nCount_RNA", feature2 = "percent.mt", pt.size = 0.25)+ theme(legend.position="bottom") 
-scatter2 <- FeatureScatter(seurat, feature1 = "nCount_RNA", feature2 = "nFeature_RNA", pt.size = 0.25) + theme(legend.position="bottom") 
+scatter1 <- FeatureScatter(seurat, feature1 = "nCount_RNA", feature2 = "percent.mt", pt.size = 0.25)+ theme(legend.position="bottom") + labs(title = "Mitochondrial % vs Nº counts", x = "Nº counts", y = "Mitochondrial %")
+scatter2 <- FeatureScatter(seurat, feature1 = "nCount_RNA", feature2 = "nFeature_RNA", pt.size = 0.25) + theme(legend.position="bottom") + labs(title = "Nº features vs Nº counts", x = "Nº counts", y = "Nº features")
+
 p3 <- CombinePlots(plots = list(scatter1, scatter2))
-ggsave(paste0(dir.name, "/", folders[1], "/3_geneplot_numi_vs_pctmit_ngene.pdf"), plot = p3, scale = 1.5)
+ggsave(paste0(dir.name, "/", folders[1], "/2_geneplot_numi_vs_pctmit_ngene.pdf"), plot = p3, scale = 1.5)
 
 # Save RDS: we can use this object to generate all the rest of the data
 saveRDS(seurat, file = paste0(dir.name, "/" ,folders[1], "/seurat_pre-qc.rds"))

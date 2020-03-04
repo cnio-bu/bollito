@@ -3,8 +3,8 @@ rule seurat_qc:
         seurat_input
     output:
         seurat_obj=f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_pre-qc.rds",
-        before_filt_plot=report(f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/1_vlnplot_ngene_numi_pctmit_beforefilt.pdf", caption="../report/conf/before_filt_plot.rst", category="2_Single-cell QC"),
-        gene_umi_plot=report(f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/3_geneplot_numi_vs_pctmit_ngene.pdf", caption="../report/conf/gene_umi_plot.rst", category="2_Single-cell QC")
+        pre_filt_plot=report(f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/1_vlnplot_QC_variables_prefilt.pdf", caption="../report/conf/pre_filt_plot.rst", category="2_Single-cell QC"),
+        gene_umi_plot=report(f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/2_geneplot_numi_vs_pctmit_ngene.pdf", caption="../report/conf/gene_umi_plot.rst", category="2_Single-cell QC")
     log:
         f"{LOGDIR}/seurat/{{sample}}/1_preprocessing/{{sample}}.preqc.log"
     benchmark:
@@ -30,8 +30,8 @@ rule seurat_post_qc:
         seurat_obj=f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_pre-qc.rds"
     output:
         seurat_obj=f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_post-qc.rds",
-        after_filt_plot=report(f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/4_vlnplot_ngene_numi_pctmit_afterfilt.pdf", caption="../report/conf/after_filt_plot.rst", category="2_Single-cell QC"),
-        stats_table=report(f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/6_pre_vs_post_stats.tsv", caption="../report/conf/stats_table.rst", category="2_Single-cell QC")
+        post_filt_plot=report(f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/3_vlnplot_QC_variables_postfilt.pdf", caption="../report/conf/post_filt_plot.rst", category="2_Single-cell QC"),
+        stats_table=report(f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/4_pre_vs_post_stats.tsv", caption="../report/conf/stats_table.rst", category="2_Single-cell QC")
     log:
         f"{LOGDIR}/seurat/{{sample}}/1_preprocessing/{{sample}}.postqc.log"
     benchmark:

@@ -53,12 +53,12 @@ if(normalization == "standard"){
   # Cell cycle scores and plots.
   seurat <- CellCycleScoring(object = seurat, s.features = s.genes, g2m.features = g2m.genes, set.ident 
 = T)
-  p4 <- FeaturePlot(object = seurat, features ="S.Score")
+  p4 <- FeaturePlot(object = seurat, features ="S.Score") + ggtitle("S phase score")
   ggsave(paste0(dir.name, "/", folders[2], "/4_sscore_featureplot.pdf"), plot = p4, scale = 1.5)
-  p5 <- FeaturePlot(object = seurat, features ="G2M.Score")
+  p5 <- FeaturePlot(object = seurat, features ="G2M.Score") + ggtitle("G2/M phase score")
   ggsave(paste0(dir.name, "/", folders[2], "/5_g2mscore_featureplot.pdf"), plot = p5, scale = 1.5)
   p6 <- DimPlot(seurat, reduction = "pca", pt.size = 0.5, label = TRUE, label.size = 5) + RotatedAxis() #+ theme(legend.position    ="bottom") 
-  ggsave(paste0(dir.name, "/", folders[2], "/6_no_umap_pca.pdf"), plot = p6, scale = 1.5)
+  ggsave(paste0(dir.name, "/", folders[2], "/6_cell_cycle_dimplot.pdf"), plot = p6, scale = 1.5)
 
   # Scaling
   if(regress_out == TRUE){
@@ -79,9 +79,9 @@ if(normalization == "standard"){
   
   #Cell cycle scores and plots.
   seurat <- CellCycleScoring(object = seurat, s.features = s.genes, g2m.features = g2m.genes, set.ident = T)
-  p4 <- FeaturePlot(object = seurat, features ="S.Score")
+  p4 <- FeaturePlot(object = seurat, features ="S.Score") + ggtitle("S phase score")
   ggsave(paste0(dir.name, "/", folders[2], "/4_sscore_featureplot.pdf"), plot = p4, scale = 1.5)
-  p5 <- FeaturePlot(object = seurat, features ="G2M.Score")
+  p5 <- FeaturePlot(object = seurat, features ="G2M.Score") + ggtitle("G2/M phase score")
   ggsave(paste0(dir.name, "/", folders[2], "/5_g2mscore_featureplot.pdf"), plot = p5, scale = 1.5)
   p6 <- DimPlot(seurat, reduction = "pca", pt.size = 0.5, label = TRUE, label.size = 5) + RotatedAxis() #+ theme(legend.position    ="bottom") 
   ggsave(paste0(dir.name, "/", folders[2], "/6_cell_cycle_dimplot.pdf"), plot = p6, scale = 1.5)
@@ -108,7 +108,7 @@ seurat <- JackStraw(seurat, num.replicate = 100, dims = 50)
 seurat <- ScoreJackStraw(seurat, dims = 1:50)
 p4 <- ElbowPlot(seurat, ndims = 50) + theme(legend.position="bottom") 
 ggsave(paste0(dir.name, "/",folders[2], "/3_elbowplot.pdf"), plot = p4, scale = 1.5)
-p5 <- JackStrawPlot(seurat, dims = 1:50) + theme(legend.position="bottom") + guides(fill=guide_legend(nrow=2, byrow=TRUE)) 
+p5 <- JackStrawPlot(seurat, dims = 1:50) + theme(legend.position="bottom") + guides(fill=guide_legend(nrow=2, byrow=TRUE)) + labs(y = "Empirical", x="Theoretical")
 ggsave(paste0(dir.name, "/",folders[2], "/4_jackstrawplot.pdf"), plot = p5, scale = 2)
 
 # Save RDS: we can use this object to generate all the rest of the data

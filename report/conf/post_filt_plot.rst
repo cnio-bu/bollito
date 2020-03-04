@@ -1,6 +1,6 @@
 **Post-filtering violin plot**
 
-Violin plot representing the number of reads, number of genes and mitochondrial percentage in each sample after the filtering.
+Violin plot representing the number of reads, number of genes, mitochondrial percentage and ribosomal percentage in each sample after the filtering.
 
 Filter paremeters used were:
 
