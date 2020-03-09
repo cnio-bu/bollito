@@ -27,7 +27,7 @@ def get_velocyto_dirs(wc):
 
 rule velocyto:
     input:
-        seurat_obj = f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds",
+        seurat_obj=f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds",
         spliced_matrix=f"{OUTDIR}/star/{{sample}}/Solo.out/Velocyto/raw/spliced/matrix.mtx"
     output: 
         seurat_obj=f"{OUTDIR}/velocyto/{{sample}}/8_RNA_velocity/seurat_velocity.rds"

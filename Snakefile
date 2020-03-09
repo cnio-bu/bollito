@@ -1,7 +1,7 @@
 import pandas as pd
 from snakemake.utils import min_version
 ##### set minimum snakemake version #####
-min_version("5.10.0'")
+min_version("5.10.0")
 
 ##### load config and sample sheets #####
 
@@ -91,8 +91,9 @@ def get_integration_input_sm(wc):
 def get_velocity_matrices(wc):
     if config["input_type"] == "matrix":
         file = []
-    if config["rules"]["velocyto"]["params"]["perform"] == True:
-        file = expand("{OUTDIR}/star/{unit.sample}/Solo.out/Velocyto/raw/spliced/matrix.mtx", unit=units.itertuples(),OUTDIR=OUTDIR)
+    elif config["input_type"] == "fastq":
+        if config["rules"]["velocyto"]["params"]["perform"] == True:
+            file = expand("{OUTDIR}/star/{unit.sample}/Solo.out/Velocyto/raw/spliced/matrix.mtx", unit=units.itertuples(),OUTDIR=OUTDIR)
     else:
         file = []
     return file 
@@ -100,10 +101,11 @@ def get_velocity_matrices(wc):
 def do_velocity(wc):
     if config["input_type"] == "matrix":
         file = []
-    elif config["rules"]["velocyto"]["params"]["perform"] == True:
-        samples = [u.sample for u in units.itertuples()]
-        file = expand("{OUTDIR}/velocyto/{sample}/8_RNA_velocity/seurat_velocity.rds", sample=samples,OUTDIR=OUTDIR)
-    else: 
+    elif config["input_type"] == "fastq":
+        if config["rules"]["velocyto"]["params"]["perform"] == True:
+            samples = [u.sample for u in units.itertuples()]
+            file = expand("{OUTDIR}/velocyto/{sample}/8_RNA_velocity/seurat_velocity.rds", sample=samples,OUTDIR=OUTDIR)
+    else:
         file = []
     return file 
 
@@ -118,7 +120,7 @@ def seurat_input(wc):
     if config["input_type"] == "matrix": 
         file = []
     elif config["input_type"] == "fastq":
-        file = f"{OUTDIR}/star/{{sample}}/Aligned.sortedByCoord.out.bam"  
+        file = f"{OUTDIR}/star/{{sample}}/Solo.out/Gene/Summary.csv"
     return file
 
 def get_input_find_clus(wc):
