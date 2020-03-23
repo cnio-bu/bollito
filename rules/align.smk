@@ -1,6 +1,6 @@
 rule star_index:
     input:
-        fasta = config["ref"]["fasta"]
+        fasta = config["ref"]["fasta"] if config["ref"]["fasta"] else "-"
     output:
         directory(config["ref"]["idx"])
     threads: get_resource("star_index","threads")
