@@ -94,7 +94,9 @@ def get_velocity_matrices(wc):
     elif config["input_type"] == "fastq":
         if config["rules"]["velocyto"]["params"]["perform"] == True:
             file = expand("{OUTDIR}/star/{unit.sample}/Solo.out/Velocyto/raw/spliced/matrix.mtx", unit=units.itertuples(),OUTDIR=OUTDIR)
-    else:
+        else:
+            file = []
+    else: 
         file = []
     return file 
 
@@ -105,6 +107,8 @@ def do_velocity(wc):
         if config["rules"]["velocyto"]["params"]["perform"] == True:
             samples = [u.sample for u in units.itertuples()]
             file = expand("{OUTDIR}/velocyto/{sample}/8_RNA_velocity/seurat_velocity.rds", sample=samples,OUTDIR=OUTDIR)
+        else:
+            file = []
     else:
         file = []
     return file 

@@ -20,6 +20,9 @@ meta_columns = snakemake@params[["meta_columns"]]
 n_cores =  snakemake@params[["n_cores"]]
 selected_res = snakemake@params[["selected_res"]]
 random_seed = snakemake@params[["random_seed"]]
+regress_out = snakemake@params[["regress_out"]]
+vars_to_regress = snakemake@params[["vars_to_regress"]]
+regress_cell_cycle = snakemake@params[["regress_cell_cycle"]]
 
 # C. Analysis
 if (is.numeric(random_seed)) {
@@ -39,11 +42,23 @@ meta_columns <-  c(meta_columns, cluster_res)
 # If seurat object is not a integration
 message(colnames(seurat@meta.data))
 if (seurat@active.assay != "integrated"){
+# To avoid negative values with SCT normalization we use the standard, keeping the information from the previous analysis.
   if (seurat@active.assay == "SCT") {
     seurat@active.assay <- "RNA"
     seurat <- NormalizeData(seurat, normalization.method = "LogNormalize", scale.factor = 10000)
     all.genes <- rownames(seurat)
-    seurat <- ScaleData(seurat, features = all.genes)
+    if(regress_out == TRUE){
+        if (regress_cell_cycle) {
+            message ("1")
+            seurat <- ScaleData(seurat, features = rownames(seurat), vars.to.regress = c(vars_to_regress, "S.Score", "G2M.Score"))
+        } else {
+            message("2")
+            seurat <- ScaleData(seurat, features = rownames(seurat), vars.to.regress = vars_to_regress)
+        }
+    } else {
+        seurat <- ScaleData(seurat, features = rownames(seurat))
+        message("3")
+    }
   }
   suppressMessages(vis <- Vision(seurat,
 		  signatures = mol_signatures,

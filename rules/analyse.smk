@@ -233,7 +233,10 @@ rule vision:
         selected_res = config["rules"]["vision"]["params"]["selected_res"],
         mol_signatures = config["rules"]["vision"]["params"]["mol_signatures"],
         meta_columns = config["rules"]["vision"]["params"]["meta_columns"],
-        n_cores = config["rules"]["vision"]["params"]["n_cores"]
+        n_cores = config["rules"]["vision"]["params"]["n_cores"],
+        regress_out = config["rules"]["seurat_normalization"]["params"]["regress_out"],
+        vars_to_regress = config["rules"]["seurat_normalization"]["params"]["vars_to_regress"],
+        regress_cell_cycle = config["rules"]["seurat_normalization"]["params"]["regress_cell_cycle"]
     conda: "../envs/vision.yaml"
     resources:
         mem=get_resource("vision","mem"),
