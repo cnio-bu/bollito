@@ -19,16 +19,10 @@ rule STAR_to_velocyto:
         bash scripts/STAR_to_velocyto.sh {params.input_dir} 2> {log}
     """
 
-def get_velocyto_dirs(wc):
-     paths = f"{OUTDIR}/star/{{sample}}/Solo.out/Velocyto/raw/"
-     paths = [i for i in paths if not ('/integrated/' in i)]
-     return paths
-
 
 rule velocyto:
     input:
-        seurat_obj=f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds",
-        spliced_matrix=f"{OUTDIR}/star/{{sample}}/Solo.out/Velocyto/raw/spliced/matrix.mtx"
+        seurat_obj=f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds"
     output: 
         seurat_obj=f"{OUTDIR}/velocyto/{{sample}}/8_RNA_velocity/seurat_velocity.rds"
     log:
@@ -39,7 +33,8 @@ rule velocyto:
         velocyto_dir = f"{OUTDIR}/star/{{sample}}/Solo.out/Velocyto/raw/",
         output_dir = f"{OUTDIR}/velocyto/{{sample}}",
         random_seed = config["random_seed"],
-        selected_res = config["rules"]["velocyto"]["params"]["selected_res"] 
+        selected_res = config["rules"]["velocyto"]["params"]["selected_res"],
+        downsampling = config["rules"]["velocyto"]["params"]["downsampling"]
     conda: "../envs/velocyto.yaml"
     resources:
         mem=get_resource("velocyto","mem"),

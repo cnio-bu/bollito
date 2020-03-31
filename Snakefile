@@ -106,7 +106,10 @@ def do_velocity(wc):
     elif config["input_type"] == "fastq":
         if config["rules"]["velocyto"]["params"]["perform"] == True:
             samples = [u.sample for u in units.itertuples()]
+            if config["rules"]["seurat_integration"]["params"]["perform"] == True:
+                samples = samples + ['integrated']
             file = expand("{OUTDIR}/velocyto/{sample}/8_RNA_velocity/seurat_velocity.rds", sample=samples,OUTDIR=OUTDIR)
+
         else:
             file = []
     else:

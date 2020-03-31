@@ -15,7 +15,8 @@ folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_g
 vars_to_regress = snakemake@params[["vars_to_regress"]]
 norm_type = snakemake@params[["norm_type"]]
 random_seed = snakemake@params[["random_seed"]]
-
+velocyto = snakemake@params[["velocyto"]]
+outdir_config = snakemake@params[["outdir_config"]]
 # C. Analysis
 if (is.numeric(random_seed)) {
   set.seed(random_seed)
@@ -28,12 +29,25 @@ g2m.genes <- cc.genes[44:97]
 
 # 6 Integration.
 # 6.1 Define a function to read each input files and perform the early steps of integration.
-path_to_seurat_object <- function(x, vars_to_regress, norm_type) {
+path_to_seurat_object <- function(x, vars_to_regress, norm_type, velocyto) {
   experiment = head(tail(strsplit(x, "/")[[1]], n=3), n=1) #Assay name is stored to later use in integrated object metadata.
   seurat_obj <- readRDS(x)
   seurat_obj <- AddMetaData(object = seurat_obj,
                             metadata = experiment,
                             col.name = 'assay_name')
+  # If RNA velocity is going to be performed.
+  if (velocyto){
+    velocyto_dir = paste0(outdir_config,"/star/", experiment,"/Solo.out/Velocyto/raw/")
+    velo_names = c("spliced", "unspliced", "ambiguous")
+    vel_matrices = list()
+    for (name in velo_names) {
+      vel_matrices[[name]] <- Read10X(data.dir = paste0(velocyto_dir, name))
+    }
+    for (name in velo_names) {
+      vel_matrices[[name]] <- vel_matrices[[name]][, which(x = colnames(vel_matrices[[name]]) %in% colnames(seurat_obj))] 
+      seurat_obj[[name]] <- CreateAssayObject(counts = vel_matrices[[name]])
+    }
+  }
   if (norm_type == "SCT"){
     seurat_obj <- SCTransform(seurat_obj, vars.to.regress = vars_to_regress, return.only.var.genes = FALSE, verbose = FALSE)
   } else if (norm_type == "standard") {
@@ -45,7 +59,7 @@ path_to_seurat_object <- function(x, vars_to_regress, norm_type) {
 }
 
 # 6.2 We apply the function obtaining a list with all the seurat objects.
-seurat_object_list <- lapply(input_data, function(x) path_to_seurat_object(x, vars_to_regress, norm_type))
+seurat_object_list <- lapply(input_data, function(x) path_to_seurat_object(x, vars_to_regress, norm_type, velocyto))
 
 # 6.3 We find the minimum number of features between assays to get an aproximate feature number.
 n_feat_calc <- function(seurat) {

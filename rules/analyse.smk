@@ -122,7 +122,9 @@ rule seurat_integration:
         output_dir = f"{OUTDIR}/seurat/integrated",
         random_seed = config["random_seed"],
         norm_type = config["rules"]["seurat_integration"]["params"]["norm_type"],
-        vars_to_regress = config["rules"]["seurat_integration"]["params"]["vars_to_regress"]    
+        vars_to_regress = config["rules"]["seurat_integration"]["params"]["vars_to_regress"],  
+        velocyto = config["rules"]["velocyto"]["params"]["perform"],
+        outdir_config = f"{OUTDIR}"
     conda: "../envs/seurat.yaml"
     resources:
         mem=get_resource("seurat_integration","mem"),
