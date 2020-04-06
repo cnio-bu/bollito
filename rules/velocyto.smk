@@ -34,7 +34,8 @@ rule velocyto:
         output_dir = f"{OUTDIR}/velocyto/{{sample}}",
         random_seed = config["random_seed"],
         selected_res = config["rules"]["velocyto"]["params"]["selected_res"],
-        downsampling = config["rules"]["velocyto"]["params"]["downsampling"]
+        downsampling = config["rules"]["velocyto"]["params"]["downsampling"],
+        n_cells = config["rules"]["velocyto"]["params"]["n_cells"]
     conda: "../envs/velocyto.yaml"
     resources:
         mem=get_resource("velocyto","mem"),

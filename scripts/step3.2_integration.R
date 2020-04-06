@@ -35,19 +35,24 @@ path_to_seurat_object <- function(x, vars_to_regress, norm_type, velocyto) {
   seurat_obj <- AddMetaData(object = seurat_obj,
                             metadata = experiment,
                             col.name = 'assay_name')
-  # If RNA velocity is going to be performed.
+  # If RNA velocity is going to be performed, we add the velocyto matrices in this step.
   if (velocyto){
+    # Velocyto matrices path is infered. 
     velocyto_dir = paste0(outdir_config,"/star/", experiment,"/Solo.out/Velocyto/raw/")
     velo_names = c("spliced", "unspliced", "ambiguous")
     vel_matrices = list()
+    # The matrices are read in 10X format.
     for (name in velo_names) {
       vel_matrices[[name]] <- Read10X(data.dir = paste0(velocyto_dir, name))
     }
+    # The matrices are added as assays in the respective seurat object.
     for (name in velo_names) {
       vel_matrices[[name]] <- vel_matrices[[name]][, which(x = colnames(vel_matrices[[name]]) %in% colnames(seurat_obj))] 
       seurat_obj[[name]] <- CreateAssayObject(counts = vel_matrices[[name]])
     }
   }
+  
+  # The normalization is chosen.
   if (norm_type == "SCT"){
     seurat_obj <- SCTransform(seurat_obj, vars.to.regress = vars_to_regress, return.only.var.genes = FALSE, verbose = FALSE)
   } else if (norm_type == "standard") {

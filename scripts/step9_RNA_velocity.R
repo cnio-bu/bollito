@@ -17,6 +17,7 @@ folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_g
 selected_res = snakemake@params[["selected_res"]]
 random_seed = snakemake@params[["random_seed"]]
 downsampling = snakemake@params[["downsampling"]]
+n_cells = snakemake@params[["n_cells"]]
 
 # C. Analysis
 if (is.numeric(random_seed)) {
@@ -33,7 +34,7 @@ if (!(cluster_res %in% colnames(seurat@meta.data))){
   stop("Specified resolution is not available.")
 }
 
-# If Seurat objects are not integrated.
+# If Seurat objects are not integrated we need to add the velocyto matrices.
 if (!(seurat@active.assay == "integrated")) {
   # 12.2 Get velocity matrices and place them in a list.
   velo_names = c("spliced", "unspliced", "ambiguous")
@@ -49,14 +50,12 @@ if (!(seurat@active.assay == "integrated")) {
     seurat[[name]] <- CreateAssayObject(counts = vel_matrices[[name]])
   }
 }
+
 # 12.4 Downsampling (optional)
 if (downsampling == TRUE){
-  if (length(rownames(seurat@meta.data)) > 3000) {
-    message(length(rownames(seurat@meta.data)))
-    n_total_cells = length(rownames(seurat@meta.data))
-    random_sample = sample(x = rownames(seurat@meta.data), size = 3000, replace = FALSE)
-    seurat <- SubsetData(object = seurat, cells.use = random_sample) 
-  }
+  #n_total_cells = length(rownames(seurat@meta.data))
+  random_sample = sample(x = rownames(seurat@meta.data), size = n_cells, replace = FALSE)
+  seurat <- subset(x = seurat, cells = random_sample) 
 }
 
 # 12.5 Set specific cluster labels as idents.

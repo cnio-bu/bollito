@@ -232,7 +232,8 @@ rules:
 # step 9. Velocyto. RNA velocity plots over single experiments samples.
 # OPTIONAL step.
 # selected_res: resolution (number of clusters) chosen to represent in the velocity plot.
-# downsampling: if the user have many cell is recomendable apply a downsampling, keeping 3K cells.
+# downsampling: if the user have many cell is recomendable apply a downsampling.
+# n_cells: number of cells used to perform the downsampling.
     velocyto:
         params:
             perform: True
