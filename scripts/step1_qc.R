@@ -32,7 +32,6 @@ if (is.numeric(random_seed)) {
 if (input_type == "fastq") {
   file.rename(paste0(data_dir,"/features.tsv"), paste0(data_dir,"/genes.tsv"))
   expression_matrix <- Read10X(data.dir = data_dir)
-  rownames(expression_matrix) = stringr::str_to_title(rownames(expression_matrix))
 #If the input file are matrices (directly read from units.tsv)
 } else if (input_type == "matrix") { # units.tsv is loaded
   units <- read.csv(units_path, header = TRUE, sep = "\t", row.names = 1, comment.char = "#")

@@ -239,5 +239,6 @@ rules:
             perform: True
             selected_res: 0.4
             downsampling: False
+            n_cells: 3000
         res: 
             mem: 16000
