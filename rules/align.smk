@@ -3,7 +3,11 @@ rule star_index:
         fasta = config["ref"]["fasta"] if config["ref"]["fasta"] else "-"
     output:
         directory(config["ref"]["idx"])
-    threads: get_resource("star_index","threads")
+    threads: 
+        get_resource("star_index","threads")
+    resources:
+        mem=get_resource("star_index","mem"),
+        walltime=get_resource("star_index","walltime")
     params:
         extra = ""
     log:

@@ -6,7 +6,7 @@ suppressMessages(library("Seurat"))
 suppressMessages(library("ggplot2"))
 suppressMessages(library("RColorBrewer"))
 
-options(future.globals.maxSize = 2000*1024^2) 
+options(future.globals.maxSize = 8000*1024^2) 
 
 # A. Parameters: folder configuration
 dir.name = snakemake@params[["output_dir"]]

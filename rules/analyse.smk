@@ -187,7 +187,9 @@ rule seurat_gs:
     params:
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
         random_seed = config["random_seed"],
-        gs_collection = config["rules"]["seurat_gs"]["params"]["geneset_collection"]
+        resolutions = config["rules"]["seurat_find_clusters"]["params"]["resolutions"],
+        gs_collection = config["rules"]["seurat_gs"]["params"]["geneset_collection"],
+        geneset_percentage = config["rules"]["seurat_gs"]["params"]["geneset_percentage"]
     conda: "../envs/seurat.yaml"
     resources:
         mem=get_resource("seurat_gs","mem"),

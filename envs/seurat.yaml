@@ -19,3 +19,4 @@ dependencies:
     - r-writexl
     - R-matrix=1.2-18
     - r-openxlsx
+    - r-patchwork
