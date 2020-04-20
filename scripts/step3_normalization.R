@@ -19,6 +19,8 @@ regress_out = snakemake@params[["regress_out"]] # true or false
 vars_to_regress = c(snakemake@params[["vars_to_regress"]]) # check if null 
 random_seed = snakemake@params[["random_seed"]]
 regress_cell_cycle = snakemake@params[["regress_cell_cycle"]]
+regress_merge_effect = snakemake@params[["regress_merge_effect"]]
+
 
 # C. Analysis
 if (is.numeric(random_seed)) {
@@ -26,6 +28,14 @@ if (is.numeric(random_seed)) {
 }
 #Load seurat object 
 seurat = readRDS(input_data)
+
+# Regress merge variable input
+if (regress_merge_effect){
+  merge_var = "assay_name"
+} else {
+  merge_var = NULL
+}
+
 
 #Load cell cycle markers signature from Tirosh et al, 2015.
 s.genes <- cc.genes$s.genes
@@ -43,9 +53,13 @@ if(normalization == "standard"){
   LabelPoints(plot = p1, points = top10, repel = TRUE) + theme(legend.position="bottom") 
   ggsave(paste0(dir.name, "/",folders[1], "/6_variable_features.pdf"), plot = p1)
   
-  #Scaling to perform PCA.
-  seurat <- ScaleData(seurat, features = rownames(seurat))
-
+  # Scaling to perform PCA.
+  # Merged object check
+  if (seurat@project.name == "merged") {
+    seurat <- ScaleData(seurat, features = rownames(seurat), vars.to.regress = merge_var)
+  } else { 
+    seurat <- ScaleData(seurat, features = rownames(seurat))
+  }
   # PCA previous to cell cycle scoring.
   seurat <- RunPCA(seurat, features = VariableFeatures(object = seurat), npcs = 50)
 
@@ -62,17 +76,33 @@ if(normalization == "standard"){
   # Scaling
   if(regress_out == TRUE){
     if (regress_cell_cycle) {
-      seurat <- ScaleData(seurat, features = rownames(seurat), vars.to.regress = c(vars_to_regress, "S.Score", "G2M.Score"))
+      if (seurat@project.name == "merged"){
+        seurat <- ScaleData(seurat, features = rownames(seurat), vars.to.regress = c(vars_to_regress, "S.Score", "G2M.Score", merge_var))
+      } else {
+        seurat <- ScaleData(seurat, features = rownames(seurat), vars.to.regress = c(vars_to_regress, "S.Score", "G2M.Score"))
+      }
     } else {
-      seurat <- ScaleData(seurat, features = rownames(seurat), vars.to.regress = vars_to_regress)
+      if (seurat@project.name == "merged"){
+        seurat <- ScaleData(seurat, features = rownames(seurat), vars.to.regress = c(vars_to_regress, merge_var))
+      } else {
+        seurat <- ScaleData(seurat, features = rownames(seurat), vars.to.regress = c(vars_to_regress))
+      }      
     }
   }
 } else if (normalization == "SCT"){
-	if(regress_out == TRUE){
-    seurat <- SCTransform(seurat, vars.to.regress = vars_to_regress, verbose = FALSE)		
-	} else {
-    seurat <- SCTransform(seurat, verbose = FALSE)		
-	}
+  if(regress_out == TRUE){
+    if(seurat@project.name == "merged"){
+      seurat <- SCTransform(seurat, vars.to.regress = c(vars_to_regress, merge_var), verbose = FALSE)
+    } else {
+      seurat <- SCTransform(seurat, vars.to.regress = vars_to_regress, verbose = FALSE)
+    }
+  } else {
+    if(seurat@project.name == "merged"){
+      seurat <- SCTransform(seurat, vars.to.regress = merge_var, verbose = FALSE)
+    } else {
+      seurat <- SCTransform(seurat, verbose = FALSE)
+    }		
+  }
   #PCA previous to cell cycle scoring.
   seurat <- RunPCA(seurat, features = VariableFeatures(object = seurat), npcs = 50) # This result could all be saved in a table.
   
@@ -88,8 +118,20 @@ if(normalization == "standard"){
 
   #If cell cycle regression is needed, a new SCT transformation is perform.
   if (regress_cell_cycle){
-    seurat <- SCTransform(seurat, assay = "RNA", new.assay = "SCT", vars.to.regress = c(vars_to_regress, "S.Score", "G2M.Score"), verbose = FALSE)
-  } 
+    if (regress_out) { 
+      if (seurat@project.name == "merged"){
+        seurat <- SCTransform(seurat, assay = "RNA", new.assay = "SCT", vars.to.regress = c(vars_to_regress, "S.Score", "G2M.Score", merge_var), verbose = FALSE)
+      } else {
+        seurat <- SCTransform(seurat, assay = "RNA", new.assay = "SCT", vars.to.regress = c(vars_to_regress, "S.Score", "G2M.Score"), verbose = FALSE)
+      }
+    } else {
+      if (seurat@project.name == "merged"){
+        seurat <- SCTransform(seurat, assay = "RNA", new.assay = "SCT", vars.to.regress = c("S.Score", "G2M.Score", merge_var), verbose = FALSE)
+      } else {
+        seurat <- SCTransform(seurat, assay = "RNA", new.assay = "SCT", vars.to.regress = c("S.Score", "G2M.Score"), verbose = FALSE)
+      }
+    }
+  }
 } else {
 	message("Normalization method not found.")
 }
@@ -102,6 +144,7 @@ p2 <- VizDimLoadings(seurat, dims = 1:2, reduction = "pca") + theme(legend.posit
 ggsave(paste0(dir.name, "/",folders[2], "/1_viz_dim_loadings.pdf"), plot = p2, scale = 1.5)#, height = height, width = height * aspect_ratio)
 p3 <- DimPlot(seurat, reduction = "pca", pt.size = 0.5) + theme(legend.position="bottom") 
 ggsave(paste0(dir.name, "/",folders[2], "/2_dimplot.pdf"), plot = p3, scale = 1.5)
+
 # 5.3. Determine the dimensionality of the dataset
 seurat <- JackStraw(seurat, num.replicate = 100, dims = 50)
 seurat <- ScoreJackStraw(seurat, dims = 1:50)
@@ -109,6 +152,13 @@ p4 <- ElbowPlot(seurat, ndims = 50) + theme(legend.position="bottom")
 ggsave(paste0(dir.name, "/",folders[2], "/3_elbowplot.pdf"), plot = p4, scale = 1.5)
 p5 <- JackStrawPlot(seurat, dims = 1:50) + theme(legend.position="bottom") + guides(fill=guide_legend(nrow=2, byrow=TRUE)) + labs(y = "Empirical", x="Theoretical")
 ggsave(paste0(dir.name, "/",folders[2], "/4_jackstrawplot.pdf"), plot = p5, scale = 2)
+
+if (seurat@project.name == "merged"){
+  Idents(seurat) <- "assay_name"
+  p6 <- DimPlot(seurat, reduction = "pca", pt.size = 0.5) + theme(legend.position="bottom")
+  ggsave(paste0(dir.name, "/",folders[2], "/2_dimplot_merged.pdf"), plot = p6, scale = 1.5)
+}
+
 
 # Save RDS: we can use this object to generate all the rest of the data
 saveRDS(seurat, file = paste0(dir.name, "/",folders[2], "/seurat_normalized-pcs.rds"))

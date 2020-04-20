@@ -1,6 +1,8 @@
-# bollito scRNA-seq pipeline
+<img src="./.img/logo_bollito.png" width="500">
 
- [Pipeline status](https://gitlab.com/bu_cnio/bollito/commits/master)
+## bollito: single-cell RNA-seq pipeline.
+
+[Pipeline status](https://gitlab.com/bu_cnio/bollito/commits/master)
 
 ## Introduction
 **bollito** is a **[Snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline** that performs a comprehensive single-cell RNA-seq analysis, covering both the basic steps (QC, alignment, quantification and cell specific QC) and more advanced downstream analyses (clustering, diferential expresion, trajectory inference, functional analysis and RNA velocity). 
@@ -181,7 +183,17 @@ The normalization itself can also be parametrized, including the possibility of 
 (such as cell cycle scoring, number of detected genes, % of mitochondrial genes) in order to mitigate their effect
 on the dataset. Refer to the example config file for the available options.
 
-#### 4.b. Integration.
+#### 4.b. Merging.
+
+bollito can perform an optional merging step.
+This step consists in combining all the sample's Seurat objects which come from the single-cell QC step.
+No normalization is performed in this step, since the merged object will be used as input in the normalization step.
+
+To enable this step, the following parameter needs to be adjusted via the configuration file:
+* Set *perform* to *TRUE*.
+
+
+#### 4.c. Integration.
 
 bollito allows for an optional integration step, in order to detect shared cell states between datasets.
 The integration method is based on the identification of *anchor cells* between the datasets,

@@ -49,15 +49,12 @@ if (seurat@active.assay != "integrated"){
     all.genes <- rownames(seurat)
     if(regress_out == TRUE){
         if (regress_cell_cycle) {
-            message ("1")
             seurat <- ScaleData(seurat, features = rownames(seurat), vars.to.regress = c(vars_to_regress, "S.Score", "G2M.Score"))
         } else {
-            message("2")
             seurat <- ScaleData(seurat, features = rownames(seurat), vars.to.regress = vars_to_regress)
         }
     } else {
         seurat <- ScaleData(seurat, features = rownames(seurat))
-        message("3")
     }
   }
   suppressMessages(vis <- Vision(seurat,

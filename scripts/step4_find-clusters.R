@@ -67,6 +67,13 @@ write_xlsx(silhouette_scores, path = paste0(dir.name, "/", folders[3], "/3_silho
 p3 <- FeaturePlot(seurat, 'nFeature_RNA', pt.size =  0.75) + labs(title = "Nº features") 
 ggsave(paste0(dir.name, "/", folders[3], "/4_featureplot.pdf"), plot = p3, scale = 1.5)
 
+# 7.5 Dimplot for merged or integrated objects.
+if (seurat@active.assay == TRUE || seurat@project.name == "merged"){
+  Idents(seurat) <- "assay_name"
+  p3 <- DimPlot(seurat, reduction = "umap")
+  ggsave(paste0(dir.name, "/", folders[3], "/2_umap_by_assay.pdf"), plot = p3, scale = 1.5)
+}
+
 # 7.5 Statistics table per cluster
 # 7.5.1 Get the index of resolution columns.
 resolutions = grep("snn_res", colnames(seurat@meta.data))

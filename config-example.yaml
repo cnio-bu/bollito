@@ -123,7 +123,6 @@ rules:
             ribo_pct: 40
         res:
             mem: 4000
-
 # step 2.1. Bollito allows you to filter out cells based on positive or negative marker gene(s).
 # Parameters:
 # gene: input a gene or list of genes (i.e. "Epcam").
@@ -136,6 +135,12 @@ rules:
             filter_out: 
         res:
             mem: 4000
+# step 2.5 Merging step for all the samples.
+    seurat_merge:
+        params:
+            perform: True
+        res:
+            mem: 16000
 # step 3. After normalization, generates a Jackstrawplot as well as an elbow plot.
 # Examine these plots in order to select the number of principal components used in the next steps.
 # Parameters:
@@ -143,12 +148,14 @@ rules:
 # regress_out: True or False depending if you want to regress out biological or technical effects stored in the metadata table (from Seurat object).
 # vars_to_regress: string (var = 1) or list (vars => 2) of varibles you want to regress. It / they must be stored in the metadata table. 
 # regress_cell_cycle: True or False depending if you want to regress out the cell cycle effect (check out the cell cycle plot first).
+# regress_merge_effect: True or False depending if you want to regress out the cell cycle effect (check out the cell cycle plot first).
     seurat_normalization:
         params:
             normalization: "SCT"
             regress_out: True
             vars_to_regress: "percent.mt"
             regress_cell_cycle: False
+            regress_merge_effect: False
         res:
             mem: 16000
 # step 3B Integration. This rule is equivalent to the normalization, but it creates the integrated object. 
@@ -192,8 +199,9 @@ rules:
     seurat_gs:
         params:
             geneset_collection:
+            geneset_percentage: 0.2
         res:
-            mem: 10000
+            mem: 16000
 # step 7. Slingshot. Trajectory inference step. Lineages and curves that goes through the clusters are calculated.
 # OPTIONAL step.
 # Parameters:
@@ -241,4 +249,4 @@ rules:
             downsampling: False
             n_cells: 3000
         res: 
-            mem: 16000
+            mem: 32000

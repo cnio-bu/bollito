@@ -2,7 +2,7 @@ rule seurat_qc:
     input: 
         seurat_input
     output:
-        seurat_obj=f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_pre-qc.rds",
+        seurat_obj= f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_pre-qc.rds",
         pre_filt_plot=report(f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/1_vlnplot_QC_variables_prefilt.pdf", caption="../report/conf/pre_filt_plot.rst", category="2_Single-cell QC"),
         gene_umi_plot=report(f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/2_geneplot_numi_vs_pctmit_ngene.pdf", caption="../report/conf/gene_umi_plot.rst", category="2_Single-cell QC")
     log:
@@ -25,9 +25,17 @@ rule seurat_qc:
     script: 
         "../scripts/step1_qc.R"
 
+def post_qc_input(wc):
+    
+    if wc.sample == "merged":
+        return ""
+    else:
+        return f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_pre-qc.rds"
+
+
 rule seurat_post_qc:
     input:
-        seurat_obj=f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_pre-qc.rds"
+        seurat_obj=post_qc_input
     output:
         seurat_obj=f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_post-qc.rds",
         post_filt_plot=report(f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/3_vlnplot_QC_variables_postfilt.pdf", caption="../report/conf/post_filt_plot.rst", category="2_Single-cell QC"),
@@ -74,14 +82,41 @@ rule seurat_filter:
     script:
         "../scripts/step2.1_filter.R"
 
+
+rule seurat_merge:
+    input:
+        data=get_merge_input
+    output:
+        seurat_obj=f"{OUTDIR}/seurat/merged/1_preprocessing/seurat_post-qc.rds"
+    log:
+        f"{OUTDIR}/seurat/merged/1_preprocessing/merged.normalization.log"
+    benchmark:
+        f"{LOGDIR}/seurat/merged/1_preprocessing/merged.normalization.log"
+    params:
+        output_dir = f"{OUTDIR}/seurat/merged",
+        random_seed = config["random_seed"], 
+        velocyto = config["rules"]["velocyto"]["params"]["perform"],
+        outdir_config = f"{OUTDIR}"
+    conda: "../envs/seurat.yaml"
+    resources:
+        mem=get_resource("seurat_merge","mem"),
+        walltime=get_resource("seurat_merge","walltime")
+    script:
+        "../scripts/step2.5_seurat_merge.R"
+
+
+
 def norm_input(wc):
     if wc.sample == "integrated":
         return ""
+    #if wc.sample == "merged":
+    #    return ""  
     else:
         if config["rules"]["seurat_filter"]["params"]["gene"]:
             return f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_post-qc-filtered.rds"
         else:
             return f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_post-qc.rds"
+
 
 rule seurat_normalization:
     input:
@@ -101,6 +136,35 @@ rule seurat_normalization:
         normalization = config["rules"]["seurat_normalization"]["params"]["normalization"],
         regress_out = config["rules"]["seurat_normalization"]["params"]["regress_out"],
         vars_to_regress = config["rules"]["seurat_normalization"]["params"]["vars_to_regress"],
+        regress_cell_cycle = config["rules"]["seurat_normalization"]["params"]["regress_cell_cycle"],
+        regress_merge_effect = config["rules"]["seurat_normalization"]["params"]["regress_merge_effect"]
+
+    conda: "../envs/seurat.yaml"
+    resources:
+        mem=get_resource("seurat_normalization","mem"),
+        walltime=get_resource("seurat_normalization","walltime")
+    script:
+        "../scripts/step3_normalization.R"
+
+"""
+rule seurat_merged_normalization:
+    input:
+        seurat_obj=f"{OUTDIR}/seurat/merged/1_merged/seurat_post_qc.rds"
+    output:
+        seurat_obj=f"{OUTDIR}/seurat/merged/2_normalization/seurat_normalized-pcs.rds",
+        elbow_plot=report(f"{OUTDIR}/seurat/merged/2_normalization/3_elbowplot.pdf", caption="../report/conf/elbow_plot.rst", category="3_Normalization"),
+        dimplot=report(f"{OUTDIR}/seurat/merged/2_normalization/2_dimplot.pdf", caption="../report/conf/dimplot.rst", category="3_Normalization"),
+        cellcycle_plot=report(f"{OUTDIR}/seurat/merged/2_normalization/6_cell_cycle_dimplot.pdf", caption="../report/conf/cellcycle_plot.rst", category="3_Normalization")
+    log:
+        f"{LOGDIR}/seurat/merged/2_normalization/merged.normalization.log"
+    benchmark:
+        f"{LOGDIR}/seurat/merged/2_normalization/merged.normalization.bmk"
+    params:
+        output_dir = f"{OUTDIR}/seurat/merged",
+        random_seed = config["random_seed"],
+        normalization = config["rules"]["seurat_normalization"]["params"]["normalization"],
+        regress_out = config["rules"]["seurat_normalization"]["params"]["regress_out"],
+        vars_to_regress = config["rules"]["seurat_normalization"]["params"]["vars_to_regress"],
         regress_cell_cycle = config["rules"]["seurat_normalization"]["params"]["regress_cell_cycle"]
     conda: "../envs/seurat.yaml"
     resources:
@@ -108,6 +172,11 @@ rule seurat_normalization:
         walltime=get_resource("seurat_normalization","walltime")
     script:
         "../scripts/step3_normalization.R"
+
+
+"""
+
+
 
 rule seurat_integration:
     input:

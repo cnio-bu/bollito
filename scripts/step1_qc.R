@@ -72,9 +72,9 @@ if (input_type == "matrix") {
 
 # 2. Preprocessing: Filter out low-quality cells
 # 2.1. Mitochondrial genes - check levels of expression for mt genes 
-seurat[["percent.mt"]] <- PercentageFeatureSet(seurat, pattern = "^Mt-")
+seurat[["percent.mt"]] <- PercentageFeatureSet(seurat, pattern = "^MT-")
 # 2.2. Ribosomal genes - check levels of expression for rb genes 
-seurat[["percent.ribo"]] <- PercentageFeatureSet(seurat, pattern = "^Rp[sl][[:digit:]]")
+seurat[["percent.ribo"]] <- PercentageFeatureSet(seurat, pattern = "^RP[SL][[:digit:]]")
 # 2.3. QC: violin plots
 p1 <- VlnPlot(seurat, features = c("nFeature_RNA"), pt.size = 0.25, cols = "#9CCCD0") + ggtitle("Nº features") + theme(legend.position="bottom") 
 p2 <- VlnPlot(seurat, features = c("nCount_RNA"), pt.size = 0.25, cols = "#8ADD56")  + ggtitle("Nº counts") + theme(legend.position="bottom")

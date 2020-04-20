@@ -35,7 +35,7 @@ if (!(cluster_res %in% colnames(seurat@meta.data))){
 }
 
 # If Seurat objects are not integrated we need to add the velocyto matrices.
-if (!(seurat@active.assay == "integrated")) {
+if (!(seurat@active.assay == "integrated" || seurat@project.name == "merged")) {
   # 12.2 Get velocity matrices and place them in a list.
   velo_names = c("spliced", "unspliced", "ambiguous")
   vel_matrices = list()
@@ -52,7 +52,7 @@ if (!(seurat@active.assay == "integrated")) {
 }
 
 # 12.4 Downsampling (optional)
-if (downsampling == TRUE){
+if (downsampling == TRUE && n_cells < length(rownames(seurat@meta.data))){
   #n_total_cells = length(rownames(seurat@meta.data))
   random_sample = sample(x = rownames(seurat@meta.data), size = n_cells, replace = FALSE)
   seurat <- subset(x = seurat, cells = random_sample) 
@@ -113,6 +113,28 @@ if (seurat@active.assay == "integrated") {
   dev.off()
 }
 
+if (seurat@project.name == "merged") {
+  Idents(seurat) <- "assay_name"
+  ident.colors <- getPalette(n_col)
+  names(ident.colors) <- levels(seurat)
+  cell.colors <- ident.colors[Idents(seurat)]
+  names(cell.colors) <- colnames(seurat)
+
+  # 12.9 Create the RNA velocity plot.
+  pdf(paste0(dir.name, "/",folders[8], "/RNA_velocity_plot_by_assay.pdf"))
+  par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
+  show.velocity.on.embedding.cor(emb = Embeddings(object = seurat, reduction = "umap"), vel = Tool(object = seurat,
+                                 slot = "RunVelocity"), n = 100, scale = "sqrt", cell.colors = ac(x = cell.colors, alpha = 0.5),
+                                 cex = 0.8, arrow.scale = 3, show.grid.flow = TRUE, min.grid.cell.mass = 0.5, grid.n = 40, arrow.lwd = 1,
+                                 do.par = FALSE,  cell.border.alpha = 0.1, xlab = "UMAP1", ylab = "UMAP2",
+                                 main = paste0("RNA velocity plot - Origin assay"))
+  opar <- par(fig=c(0, 1, 0, 1), oma=c(0, 0, 0, 0), mar=c(0, 0, 0, 0), new=TRUE)
+  on.exit(par(opar))
+  plot(0, 0, type='n', bty='n', xaxt='n', yaxt='n')
+  legend("topright", inset = c(0.05, 0.115), legend=paste0("Assay - ", levels(seurat)),
+         pch=16, col=getPalette(n_col))
+  dev.off()
+}
 
 # 12.10 Save seurat object with RNA velocity slots. 
 saveRDS(seurat, file = paste0(dir.name, "/",folders[8], "/seurat_velocity.rds"))
