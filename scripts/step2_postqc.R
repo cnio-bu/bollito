@@ -79,6 +79,11 @@ row.names(filtering_df) <- c("Pre-QC", "Post-QC")
 message(row.names(filtering_df))
 write.table(filtering_df, file = paste0(dir.name, "/", folders[1], "/4_pre_vs_post_stats.tsv"), sep = "\t", col.names = NA, quote = FALSE)
 
+
+# Save expression matrix
+write.table(as.matrix(seurat@assays$RNA@counts), file = paste0(dir.name, "/", folders[1], "/expression_matrix.tsv"), sep = "\t", row.names = TRUE, col.names = TRUE, quote = FALSE)
+
+
 # Save RDS: we can use this object to generate all the rest of the data
 saveRDS(seurat, file = paste0(dir.name, "/",folders[1], "/seurat_post-qc.rds"))
 

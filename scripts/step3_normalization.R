@@ -14,7 +14,7 @@ input_data = snakemake@input[["seurat_obj"]]
 folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs")
 
 # B. Parameters: analysis configuration 
-normalization = snakemake@params[["normalization"]] # "sct" or "standard"
+normalization = snakemake@params[["normalization"]] # "SCT" or "standard"
 regress_out = snakemake@params[["regress_out"]] # true or false
 vars_to_regress = c(snakemake@params[["vars_to_regress"]]) # check if null 
 random_seed = snakemake@params[["random_seed"]]
@@ -159,6 +159,12 @@ if (seurat@project.name == "merged"){
   ggsave(paste0(dir.name, "/",folders[2], "/2_dimplot_merged.pdf"), plot = p6, scale = 1.5)
 }
 
-
+# 5.4 Save matrices
+if (normalization == "SCT") {
+  write.table(as.matrix(seurat@assays$SCT@scale.data), file = paste0(dir.name, "/", folders[2], "/normalized_expression_matrix.tsv"), sep = "\t", row.names = TRUE, col.names = TRUE, quote = FALSE)
+}
+if (normalization == "standard") {
+  write.table(as.matrix(seurat@assays$RNA@scale.data), file = paste0(dir.name, "/", folders[2], "/normalized_expression_matrix.tsv"), sep = "\t", row.names = TRUE, col.names = TRUE, quote == FALSE)
+}
 # Save RDS: we can use this object to generate all the rest of the data
 saveRDS(seurat, file = paste0(dir.name, "/",folders[2], "/seurat_normalized-pcs.rds"))

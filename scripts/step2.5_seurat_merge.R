@@ -62,6 +62,9 @@ y_seurat <- seurat_list[2:length(seurat_list)]
 # Merging
 seurat <- merge(x_seurat, y = as.vector(y_seurat), add.cell.ids = cells_id, project = "merged")
 
+# Save expression matrix
+write.table(as.matrix(seurat@assays$RNA@counts), file = paste0(dir.name, "/", folders[1], "/expression_matrix.tsv"), sep = "\t", row.names = TRUE, col.names = TRUE, quote = FALSE)
+
 # Save
 saveRDS(seurat, file = paste0(dir.name, "/", folders[1], "/seurat_post-qc.rds"))
 
