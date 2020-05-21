@@ -4,11 +4,19 @@ from snakemake.utils import min_version
 min_version("5.10.0")
 
 ##### load config and sample sheets #####
+#
+
+def warning(msg):
+    FAIL = '\033[31m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    print(f"\n{BOLD}{FAIL}{msg}{ENDC}\n",file=sys.stderr)
 
 try:
     configfile: "config.yaml"
 except WorkflowError:
-    quit(f"ERROR: the config file config.yaml does not exist. Please see the README file for details.")
+    warning("ERROR: config.yaml does not exist. Please see the README file for details. Quitting now.")
+    sys.exit(1)
 
 OUTDIR = config["outdir"]
 LOGDIR = config["logdir"]
@@ -16,16 +24,28 @@ LOGDIR = config["logdir"]
 try:
     samples = pd.read_csv(config["samples"], sep="\t", comment="#").set_index("sample", drop=False)
 except FileNotFoundError:
-    quit(f"ERROR: the samples file ({config['samples']}) does not exist. Please see the README file for details.")
+    warning(f"ERROR: the samples file ({config['samples']}) does not exist. Please see the README file for details. Quitting now.")
+    sys.exit(1)
 
 try:
     units = pd.read_csv(config["units"], dtype=str, sep="\t", comment="#").set_index(["sample", "unit"], drop=False)
 except FileNotFoundError:
-    quit(f"ERROR: the units file ({config['units']}) does not exist. Please see the README file for details.")
+    warning(f"ERROR: the units file ({config['units']}) does not exist. Please see the README file for details. Quitting now.")
+    sys.exit(1)
+
 units.index = units.index.set_levels([i.astype(str) for i in units.index.levels])  # enforce str in index
 
-#if config["rules"]["seurat_integration"]["params"]["perform"] and config["rules"]["seurat_merge"]["params"]["perform"] == True:
-#    raise ValueError("\nATTENTION: Seurat integration and merging can not be performed together.")
+def confirm():
+    prompt = "Continue anyway? [y/N] "
+    while 1:
+        sys.stdout.write(prompt)
+        choice = input().lower()
+        if choice in ['yes','y']:
+            return True
+        elif choice in ['','no','n']:
+            return False
+        else:
+            sys.stdout.write("Please respond with 'yes' or 'no': ") 
 
 def get_resource(rule,resource):
     try:
@@ -33,7 +53,6 @@ def get_resource(rule,resource):
     except KeyError:
         return config["rules"]["default"]["res"][resource]
 
-## get rule all inputs depending on the enabled fields ## 
 def get_input_degs(wc):
     if config["rules"]["seurat_degs"]["params"]["selected_res"]:
         samples = [u.sample for u in units.itertuples()] 
@@ -83,26 +102,34 @@ def get_input_fa(wc):
     return file
 
 def get_integration(wc):
+    file = []
+
     samples =list(set([u.sample for u in units.itertuples()]))
-    if len(samples) == 1 and config["rules"]["seurat_integration"]["params"]["perform"] == True:
-        raise ValueError("\nATTENTION: Seurat integration must be deactivated when there is only one sample.\nChange integration perform value to 'False' in config.yaml file.")
+
     if config["rules"]["seurat_integration"]["params"]["perform"] == True:
-        file = expand("{OUTDIR}/seurat/integrated/2_normalization/seurat_normalized-pcs.rds",OUTDIR=OUTDIR)
-    else:
-        file = []
+        if len(samples) == 1:
+            print("WARNING: found only one sample. Deactivating Seurat integration.")
+            print("You can remove this warning by disabling Seurat integration in config.yaml.")
+        else:
+            file = expand("{OUTDIR}/seurat/integrated/2_normalization/seurat_normalized-pcs.rds",OUTDIR=OUTDIR)
+
     return file
 
 def get_merge(wc):
+    file = []
+
     samples =list(set([u.sample for u in units.itertuples()]))
-    if len(samples) == 1 and config["rules"]["seurat_merge"]["params"]["perform"] == True:
-        raise ValueError("\nATTENTION: Seurat merge must be deactivated when there is only one sample.\nChange merge perform value to 'False' in config.yaml file.")
+
     if config["rules"]["seurat_merge"]["params"]["perform"] == True:
-        file = expand("{OUTDIR}/seurat/merged/1_preprocessing/seurat_post-qc.rds",OUTDIR=OUTDIR)
-    else:
-        file = []
+        if len(samples) == 1:
+            print("\nWARNING: found only one sample. Deactivating Seurat merge.")
+            print("You can remove this warning by disabling Seurat merge in config.yaml.")
+            if not confirm():
+                quit()
+        else:
+            file = expand("{OUTDIR}/seurat/merged/1_preprocessing/seurat_post-qc.rds",OUTDIR=OUTDIR)
+
     return file
-
-
 
 def get_integration_input_sm(wc):
     file = expand("{OUTDIR}/seurat/{unit.sample}/1_preprocessing/seurat_post-qc.rds", unit=units.itertuples(),OUTDIR=OUTDIR)
