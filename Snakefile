@@ -5,12 +5,13 @@ min_version("5.10.0")
 
 ##### load config and sample sheets #####
 #
-
-def warning(msg):
-    FAIL = '\033[31m'
+class ansitxt:
+    RED = '\033[31m'
     ENDC = '\033[0m'
     BOLD = '\033[1m'
-    print(f"\n{BOLD}{FAIL}{msg}{ENDC}\n",file=sys.stderr)
+
+def warning(msg):
+    print(f"\n{ansitxt.BOLD}{ansitxt.RED}{msg}{ansitxt.ENDC}\n",file=sys.stderr)
 
 try:
     configfile: "config.yaml"
@@ -36,7 +37,7 @@ except FileNotFoundError:
 units.index = units.index.set_levels([i.astype(str) for i in units.index.levels])  # enforce str in index
 
 def confirm():
-    prompt = "Continue anyway? [y/N] "
+    prompt = f"{ansitxt.BOLD}Continue anyway? [y/N]{ansitxt.ENDC} "
     while 1:
         sys.stdout.write(prompt)
         choice = input().lower()
@@ -108,8 +109,10 @@ def get_integration(wc):
 
     if config["rules"]["seurat_integration"]["params"]["perform"] == True:
         if len(samples) == 1:
-            print("WARNING: found only one sample. Deactivating Seurat integration.")
+            print(f"\nWARNING: found only one sample. {ansitxt.RED}{ansitxt.BOLD}Deactivating Seurat integration.{ansitxt.ENDC}")
             print("You can remove this warning by disabling Seurat integration in config.yaml.")
+            if not confirm():
+                sys.exit(1)
         else:
             file = expand("{OUTDIR}/seurat/integrated/2_normalization/seurat_normalized-pcs.rds",OUTDIR=OUTDIR)
 
@@ -122,10 +125,10 @@ def get_merge(wc):
 
     if config["rules"]["seurat_merge"]["params"]["perform"] == True:
         if len(samples) == 1:
-            print("\nWARNING: found only one sample. Deactivating Seurat merge.")
+            print(f"\nWARNING: found only one sample. {ansitxt.RED}{ansitxt.BOLD}Deactivating Seurat merge.{ansitxt.ENDC}")
             print("You can remove this warning by disabling Seurat merge in config.yaml.")
             if not confirm():
-                quit()
+                sys.exit(1)
         else:
             file = expand("{OUTDIR}/seurat/merged/1_preprocessing/seurat_post-qc.rds",OUTDIR=OUTDIR)
 
