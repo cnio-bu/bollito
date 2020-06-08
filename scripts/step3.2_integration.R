@@ -6,9 +6,7 @@ suppressMessages(library("Seurat"))
 suppressMessages(library("ggplot2"))
 suppressMessages(library("RColorBrewer"))
 
-options(future.globals.maxSize = 8000*1024^2) 
-
-# A. Parameters: folder configuration
+# A. Parameters: folder configuration.
 dir.name = snakemake@params[["output_dir"]]
 input_data = snakemake@input[["data"]]
 folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs", "6_traj_in", "7_func_analysis")
@@ -17,17 +15,40 @@ norm_type = snakemake@params[["norm_type"]]
 random_seed = snakemake@params[["random_seed"]]
 velocyto = snakemake@params[["velocyto"]]
 outdir_config = snakemake@params[["outdir_config"]]
-# C. Analysis
+case = snakemake@params[["case"]]
+ram = snakemake@res[["mem"]]
+
+# C. Analysis.
+options(future.globals.maxSize = ram*1024^2)
+
+# Set sedd. 
 if (is.numeric(random_seed)) {
   set.seed(random_seed)
 }
 
-#Load cell cycle genes.
+# Load cell cycle genes.
 s.genes <- cc.genes$s.genes
 g2m.genes <- cc.genes$g2m.genes
 
-# 6 Integration.
-# 6.1 Define a function to read each input files and perform the early steps of integration.
+# Set gene letter cases.
+if (case == "lowercase") {
+  s.genes <- str_to_lower(s.genes)
+  g2m.genes <- str_to_lower(g2m.genes)
+  message ("Set to lowercase.")
+} else if (case == "titlecase") {
+  s.genes <- str_to_title(s.genes)
+  g2m.genes <- str_to_title(g2m.genes)
+  message ("Set to titlecase.")
+} else if (case == "uppercase") {
+  message ("Set to uppercase.")
+} else {
+  message("Please choose a correc case option.")
+  quit()
+}
+
+
+# 6. Integration.
+# 6.1. Define a function to read each input files and perform the early steps of integration.
 path_to_seurat_object <- function(x, vars_to_regress, norm_type, velocyto) {
   experiment = head(tail(strsplit(x, "/")[[1]], n=3), n=1) #Assay name is stored to later use in integrated object metadata.
   seurat_obj <- readRDS(x)
@@ -62,10 +83,10 @@ path_to_seurat_object <- function(x, vars_to_regress, norm_type, velocyto) {
   return(assign(paste0(experiment[[1]][6]),seurat_obj))
 }
 
-# 6.2 We apply the function obtaining a list with all the seurat objects.
+# 6.2. The function is applied obtaining a list with all the seurat objects.
 seurat_object_list <- lapply(input_data, function(x) path_to_seurat_object(x, vars_to_regress, norm_type, velocyto))
 
-# 6.3 We find the minimum number of features between assays to get an aproximate feature number.
+# 6.3. The minimum number of features between assays is obtained to get an aproximate feature number and keep as much genes as possible.
 n_feat_calc <- function(seurat) {
   if (seurat@active.assay == "SCT"){
     return(length(rownames(seurat@assays$SCT@counts)))
@@ -75,7 +96,7 @@ n_feat_calc <- function(seurat) {
 }
 n_features <- min(unlist(lapply(seurat_object_list, function(x) n_feat_calc(x))))
 
-# 6.4 Final integration steps and integration object creation.
+# 6.4. Final integration steps and integration object creation.
 if (norm_type == "SCT") {
   seurat.features <- SelectIntegrationFeatures(object.list = seurat_object_list, nfeatures = n_features, verbose = FALSE)
   seurat.list <- PrepSCTIntegration(object.list = seurat_object_list, anchor.features = seurat.features, 
@@ -91,17 +112,17 @@ if (norm_type == "SCT") {
   seurat.integrated <- ScaleData(seurat.integrated, verbose = TRUE, vars.to.regress = vars_to_regress)  
 }
 
-# 6.5 PCA and Visualize Dimensional Reduction genes.
+# 6.5. PCA and Visualize Dimensional Reduction genes.
 seurat.integrated <- RunPCA(seurat.integrated, ncps = 100, verbose = FALSE)
 p1 <- VizDimLoadings(seurat.integrated, dims = 1:2, reduction = "pca") + theme(legend.position="bottom") 
 ggsave(paste0(dir.name, "/",folders[2], "/1_viz_dim_loadings.pdf"), plot = p1, scale = 1.5)
 
-# 6.6 PCA projection and integration visualization plot.
+# 6.6. PCA projection and integration visualization plot.
 getPalette <- colorRampPalette(brewer.pal(9,'Set1'))
 p2 <- DimPlot(seurat.integrated, reduction = "pca", group.by = "assay_name", cols=getPalette(length(levels(as.factor(seurat.integrated$assay_name)))))
 ggsave(paste0(dir.name, "/", folders[2], "/2_dimplot_PCA.pdf"), plot = p2)
 
-# 6.7 Principal component study using Elbow plot and Jack Straw Plot
+# 6.7. Principal component study using Elbow plot and Jack Straw Plot.
 seurat.integrated <- JackStraw(seurat.integrated, num.replicate = 100, dims = 30)
 seurat.integrated <- ScoreJackStraw(seurat.integrated, dims = 1:30)
 p3 <- ElbowPlot(seurat.integrated, ndims = 30) + theme(legend.position="bottom") 
@@ -109,7 +130,7 @@ ggsave(paste0(dir.name, "/",folders[2], "/3_elbowplot.pdf"), plot = p3, scale = 
 p4 <- JackStrawPlot(seurat.integrated, dims = 1:30) + theme(legend.position="bottom") + guides(fill=guide_legend(nrow=2, byrow=TRUE)) 
 ggsave(paste0(dir.name, "/",folders[2], "/4_jackstrawplot.pdf"), plot = p4, scale = 2)
 
-# 6.8 Cell cycle scores and plots
+# 6.8. Cell cycle scores and plots.
 seurat.integrated <- CellCycleScoring(object = seurat.integrated, s.features = s.genes, g2m.features = g2m.genes, set.ident = T)
 p5 <- FeaturePlot(object = seurat.integrated, features ="S.Score")
 ggsave(paste0(dir.name, "/", folders[2], "/5_sscore_featureplot.pdf"), plot = p5, scale = 1.5)
@@ -118,7 +139,8 @@ ggsave(paste0(dir.name, "/", folders[2], "/6_g2mscore_featureplot.pdf"), plot = 
 p7 <- DimPlot(seurat.integrated, reduction = "pca", pt.size = 0.5, label = TRUE, label.size = 5) + RotatedAxis() #+ theme(legend.position    ="bottom") 
 ggsave(paste0(dir.name, "/", folders[2], "/7_no_umap_pca.pdf"), plot = p7, scale = 1.5)
 
-# Save expression matrix
+# 6.9. Save expression matrix.
 write.table(as.matrix(seurat.integrated@assays$integrated@scale.data), file = paste0(dir.name, "/", folders[2], "/normalized_expression_matrix.tsv"), sep = "\t", row.names = TRUE, col.names = TRUE, quote = FALSE)
 
+# 6.10. Save Seurat object.
 saveRDS(object = seurat.integrated, file = paste0(dir.name, "/", folders[2], "/seurat_normalized-pcs.rds"))

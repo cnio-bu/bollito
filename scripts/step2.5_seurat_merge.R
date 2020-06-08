@@ -4,20 +4,21 @@ sink(log, type = "message")
 
 suppressMessages(library("Seurat"))
 
-# A. Parameters: folder configuration
+# A. Parameters: folder configuration.
 dir.name = snakemake@params[["output_dir"]]
 input_data = snakemake@input[["data"]]
-folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs", "6_traj_in", "7_func_analysis", "1_merged")
 random_seed = snakemake@params[["random_seed"]]
 velocyto = snakemake@params[["velocyto"]]
 outdir_config = snakemake@params[["outdir_config"]]
+folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs", "6_traj_in", "7_func_analysis", "1_merged")
 
-# C. Analysis
+# C. Analysis.
 if (is.numeric(random_seed)) {
   set.seed(random_seed)
 }
 
-# Merging 
+# 2.5. Merging all samples in the execution. 
+
 # Loading seurat object function.
 combine_object <- function(x, velocyto) {
   experiment = head(tail(strsplit(x, "/")[[1]], n=3), n=1) #Assay name is stored to later use in integrated object metadata.
@@ -44,28 +45,28 @@ combine_object <- function(x, velocyto) {
   return(seurat_obj)
 }
 
-# Function to get sample names
+# Function to get sample names.
 get_name_assays <- function(x) {
   experiment = head(tail(strsplit(x, "/")[[1]], n=3), n=1) #Assay name is stored to later use in integrated object metadata.
   return(experiment)
 }
 
-# We load the Seurat objects and sample names.
+# Seurat objects are loaded and sample names are obtained.
 seurat_list = lapply(input_data, function(x) combine_object(x, velocyto))
 cells_id = sapply(input_data, function(x) get_name_assays(x))
 names(seurat_list) <- cells_id
 
-# Seurat object split for merging
+# Seurat object split for merging.
 x_seurat <- seurat_list[[1]]
 y_seurat <- seurat_list[2:length(seurat_list)]
 
-# Merging
+# Merging step.
 seurat <- merge(x_seurat, y = as.vector(y_seurat), add.cell.ids = cells_id, project = "merged")
 
-# Save expression matrix
+# Save expression matrix.
 write.table(as.matrix(seurat@assays$RNA@counts), file = paste0(dir.name, "/", folders[1], "/expression_matrix.tsv"), sep = "\t", row.names = TRUE, col.names = TRUE, quote = FALSE)
 
-# Save
+# Save merged Seurat object.
 saveRDS(seurat, file = paste0(dir.name, "/", folders[1], "/seurat_post-qc.rds"))
 
 

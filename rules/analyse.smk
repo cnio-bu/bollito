@@ -16,6 +16,7 @@ rule seurat_qc:
         units_path = config["units"],
         input_type = config["input_type"],
         random_seed = config["random_seed"],
+        case = config["case"],
         sample = f"{{sample}}",
         min_cells_per_gene = config["rules"]["seurat_qc"]["params"]["min_cells_per_gene"]
     conda: "../envs/seurat.yaml"
@@ -133,12 +134,13 @@ rule seurat_normalization:
     params:
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
         random_seed = config["random_seed"],
+        case = config["case"],
         normalization = config["rules"]["seurat_normalization"]["params"]["normalization"],
         regress_out = config["rules"]["seurat_normalization"]["params"]["regress_out"],
         vars_to_regress = config["rules"]["seurat_normalization"]["params"]["vars_to_regress"],
         regress_cell_cycle = config["rules"]["seurat_normalization"]["params"]["regress_cell_cycle"],
         regress_merge_effect = config["rules"]["seurat_normalization"]["params"]["regress_merge_effect"]
-
+        
     conda: "../envs/seurat.yaml"
     resources:
         mem=get_resource("seurat_normalization","mem"),
@@ -190,6 +192,7 @@ rule seurat_integration:
     params:
         output_dir = f"{OUTDIR}/seurat/integrated",
         random_seed = config["random_seed"],
+        case = config["case"],
         norm_type = config["rules"]["seurat_integration"]["params"]["norm_type"],
         vars_to_regress = config["rules"]["seurat_integration"]["params"]["vars_to_regress"],  
         velocyto = config["rules"]["velocyto"]["params"]["perform"],

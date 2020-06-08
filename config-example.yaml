@@ -27,6 +27,9 @@ logdir: "/test/log"
 # Seed that will be used in some scripts
 random_seed:  4848
 
+# Set gene case format (uppercase, lowercase and titlecase)
+case: "titlecase"
+
 # Genomic references (gtf and STAR index).
 ref:
     annotation: "/scratch/resources/annotations/m_musculus/gencode.vM20.annotation.gtf"
