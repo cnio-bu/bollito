@@ -13,7 +13,7 @@ rule star_index:
     log:
         f"{LOGDIR}/star_index/index.log"
     wrapper:
-        "0.49.0/bio/star/index"
+        "0.60.0/bio/star/index"
 
 def input_merge(wildcards):  
     return list(units.loc[(wildcards.sample), "fq" + wildcards.group])
@@ -76,4 +76,4 @@ rule star:
         mem=get_resource("star","mem"),
         walltime=get_resource("star","walltime")
     wrapper: 
-        "0.49.0/bio/star/align"
+        "0.60.0/bio/star/align"

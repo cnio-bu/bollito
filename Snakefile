@@ -113,6 +113,8 @@ def get_integration(wc):
             print("You can remove this warning by disabling Seurat integration in config.yaml.")
             if not confirm():
                 sys.exit(1)
+            else:
+                config["rules"]["seurat_integration"]["params"]["perform"] = False
         else:
             file = expand("{OUTDIR}/seurat/integrated/2_normalization/seurat_normalized-pcs.rds",OUTDIR=OUTDIR)
 
@@ -129,6 +131,8 @@ def get_merge(wc):
             print("You can remove this warning by disabling Seurat merge in config.yaml.")
             if not confirm():
                 sys.exit(1)
+            else:
+                config["rules"]["seurat_merge"]["params"]["perform"] = False
         else:
             file = expand("{OUTDIR}/seurat/merged/1_preprocessing/seurat_post-qc.rds",OUTDIR=OUTDIR)
 
@@ -198,13 +202,13 @@ def get_input_find_clus(wc):
 
 rule all:
     input:
+        get_integration,
+        get_merge,
         get_multiqc,
         get_input_degs, 
         get_input_gs,
         get_input_ti,
         get_input_fa,
-        get_integration,
-        get_merge,
         do_velocity,
         get_velocity_matrices
 

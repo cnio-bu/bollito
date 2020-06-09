@@ -73,25 +73,41 @@ Use git clone command to create a local copy.
 
 ### 3. Configure the pipeline.
 #### a. samples.tsv
-Fill the file with the sample names and the features related to each sample. 
 
-An [example file](https://gitlab.com/bu_cnio/bollito/-/blob/master/samples-example.tsv) is included in the repository.
+This file contains information on the samples to be analysed.
+
+An example file ([samples-example.tsv)](https://gitlab.com/bu_cnio/bollito/-/blob/master/samples-example.tsv)) is included in the repository.
+
+Rename it to `samples.tsv` and edit its contents to list the sample names and the features 
+related to each sample. 
 
 #### b. units.tsv
-* If your input are FASTQ files, for each FASTQ pair input the following data into units.tsv:
 
-| **Column name** 	| **Description**                                         	|
+This file contains information about the data files associated to each sample.
+
+There are two example files, depending on the type of input data:
+
+* If your input are FASTQ files:
+
+An example file ([units-example_fastq.tsv](https://gitlab.com/bu_cnio/bollito/-/blob/master/units-example_fastqs.tsv)) is included in the repository.
+
+Rename it to `units.tsv` and edit its contents according to the following table:
+
+| **Field name** 	| **Description**                                         	|
 |------------	|-----------------------------------------------------	|
 | **sample**     	| Sample name (must match the sample name specified in *samples.tsv*).         	|
 | **unit**       	| A distinct name for each pair of files associated to the same sample (for example in the case of replicates). 	|
 | **fq1**        	| FASTQ file for read 1, containing the Cell Barcode and UMI.  	|
 | **fq2**        	| FASTQ file for read 2, containing the transcriptomic sequence.       	|
 
-An [example file](https://gitlab.com/bu_cnio/bollito/-/blob/master/units-example_fastqs.tsv) is included in the repository.
 
-* If your input are matrix files, for each matrix enter the following data:
+* If your input are matrix files:
 
-| **Parameters**            	| **Description**                                                                                                                                                                                     	|
+An example file ([units-example_matrices.tsv](https://gitlab.com/bu_cnio/bollito/-/blob/master/units-example_matrices.tsv)) is included in the repository.
+
+Rename it to `units.tsv` and edit its contents according to the following table:
+
+| **Field name**            	| **Description**                                                                                                                                                                                     	|
 |-----------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|
 | **sample**                	| Sample name (must match the sample name specified in *samples.tsv*).                                                                                                                                                     	|
 | **unit**                  	| Type of input matrix (*10x* or *standard*).                                                                                                                                                         	|
@@ -100,13 +116,12 @@ An [example file](https://gitlab.com/bu_cnio/bollito/-/blob/master/units-example
 | **gene_names** (10x only) 	| tsv file containing one gene name per row.                                                                                                                                                      	|
 | **metadata** (optional) 	| tsv file with two or more columns. First column corresponds to each cell name specified in *cell_names.tsv* and the rest are metadata variables. First row indicates the metadata variable name.       |
 
-An [example file](https://gitlab.com/bu_cnio/bollito/-/blob/master/units-example_matrices.tsv) is included in the repository.
-
 #### c. config.yaml
 
 This is the pipeline configuration file, where you can tune all the available parameters to customise your single-cell analysis.
 
-The [example file](https://gitlab.com/bu_cnio/bollito/-/blob/master/config_example.yaml) features extensive inline documentation.
+The example file ([config-example.yaml](https://gitlab.com/bu_cnio/bollito/-/blob/master/config-example.yaml)) features extensive inline documentation.
+
 Here are some of the main available parameters:
 
 |**Parameter** | **Description** |
