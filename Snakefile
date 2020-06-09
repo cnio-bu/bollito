@@ -50,16 +50,16 @@ def confirm():
 
 def get_resource(rule,resource):
     try:
-        return config["rules"][rule]["res"][resource]
+        return config["resources"][rule][resource]
     except KeyError:
-        return config["rules"]["default"]["res"][resource]
+        return config["resources"]["default"][resource]
 
 def get_input_degs(wc):
-    if config["rules"]["seurat_degs"]["params"]["selected_res"]:
+    if config["parameters"]["seurat_degs"]["selected_res"]:
         samples = [u.sample for u in units.itertuples()] 
-        if config["rules"]["seurat_integration"]["params"]["perform"] == True:
+        if config["parameters"]["seurat_integration"]["enabled"] == True:
             samples = samples + ['integrated']
-        if config["rules"]["seurat_merge"]["params"]["perform"] == True:
+        if config["parameters"]["seurat_merge"]["enabled"] == True:
             samples = samples + ['merged']
         file = expand("{OUTDIR}/seurat/{sample}/4_degs/seurat_degs.rds", sample=samples,OUTDIR=OUTDIR)
     else:
@@ -67,11 +67,11 @@ def get_input_degs(wc):
     return file
 
 def get_input_gs(wc):
-    if config["rules"]["seurat_gs"]["params"]["geneset_collection"]:
+    if config["parameters"]["seurat_gs"]["geneset_collection"]:
         samples = [u.sample for u in units.itertuples()]
-        if config["rules"]["seurat_integration"]["params"]["perform"] == True:
+        if config["parameters"]["seurat_integration"]["enabled"] == True:
             samples = samples + ['integrated']
-        if config["rules"]["seurat_merge"]["params"]["perform"] == True:
+        if config["parameters"]["seurat_merge"]["enabled"] == True:
             samples = samples + ['merged']
         file = expand("{OUTDIR}/seurat/{sample}/5_gs/seurat_complete.rds", sample=samples,OUTDIR=OUTDIR)
     else:
@@ -79,11 +79,11 @@ def get_input_gs(wc):
     return file
 
 def get_input_ti(wc):
-    if config["rules"]["slingshot"]["params"]["perform"] == True:
+    if config["parameters"]["slingshot"]["enabled"] == True:
         samples = [u.sample for u in units.itertuples()] 
-        if config["rules"]["seurat_integration"]["params"]["perform"] == True:
+        if config["parameters"]["seurat_integration"]["enabled"] == True:
             samples = samples + ['integrated']
-        if config["rules"]["seurat_merge"]["params"]["perform"] == True:
+        if config["parameters"]["seurat_merge"]["enabled"] == True:
             samples = samples + ['merged']
         file = expand("{OUTDIR}/slingshot/{sample}/6_traj_in/slingshot_sce_objects.RData", sample=samples,OUTDIR=OUTDIR)
     else:
@@ -91,11 +91,11 @@ def get_input_ti(wc):
     return file
 
 def get_input_fa(wc):
-    if config["rules"]["vision"]["params"]["perform"] == True:
+    if config["parameters"]["vision"]["enabled"] == True:
         samples = [u.sample for u in units.itertuples()] 
-        if config["rules"]["seurat_integration"]["params"]["perform"] == True:
+        if config["parameters"]["seurat_integration"]["enabled"] == True:
             samples = samples + ['integrated']
-        if config["rules"]["seurat_merge"]["params"]["perform"] == True:
+        if config["parameters"]["seurat_merge"]["enabled"] == True:
             samples = samples + ['merged']
         file = expand("{OUTDIR}/vision/{sample}/7_func_analysis/vision_object.rds", sample=samples,OUTDIR=OUTDIR)
     else:
@@ -107,14 +107,14 @@ def get_integration(wc):
 
     samples =list(set([u.sample for u in units.itertuples()]))
 
-    if config["rules"]["seurat_integration"]["params"]["perform"] == True:
+    if config["parameters"]["seurat_integration"]["enabled"] == True:
         if len(samples) == 1:
             print(f"\nWARNING: found only one sample. {ansitxt.RED}{ansitxt.BOLD}Deactivating Seurat integration.{ansitxt.ENDC}")
             print("You can remove this warning by disabling Seurat integration in config.yaml.")
             if not confirm():
                 sys.exit(1)
             else:
-                config["rules"]["seurat_integration"]["params"]["perform"] = False
+                config["parameters"]["seurat_integration"]["enabled"] = False
         else:
             file = expand("{OUTDIR}/seurat/integrated/2_normalization/seurat_normalized-pcs.rds",OUTDIR=OUTDIR)
 
@@ -125,14 +125,14 @@ def get_merge(wc):
 
     samples =list(set([u.sample for u in units.itertuples()]))
 
-    if config["rules"]["seurat_merge"]["params"]["perform"] == True:
+    if config["parameters"]["seurat_merge"]["enabled"] == True:
         if len(samples) == 1:
             print(f"\nWARNING: found only one sample. {ansitxt.RED}{ansitxt.BOLD}Deactivating Seurat merge.{ansitxt.ENDC}")
             print("You can remove this warning by disabling Seurat merge in config.yaml.")
             if not confirm():
                 sys.exit(1)
             else:
-                config["rules"]["seurat_merge"]["params"]["perform"] = False
+                config["parameters"]["seurat_merge"]["enabled"] = False
         else:
             file = expand("{OUTDIR}/seurat/merged/1_preprocessing/seurat_post-qc.rds",OUTDIR=OUTDIR)
 
@@ -152,7 +152,7 @@ def get_velocity_matrices(wc):
     if config["input_type"] == "matrix":
         file = []
     elif config["input_type"] == "fastq":
-        if config["rules"]["velocyto"]["params"]["perform"] == True:
+        if config["parameters"]["velocyto"]["enabled"] == True:
             file = expand("{OUTDIR}/star/{unit.sample}/Solo.out/Velocyto/raw/spliced/matrix.mtx", unit=units.itertuples(),OUTDIR=OUTDIR)
         else:
             file = []
@@ -164,11 +164,11 @@ def do_velocity(wc):
     if config["input_type"] == "matrix":
         file = []
     elif config["input_type"] == "fastq":
-        if config["rules"]["velocyto"]["params"]["perform"] == True:
+        if config["parameters"]["velocyto"]["enabled"] == True:
             samples = [u.sample for u in units.itertuples()]
-            if config["rules"]["seurat_integration"]["params"]["perform"] == True:
+            if config["parameters"]["seurat_integration"]["enabled"] == True:
                 samples = samples + ['integrated']
-            if config["rules"]["seurat_merge"]["params"]["perform"] == True:
+            if config["parameters"]["seurat_merge"]["enabled"] == True:
                 samples = samples + ['merged']
             file = expand("{OUTDIR}/velocyto/{sample}/8_RNA_velocity/seurat_velocity.rds", sample=samples,OUTDIR=OUTDIR)
         else:
@@ -193,9 +193,9 @@ def seurat_input(wc):
 
 def get_input_find_clus(wc):
     samples = [u.sample for u in units.itertuples()] 
-    if config["rules"]["seurat_integration"]["params"]["perform"] == True:
+    if config["parameters"]["seurat_integration"]["enabled"] == True:
         samples = samples + ['integrated']
-    if config["rules"]["seurat_merge"]["params"]["perform"] == True:
+    if config["parameters"]["seurat_merge"]["enabled"] == True:
         samples = samples + ['merged']
     file = expand("{OUTDIR}/seurat/{sample}/2_normalization/seurat_normalized-pcs.rds", sample=samples,OUTDIR=OUTDIR)
     return file

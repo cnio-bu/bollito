@@ -30,7 +30,7 @@ rule fastq_screen_indexes:
         "../envs/fastq_screen.yaml"
     threads: get_resource("fastq_screen_indexes","threads")
     params:
-        outdir=config["rules"]["fastq_screen_indexes"]["outdir"]
+        outdir=config["parameters"]["fastq_screen_indexes"]["outdir"]
     resources:
         mem=get_resource("fastq_screen_indexes","mem"),
         walltime=get_resource("fastq_screen_indexes","walltime")
@@ -41,7 +41,7 @@ rule fastq_screen_indexes:
 rule fastq_screen:
     input:
         lambda wc: units.loc[(wc.sample,wc.unit)]['fq' + wc.read],
-        conf="{}/FastQ_Screen_Genomes/fastq_screen.conf".format(config["rules"]["fastq_screen_indexes"]["outdir"])
+        conf="{}/FastQ_Screen_Genomes/fastq_screen.conf".format(config["parameters"]["fastq_screen_indexes"]["outdir"])
     output:
         txt="{}/qc/fastq_screen/{{sample}}.{{unit}}.r{{read}}.fastq_screen.txt".format(OUTDIR),
         png="{}/qc/fastq_screen/{{sample}}.{{unit}}.r{{read}}.fastq_screen.png".format(OUTDIR)
@@ -54,7 +54,7 @@ rule fastq_screen:
         mem=get_resource("fastq_screen","mem"),
         walltime=get_resource("fastq_screen","walltime")
     params:
-        fastq_screen_config="{}/FastQ_Screen_Genomes/fastq_screen.conf".format(config["rules"]["fastq_screen_indexes"]["outdir"]),
+        fastq_screen_config="{}/FastQ_Screen_Genomes/fastq_screen.conf".format(config["parameters"]["fastq_screen_indexes"]["outdir"]),
         subset=100000,
         aligner='bowtie2'
     wrapper:
@@ -264,7 +264,7 @@ def multiqc_input(wc):
     f += expand("{OUTDIR}/qc/rseqc/{unit.sample}.readgc.GC_plot.pdf", unit=units.itertuples(), OUTDIR=OUTDIR)
     f += expand("{LOGDIR}/rseqc/rseqc_junction_annotation/{unit.sample}.log", unit=units.itertuples(), LOGDIR=LOGDIR)
     try:
-        if not config["rules"]["fastq_screen"]["disabled"]:
+        if config["parameters"]["fastq_screen"]["enabled"]:
             f += expand("{OUTDIR}/qc/fastq_screen/{unit.sample}.{unit.unit}.r2.fastq_screen.txt", unit=units.itertuples(), OUTDIR=OUTDIR)
     except KeyError:
         print("FASTQ_SCREEN disabled by config file. Skipping...")
@@ -276,7 +276,7 @@ rule multiqc:
     output:
         report(f"{OUTDIR}/qc/multiqc_report.html", caption="../report/conf/multiqc.rst", category="1_QC")
     params:
-        config["rules"]["multiqc"]["params"]
+        config["parameters"]["multiqc"]
     benchmark:
         "{}/multiqc.bmk".format(LOGDIR)
     log:
