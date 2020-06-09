@@ -13,7 +13,7 @@ The pipeline makes extensive use of Snakemake's integration with the [conda](htt
 take care of software requirements and dependencies.
 
 bollito has two main modes of execution depending on the input data: 
-* From **FASTQ**: it accepts FASTQ-formatted raw data (from **drop-seq** or **10X Genomics** experiments).
+* From **FASTQ**: it accepts FASTQ-formatted raw data (from **drop-seq** or **10x Genomics** experiments).
 * From **matrices** including:
     * [Feature-barcode matrices](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/output/matrices) (expression matrix format from STARsolo).
     * Standard matrices (cell names and gene names included in the matrix). 
@@ -52,7 +52,7 @@ A general description of these files follows. See the *Usage* section for more d
 or
 
 * matrices of count data
-    * **10X**-like input (matrix.mtx + genes.tsv + barcodes.tsv)
+    * **10x**-like input (matrix.mtx + genes.tsv + barcodes.tsv)
 
     or
 
@@ -127,7 +127,7 @@ Here are some of the main available parameters:
 |**Parameter** | **Description** |
 |--------------|--------------|
 |**input_type** |Type of input data (*fastq* or *matrix*).|
-|**technology** |Technology used to get the reads files (*10X* or *Drop-seq*).|
+|**technology** |Technology used to get the reads files (*10x* or *Drop-seq*).|
 |**outdir** |Directory where to store the output files.|
 |**logdir** |Directory where to store the log files.|
 |**random_seed** |Seed parameter to allow for reproducible analyses.|
@@ -325,7 +325,7 @@ To generate the report, you only need to use --report option when the analysis i
 
 ## Test data
 
-The system is pre-configured to run an example based on sample data available from 10X Genomics. The required datasets can be found at these URLS. Please update the "units.tsv" file to point at the data as needed.
+The system is pre-configured to run an example based on sample data available from 10x Genomics. The required datasets can be found at these URLS. Please update the "units.tsv" file to point at the data as needed.
 
 * https://support.10xgenomics.com/single-cell-gene-expression/datasets/3.0.0/neuron_10k_v3
 * https://support.10xgenomics.com/single-cell-gene-expression/datasets/3.0.0/heart_10k_v3

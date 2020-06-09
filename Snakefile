@@ -16,7 +16,7 @@ def warning(msg):
 try:
     configfile: "config.yaml"
 except WorkflowError:
-    warning("ERROR: config.yaml does not exist. Please see the README file for details. Quitting now.")
+    warning("ERROR: config.yaml does not exist or is incorrectly formatted. Please see the README file for details. Quitting now.")
     sys.exit(1)
 
 OUTDIR = config["outdir"]

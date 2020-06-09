@@ -10,5 +10,5 @@ report_comment: ""
 report_header_info:
     - Contact E-mail: 'bioinformatica@cnio.es'
     - Application Type: 'Single Cell RNA-seq'
-    - Sequencing Platform: 'Chromium 10X'
+    - Sequencing Platform: 'Chromium 10x'
     - Sequencing Setup: '1x28+1x55'

@@ -89,7 +89,7 @@ The following parameters affect the pipeline as a whole. Use the following table
 | Name               | Value | Notes                                             |
 |--------------------|-------|--------------------------------------------------------|
 | input_type         | fastq | Input files are FASTQ in fastq format.                                 |
-| technology         | 10X   | Input files are generated with 10x Genomics technology. |
+| technology         | 10x   | Input files are generated with 10x Genomics technology. |
 | case               | uppercase | Human genes are generally written using upper case letters.              |
 | random_seed        | 4848  | A random seed. Using the same seed allows us to have replicable results between pipeline runs.                                  |
 | annotation         | /my/data/files/gencode.v34.annotation.gtf | The GENCODE annotation file you just downloaded.  |

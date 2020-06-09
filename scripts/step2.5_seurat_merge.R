@@ -32,7 +32,7 @@ combine_object <- function(x, velocyto) {
     velocyto_dir = paste0(outdir_config,"/star/", experiment,"/Solo.out/Velocyto/raw/")
     velo_names = c("spliced", "unspliced", "ambiguous")
     vel_matrices = list()
-    # The matrices are read in 10X format.
+    # The matrices are read in 10x format.
     for (name in velo_names) {
       vel_matrices[[name]] <- Read10X(data.dir = paste0(velocyto_dir, name))
     }

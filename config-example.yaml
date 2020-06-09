@@ -17,8 +17,8 @@ units: units.tsv
 # input type: this variable is used to specify the input files nature ("matrix" or "fastq"). 
 input_type: "matrix"
 
-# technology: technology used to get the reads files (10X or Drop-seq)
-technology: "Drop-seq"
+technology: "10x" # single-cell sequencing technology used ("10x" or "Drop-seq")
+technology_version: "v3" # version of the sequencing technology used (10x only)
 
 # Output and log files paths.
 outdir: "out"
@@ -39,7 +39,7 @@ ref:
     idx: "/my/genome_idx"
 
 # Barcodes whitelist
-# Necessary in 10X technology. This depends on the 10X chemistry (V1, V2 or V3).
+# Necessary in 10x technology. This depends on the 10x chemistry (V1, V2 or V3).
 # Drop-seq technology does not use barcode lists, so this will be ignored.
 whitelist: "/my/barcodes.txt"  
 
@@ -66,7 +66,7 @@ rules:
             mem: 32000
 
 # STAR alignment
-# UMI length is related to 10X chemist.
+# UMI length is related to 10x chemist.
 # Other parameters might be modified depending on the user needs.
     star_index:
         res:
@@ -74,12 +74,17 @@ rules:
             mem: 64000
 
 #STAR params are technology related so:
-### -> For 10X v1 chemistry we recommend "--soloType Droplet --soloFeatures Gene Velocyto --outFilterMultimapNmax 50 --winAnchorMultimapNmax 50 --alignEndsType EndToEnd --outReadsUnmapped Fastx --soloUMIlen 10  --soloCBlen 14 --outSAMtype BAM SortedByCoordinate --outSAMattributes NH HI nM AS CR UR CB UB GX GN sS sQ sM"
-### -> For 10X v2 chemistry we recommend "--soloType Droplet --soloFeatures Gene Velocyto --outFilterMultimapNmax 50 --winAnchorMultimapNmax 50 --alignEndsType EndToEnd --outReadsUnmapped Fastx --soloUMIlen 10 --outSAMtype BAM SortedByCoordinate --outSAMattributes NH HI nM AS CR UR CB UB GX GN sS sQ sM"
-### -> For 10X v3 chemistry we recommend "--soloType Droplet --soloFeatures Gene Velocyto --outFilterMultimapNmax 50 --winAnchorMultimapNmax 50 --alignEndsType EndToEnd --outReadsUnmapped Fastx --soloUMIlen 12 --outSAMtype BAM SortedByCoordinate --outSAMattributes NH HI nM AS CR UR CB UB GX GN sS sQ sM"
-### -> For Drop-seq technology we recommed "--soloType Droplet --soloFeatures Gene Velocyto --outFilterMultimapNmax 50 --winAnchorMultimapNmax 50 --alignEndsType EndToEnd --outReadsUnmapped Fastx --soloUMIlen 8 --soloCBlen 12 --outSAMtype BAM SortedByCoordinate --outSAMattributes NH HI nM AS CR UR CB UB GX GN sS sQ sM" 
     star:
-        params: "--soloType Droplet --soloFeatures Gene Velocyto Transcript3p --outFilterMultimapNmax 50 --winAnchorMultimapNmax 50 --alignEndsType EndToEnd --outReadsUnmapped Fastx --soloUMIlen 10 --outSAMtype BAM SortedByCoordinate --outSAMattributes NH HI nM AS CR UR CB UB GX GN sS sQ sM"
+        params: "--soloType Droplet --soloFeatures Gene Velocyto --outFilterMultimapNmax 50 --winAnchorMultimapNmax 50 --alignEndsType EndToEnd --outReadsUnmapped Fastx --soloUMIlen 12 --outSAMtype BAM SortedByCoordinate --outSAMattributes NH HI nM AS CR UR CB UB GX GN sS sQ sM"
+            10x:
+                v1:
+                    "--soloType Droplet --soloFeatures Gene Velocyto --outFilterMultimapNmax 50 --winAnchorMultimapNmax 50 --alignEndsType EndToEnd --outReadsUnmapped Fastx --soloUMIlen 10  --soloCBlen 14 --outSAMtype BAM SortedByCoordinate --outSAMattributes NH HI nM AS CR UR CB UB GX GN sS sQ sM"
+                v2:
+                    "--soloType Droplet --soloFeatures Gene Velocyto --outFilterMultimapNmax 50 --winAnchorMultimapNmax 50 --alignEndsType EndToEnd --outReadsUnmapped Fastx --soloUMIlen 10 --outSAMtype BAM SortedByCoordinate --outSAMattributes NH HI nM AS CR UR CB UB GX GN sS sQ sM"
+                v3:
+                    "--soloType Droplet --soloFeatures Gene Velocyto --outFilterMultimapNmax 50 --winAnchorMultimapNmax 50 --alignEndsType EndToEnd --outReadsUnmapped Fastx --soloUMIlen 12 --outSAMtype BAM SortedByCoordinate --outSAMattributes NH HI nM AS CR UR CB UB GX GN sS sQ sM"
+            drop-seq:
+                "--soloType Droplet --soloFeatures Gene Velocyto --outFilterMultimapNmax 50 --winAnchorMultimapNmax 50 --alignEndsType EndToEnd --outReadsUnmapped Fastx --soloUMIlen 8 --soloCBlen 12 --outSAMtype BAM SortedByCoordinate --outSAMattributes NH HI nM AS CR UR CB UB GX GN sS sQ sM" 
         res:
             threads: 8
             mem: 64000

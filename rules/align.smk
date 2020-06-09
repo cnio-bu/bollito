@@ -45,11 +45,12 @@ def input_star(sample,group):
 
 
 def extra_params(wc):
-    if config["technology"] == "10X":
-        extra="--sjdbGTFfile {} --soloCBwhitelist {} {}".format(config["ref"]["annotation"], config["whitelist"], config["rules"]["star"]["params"])
+    if config["technology"] == "10x":
+        ver = config["technology_version"]
+        extra="--sjdbGTFfile {} --soloCBwhitelist {} {}".format(config["ref"]["annotation"], config["whitelist"], config["rules"]["star"]["params"]["10x"][ver])
         return extra
-    elif config["technology"] == "Drop-seq":
-        extra = "--sjdbGTFfile {} --soloCBwhitelist None {}".format(config["ref"]["annotation"], config["rules"]["star"]["params"])
+    elif config["technology"] == "drop-seq":
+        extra = "--sjdbGTFfile {} --soloCBwhitelist None {}".format(config["ref"]["annotation"], config["rules"]["star"]["params"]["drop-seq"])
         return extra
     else:
         raise ValueError('Specified technology is not valid.')

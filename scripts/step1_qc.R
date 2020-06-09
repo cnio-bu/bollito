@@ -56,7 +56,7 @@ if (input_type == "fastq") {
   units <- read.csv(units_path, header = TRUE, sep = "\t", row.names = 1, comment.char = "#")
   
   # If the expression matrix is in 10x like format (matrix, cell barcodes and genes).
-  if (units[sample,"unit"] == "10X") { 
+  if (units[sample,"unit"] == "10x") { 
     expression_matrix <- readMM(toString(units[sample,"matrix"]))
     colnames(expression_matrix) <- read.table(toString(units[sample,"cell_names"]))[,1]
     row.names(expression_matrix) <- read.table(toString(units[sample,"gene_names"]))[,1]
