@@ -1,3 +1,3 @@
-sample	unit	matrix	metadata
+sample	matrix_type	matrix	metadata
 heart	standard	data/matrices/heart/expresion_matrix.tsv	data/matrices/heart/metadata.tsv
 brain	standard	data/matrices/brain/expression_matrix.tsv	data/matrices/brain/metadata.tsv

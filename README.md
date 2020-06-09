@@ -198,6 +198,12 @@ The normalization itself can also be parametrized, including the possibility of 
 (such as cell cycle scoring, number of detected genes, % of mitochondrial genes) in order to mitigate their effect
 on the dataset. Refer to the example config file for the available options.
 
+> NOTE: the user will have to choose the correct value for some parameters
+(QC threshold filters, significant PCA components or regressed variables) after the execution of these steps. 
+For this purpose, it is necessary to stop the pipeline executions when these steps are finished.
+Then, take a look and the results to define those parameter values at the configuration file.
+Finally, re-run the pipeline from these steps in order to apply the changes.
+
 #### 4.b. Merging.
 
 bollito can perform an optional merging step.
@@ -235,6 +241,9 @@ For this step, the following parameters need to be adjusted via the configuratio
 * Number of significant components based on the elbow plot or JackStraw analysis obtained in previous steps.
 * Number of neighbours (*k*) used to generate the KNN graph (optional).
 * Resolutions to be used in the community detection method.
+
+> NOTE: the best resolution obtained should be specified in the configuration file,
+since it is used in posterior effects.
 
 ### 6. Differential expression analysis.
 
@@ -282,7 +291,7 @@ To enable this step, the following parameters need to be adjusted via the config
 * Set *perform* to *TRUE*.
 * Cluster resolution must be specified.
 
-**Note**: RNA velocity step can not be performed if we use a matrix as input of the pipeline,
+> NOTE: RNA velocity step can not be performed if we use a matrix as input of the pipeline,
 since it needs the BAM files to generate the three count matrices (spliced, unspliced and ambiguous).
 
 ## Shortcuts

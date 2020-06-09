@@ -56,13 +56,13 @@ if (input_type == "fastq") {
   units <- read.csv(units_path, header = TRUE, sep = "\t", row.names = 1, comment.char = "#")
   
   # If the expression matrix is in 10x like format (matrix, cell barcodes and genes).
-  if (units[sample,"unit"] == "10x") { 
+  if (units[sample,"matrix_type"] == "10x") { 
     expression_matrix <- readMM(toString(units[sample,"matrix"]))
     colnames(expression_matrix) <- read.table(toString(units[sample,"cell_names"]))[,1]
     row.names(expression_matrix) <- read.table(toString(units[sample,"gene_names"]))[,1]
 
   # If the expression matrix is in TSV format ((genes as row names and cells as column names).
-  } else if (units[sample,"unit"] == "standard") { 
+  } else if (units[sample,"matrix_type"] == "standard") { 
     expression_matrix = read.csv(toString(units[sample,"matrix"]), sep = "\t", header = TRUE, row.names = 1)
 
   } else {

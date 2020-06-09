@@ -66,13 +66,13 @@ parameters:
     seurat_qc:
         min_cells_per_gene: 1
 # step 2. Implement your filters in order to get quality cells using the information gathered in step 1.
-# These quality filters are the following:
+# Filters:
 # Minimum (min_feat) and maximum (max_feat) number of unique genes detected per cell.
 # Minimum (min_count) and maximum (max_count) number of counts detected per cell.
-# Minimum percentaje of reads mapping to the mitochondrial genome (mit_pct, recommended 5).
-# Minimum percentaje of reads mapping to the ribosomal genome (ribo_pct, recommended 40).
-# Leave empty variables in case you do not want to filter.
-# Empty "min_feat" and "min_count" indicate not to perform the filter. Use 0 is no bottom threshold is desired.
+# Minimum percentage of reads mapping to the mitochondrial genome.
+# Minimum percentage of reads mapping to the ribosomal genome.
+# Leave empty in case you do not want to filter.
+# Empty "min_feat" and "min_count" indicate not to perform the filter. Use 0 if no bottom threshold is desired.
 # Empty "max_feat" and "max_count" indicate no upper threshold.
     seurat_postqc:
         min_feat: 500
@@ -85,7 +85,7 @@ parameters:
 # Parameters:
 # gene: input a gene or list of genes (i.e. "Epcam").
 # threshold: expression-based filtering criteria (i.e. 0).
-# filter_out: if true, cells will be filtered out based on the specified threshold; cells with higher expression values will be kept. If false, cells with the will be kept.
+# filter_out: if true, cells with a higher expression than the threshold are kept. If false, cells are filtered.
     seurat_filter:
         gene: 
         threshold: 
@@ -96,11 +96,11 @@ parameters:
 # step 3. After normalization, generates a Jackstrawplot as well as an elbow plot.
 # Examine these plots in order to select the number of principal components used in the next steps.
 # Parameters:
-# normalization: type of normalization performed ("SCT" or "standard").
-# regress_out: True or False depending if you want to regress out biological or technical effects stored in the metadata table (from Seurat object).
-# vars_to_regress: string (var = 1) or list (vars => 2) of varibles you want to regress. It / they must be stored in the metadata table. 
-# regress_cell_cycle: True or False depending if you want to regress out the cell cycle effect (check out the cell cycle plot first).
-# regress_merge_effect: True or False depending if you want to regress out the cell cycle effect (check out the cell cycle plot first).
+# normalization: type of normalization applied ("SCT" or "standard").
+# regress_out: True or False depending if you want to regress out any effect stored in Seurat's metadata table.
+# vars_to_regress: string (var = 1) or list (vars >= 2) of variables you want to regress.
+# regress_cell_cycle: True or False to regress out the cell cycle effect (check out the cell cycle plot first).
+# regress_merge_effect: True or False to regress out the merge effect (check out the cell cycle plot first).
     seurat_normalization:
         normalization: "SCT"
         regress_out: True
@@ -110,8 +110,8 @@ parameters:
 # step 3B Integration. This rule is equivalent to the normalization, but it creates the integrated object. 
 # OPTIONAL step.
 # Parameters:
-# norm_type: this integration depends on the normalization applied (standard or SCT).
-# vars_to_regress: some variables can be regressed out to minimize their effect on the samples. It needs to be written in a python list format (more than one variable).
+# norm_type: type of normalization applied ("SCT" or "standard").
+# vars_to_regress: string (var = 1) or list (vars >= 2) of variables you want to regress.
     seurat_integration:
         enabled: True
         norm_type: "SCT"
@@ -120,8 +120,8 @@ parameters:
 # Paramters:
 # random_seed: ensures the reproducibility of your analysis.
 # principal_components: number of components used.
-# resolutions: the resolution(s) values will set the granularity of the clustering (typicaly between 0.4-1.2).
-# k_neighbors: number of neighbors (k) used to generate the SNN graph (Default = 20).
+# resolutions: the resolution(s) values will set the granularity of the clustering.
+# k_neighbors: number of neighbors (k) used to generate the KNN graph (default = 20).
     seurat_find_clusters:
         principal_components: 10
         resolutions: [0.2, 0.4, 0.8, 1.2, 1.6]
@@ -159,8 +159,8 @@ parameters:
 # OPTIONAL step.
 # Parameters:
 # mol_signatures: path to molecular signatures gmt file.
-# meta_columns: metadata information that is kept from Seurat object. It needs to be written in a python list format (more than one variable).
-# selected_res: resolution (number of clusters) chosen from Seurat object to be added as metadata.
+# meta_columns: metadata information that is kept from Seurat object.
+# selected_res: clustering resolution chosen from Seurat object to be added as metadata.
 # n_cores: cores given for the analysis.
 # use_integrated: set True if integration is perform, False if not. 
     vision:
