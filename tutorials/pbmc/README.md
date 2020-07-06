@@ -32,7 +32,7 @@ Second pair of files, corresponding to lane 2 of the flowcell:
 > The files with *R2* (for *read 2*) in their names store the cDNA data.
 
 ### Samples file (samples.tsv)
-We will now configure the samples file, *samples.tsv*, to adjust it to our data. Since we are dealing with a single sample, so we will need to enter a single line:
+We will now configure the samples file, *samples.tsv*, to adjust it to our data. Since we are dealing with a single sample, we will only need a single line:
 
 - In the *sample* column we will enter the sample name. We will use the name of the dataset, *PBMC*.
 
@@ -65,11 +65,8 @@ Your units.tsv file should look like this:
 
 ### Main configuration file (config.yaml)
 
-We have now successfully configured our input data. Let's now configure resources and parameters
-that the pipeline needs in order to correctly process the data.
-
-The configuration file features a large amount of parameters. Out of these we will only be adjusting the ones
-needed to correctly process our current dataset, and to obtain the results we are after.
+Once we have configured our input data, we should configure the resources and parameters
+that the pipeline needs in order to correctly process the data. These parameters shouldn't be all configured at once. Instead, users should consider the outputs of each rule in order to correctly set the configuration parameters for the following one. 
 
 #### Required files
 
@@ -80,7 +77,7 @@ the corresponding annotation file:
 - [Annotation file](ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_34/gencode.v34.annotation.gtf.gz)
 - [Barcode whitelist file](https://bioinformatics.cnio.es/data/pipelines/single_cell/10x_sample_data/pbmc_1M/3M-february-2018.txt.gz)
 
-> NOTE: You should descompress these files and place them in a directory of your choice. Again, we will use */my/data/files* here.
+> NOTE: you should descompress these files and place them in a directory of your choice. Again, we will use */my/data/files* here.
 
 #### General parameters
 
@@ -100,12 +97,11 @@ The following parameters affect the pipeline as a whole. Use the following table
 ### Step-specific parameters
 
 #### Alignment step (star)
-STAR extra parameter is configured depending on the sample. In this case, due to the Chromium V3 chemistry, the string is:
+The STAR alignment parameters are selected depending on the single-cell technology and version. In this case, since the Chromium V3 chemistry was used for sequencing the samples, the system will automatically apply the following STAR parameters:
 "--soloType Droplet --soloFeatures Gene Velocyto --outFilterMultimapNmax 50 --winAnchorMultimapNmax 50 --alignEndsType EndToEnd --outReadsUnmapped Fastx --soloUMIlen 12 --outSAMtype BAM SortedByCoordinate --outSAMattributes NH HI nM AS CR UR CB UB GX GN sS sQ sM"
 
 #### Single-cell pre-QC (seurat_qc)
-For the purpose of this tutorial we want to maximise the number of genes and cells we use. We will therefore set the required number of
-cells in which a gene must be detected to just 1, to keep all the expressed genes in the matrix.
+For the purpose of this tutorial, we have downsampled our data. This operation reduces the number of genes and cells we will be using. Because of this, we will set the required number of cells in which a gene must be detected to just 1.
 
 | Parameter        | Value |  Commentary                                             |
 |------------------|-------|---------------------------------------------------------|
@@ -155,7 +151,7 @@ In this case, some PBMC related signatures were tested.
 
 #### Single-cell functional analysis Vision-based - “vision“
 To obtain a wider explanation of the functional characteristics of our  sample, we decided to test the Hallmarks signatures from MSigDB.
-Also, the metadata variables from the Seurat object were addedand the chosen clustering resolution was set to 0.4.
+Also, the metadata variables from the Seurat object were added and the chosen clustering resolution was set to 0.4.
 
 | Name             | Value |  Commentary                                             |
 |------------------|-------|---------------------------------------------------------|
@@ -166,7 +162,7 @@ Also, the metadata variables from the Seurat object were addedand the chosen clu
 | selected_res    | 0.4 | Clustering resolution chosen. |
 
 #### Single-cell differential expression analysis - “seurat_degs“
-We decided to focus the differential expression analysis between clusters in the resolution 0.4. For the differential expression analysis step, the statistical test to use must be specified. In our case, we decided to apply a  Wilcoxon test. The resolution must also be specified.
+We have also decided to focus on the resolution 0.4, for the differential expression analysis between clusters. For the differential expression analysis step, the statistical test must be specified. In our case, we decided to apply a  Wilcoxon test. The resolution must also be specified.
 
 | Name             | Value |  Commentary                                             |
 |------------------|-------|---------------------------------------------------------|
@@ -201,33 +197,30 @@ The command line used is:
 At this point, Snakemake decides the execution order based on the rules resources specification and triggers the first rules.
 
 ### Pipeline execution recommendation.
-The normal use of the pipeline requires its execution at least two times (three recommended). It is recommended to set the parameters according to the results obtained in previous steps when needed.
+The pipeline requires its execution at least two times (three recommended). It is recommended to set the parameters according to the results obtained in previous steps when needed.
 
 1. **First execution - Single-cell QC filtering parameters**:
-This first execution is highly recommended to set the values for the filtering rule "seurat_postqc".
-Once the pipeline has completed both the "seurat_preqc" and the "seurat_postqc" steps, the user must take a look at the QC plots and choose the proper filtering values (later explained).
-After setting these filters in the configuration file, the user must remove the previous seurat_postqc outputs (just the ones found in this specific folder) in order to repeat the single-cell QC. 
-To run the pipeline until the normalization step we use the "until" parameter from Snakemake.
+A first execution would allow us setting the values for the filtering rule "seurat_postqc".
+Once the pipeline has completed both the "seurat_preqc" and the "seurat_postqc" steps, the user should take a look at the QC plots and choose the proper filtering values (later explained).
+After setting these filters in the configuration file, the user should remove the previous seurat_postqc outputs (just the ones found in these specific folders) in order to repeat the single-cell QC. In order to run the pipeline until the normalization step we use the "until" parameter from Snakemake.
 
 `snakemake --use-conda -j N --until normalized_expression_matrix`
 
 
 2. **Second execution - Single-cell normalization parameters parameters**: 
-The second execution is used to study the significance of the principal components of the PCA, and the cell cycle effect.
-Also, it is recommended to check the effect of another variables like the QC ones, such as the differences in the number of features or counts.
-Once the user has decided which is the number of significant components and the variables that are going to be regressed out (if any),
-they should set the values in the configuration file.
-Following the indications defined in the previous point,
-the user must remove the normalization folder to repeat the step if some regressions are performed.
+A second execution would allow us studying the significance of the principal components of the PCA, and the cell cycle effect.
+It is also recommended to check the effect of other QC variables such as the differences in the number of features or counts.
+Once the user has decided the number of significant components to include in the analysis and the variables to be regressed out (if any),
+these values should be set in the configuration file.
+Following the indications defined in the previous section, the user must remove the output files in the normalization folder, in order to repeat the step (if needed).
 To run the pipeline only until the normalization step, we use the "until" parameter from Snakemake.
 
 `snakemake --use-conda -j N --until normalized_expression_matrix`
 
 
 3. **Third execution - Clustering resolution selection and final execution**: 
-the third execution is only meant to study the clustering results and decide
-the clustering resolution to use in the following steps.
-Once, the UMAPs, silhouette scores and the clustree plots are studied, the user must set the desired clustering resolution in the configuration file.
+With the third execution, the user will study the clustering results and decide the clustering resolution to use in the following steps.
+Once, the UMAPs, silhouette scores and clustree plots are analysed. The clustering resolution of interest should be set in the configuration file.
 To run the pipeline we use the following command: 
 
 `snakemake --use-conda -j N`
@@ -255,7 +248,7 @@ but the higher content of A-T bases could mean the presence of poli-A tails (lef
 
 ### 2. Alignment quantification and demultiplexing. 
 
-All these step are carried out by STAR.
+All these steps are carried out by STAR.
 The user must be careful to choose the **correct parameters** (technology and chemistry), since an error in this step might not be detected until downstream steps.
 
 The main outputs are:
@@ -272,22 +265,22 @@ It is reccomended to check the alignment statistics to detect posible errors.
 Single-cell QC is performed by Seurat and it is divided in two rules:
 
 #### **seurat_qc**: 
-In this rule the Seurat object is created from the expression matrix, and it is filtered out twice.
+In this rule, a Seurat object is created from the expression matrix, and it is filtered out twice.
 1. CBs expressing less than 200 genes are filtered out, since they might be broken cells or debris.
 2. Genes that are expressed in less than *n* CBs are filtered out.
 In our case, genes that are not expressed in any cells were also removed (**n** = 1).
 
 > TIP: Filtering out genes is recommended when the user wants to reduce the dimensionality of the dataset.
 
-Finally, it generates some plots for the study of the quality metrics of the sample.
+Finally, the rule generates some plots that will allow us to study the quality metrics of the sample.
 The most important ones are the four violin plots describing the main QC variables, neccesary for stablishing the seurat_postqc thresholds. 
-These thresholds are meant to help the user to avoid both doublets (detected by their high number of counts or features) and broken cells (detected a higher expression of mitochondrial genes).
+These thresholds are meant to help the user avoiding both doublets (detected by their high number of counts or features) and broken cells (detected a higher expression of mitochondrial genes).
 
 > NOTE: features refers to genes and viceversa. 
 
 <img src="./images/1_vlnplot_QC_variables_prefilt.png" width="750">
 
-> TIP:  A good criteria for establishing the thresholds for botth the features and the counts, consists on choosing twice the 
+> TIP:  A good criteria for establishing the thresholds for both the features and the counts, consists on choosing twice the 
 median of the distribution for the upper threshold and half the median for the bottom threshold.
 
 After carefully examining the violing plots, we need to decide the QC variables to consider for filtering the dataset, 
@@ -319,7 +312,7 @@ At this point, the filtered **expression matrix** is exported in TSV format.
 
 ### 4. Normalization
 The dataset was normalized using the **SCT method** developed by Seurat's team.
-This method aims to remove the technical effect while keeping the biological meaning of the sample. During this step,  the sample is also scaled.
+This method aims to remove the technical effect while keeping the biological meaning of the sample. During this step, the sample is also scaled.
 
 A **dimensionality reduction** is performed using a Principal Components Analysis (PCA). In our case, we studied the first 50 components.
 To study which of those components is significant, bollito produces both an elbow plot and a JackStraw plot.
@@ -327,10 +320,10 @@ The first one shows the variance explained by each component, while the second o
 
 <img src="./images/3_elbowplot.png" width="500"> <img src="./images/4_jackstrawplot.png" width="500">
 
-From the JackStraw plot, we can be observe that the last significant component is the 9th component.
-But if we focus on the elbow plot, we can see that the variance starts to be stabe at the 7th component.
+From the JackStraw plot, we have observed that the 9th component is the last significant one.
+But if we focus on the elbow plot, we can see that the variance starts to be stable at the 7th component.
 For this reason, we prefer to be conservative and keep the first **7 components**.
-Since they are few components, the execution time won't be compromised.
+Since these are very few components, the execution time won't be compromised.
 
 > NOTE: the number of significant components chosen in this step is **fundamental** for the following steps of the analysis. 
 This parameter does have a high impact in the outcome of the analysis since both the clustering (one of the most important steps) and the visualization, depend directly on it.
@@ -338,7 +331,7 @@ We recommend to be cautious choosing this value.
 
 <p align="center"><img src="./images/6_cell_cycle_dimplot.png" width="400"></p>
 
-Next, we must check the **cell cycle effect**. 
+Next, we should check the **cell cycle effect**. 
 The plot shows that the sample is not affected by the differences in the cell cycle of the cells, since the labels are not clusterized.
 Also, it is useful to check the effect of other QC variables (such as the number of counts or detected features), to regress out their effects in case it is neccesary.
 In this example, no variable needs to be regressed out, so in the configuration file these fields should be turned to "False" or left empty.
@@ -356,7 +349,7 @@ The number of significant PCs was chosen in the previous step --> 7 PCs.
 - __*k* parameter__: used to generate the kNN graph. In our analysis the default value was chosen (*k* = 20).
 - **Clustering resolution**: these numbers are directly related to the granularity of the clustering analysis or in other words, the number of clusters.
 The higher the resolution, the more clusters we obtain.
-The analysis can be applied to one or more resolutions. And it is always interesting to check the behaviour of the clustering on (at least) one high and one low resolutions. We decided to chose these resolutions: 0.2, 0.4, 0.8, 1.2 and 1.6.
+The analysis can be applied to one or more resolutions. And it is always interesting to check the behaviour of the clustering on (at least) one high and one low resolutions. We decided to chose the following resolutions: 0.2, 0.4, 0.8, 1.2 and 1.6.
 
 > TIP: we recommend choosing a range of resolutions according to the number of expected clusters.  
 
@@ -375,14 +368,13 @@ To choose the clustering resolution of interest you should consider:
 choose the resolution that better adapts to the expected biology).
 - Information from downstream analyses (sometimes it is necessary to study serveral resolutions before choosing the one that reflects better the biology of your data).
 
-In our case we decided to choose the **0.8 resolution**,
-since this resolution better described the biological groups that we were expecting.
+In our case we decided to choose the **0.8 resolution**, since it better described the biological groups that we were expecting.
 
 
 ### 6. Diferential expression analysis
 
 This step is **fundamental** to characterize the dataset. 
-Here, the expression profile of each cluster is compared to the rest of the clusters,
+Here, the expression profile of each cluster is compared to the rest,
 obtaining the **marker genes** per cluster (filtered by logFC, and a minimum number of cells expressing each gene), but also complete differential expression analysis including all the genes of the dataset.
 The marker genes are a valuable information since they will be useful for the functional characterization of the clusters.
 
@@ -443,10 +435,9 @@ This tool calculates a score called "Vision score" which represents the molecula
 The higher the score, the more expressed the signature is.
 The significance of this score is calculated using the Geary C Statistics method,
 which measures autocorrelation between cells.
-If the cells that are close in the dimensional space and have a high Vision score compared to the rest of the cells, 
-the molecular signature will be significant.
-If a molecular signature is significant at the chosen resolution, 
-bollito will create a plot representing the Vision scores of each cell in the UMAP.
+If cells in close proximity have a high Vision score compared to the rest of the cells, the molecular signature will be significant.
+When a molecular signature is significant (at the chosen resolution), bollito will create a plot representing the Vision scores of each cell in the UMAP.
+
 
 In this case the user will just have to select:
 - Set of **molecular signatures** to be tested.
