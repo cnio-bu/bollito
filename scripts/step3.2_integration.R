@@ -5,6 +5,7 @@ sink(log, type = "message")
 suppressMessages(library("Seurat"))
 suppressMessages(library("ggplot2"))
 suppressMessages(library("RColorBrewer"))
+suppressMessages(library("stringr"))
 
 # A. Parameters: folder configuration.
 dir.name = snakemake@params[["output_dir"]]
