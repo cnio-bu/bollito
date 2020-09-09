@@ -8,7 +8,7 @@ suppressMessages(library("data.table"))
 suppressMessages(library("reticulate"))
 suppressMessages(library("ggplot2"))
 suppressMessages(library("stringr"))
-
+suppressMessages(library("future"))
 
 # A. Parameters: folder configuration. 
 dir.name = snakemake@params[["output_dir"]]
@@ -16,19 +16,23 @@ input_data = snakemake@input[["seurat_obj"]]
 folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs")
 
 # B. Parameters: analysis configuration. 
-normalization = snakemake@params[["normalization"]] # "SCT" or "standard"
+normalization = snakemake@params[["norm_type"]] # "SCT" or "standard"
 regress_out = snakemake@params[["regress_out"]] # true or false
 vars_to_regress = c(snakemake@params[["vars_to_regress"]]) # check if null 
 random_seed = snakemake@params[["random_seed"]]
 regress_cell_cycle = snakemake@params[["regress_cell_cycle"]]
 regress_merge_effect = snakemake@params[["regress_merge_effect"]]
 case = snakemake@params[["case"]]
+threads = snakemake@threads
 
 # C. Analysis.
 # Set seed.
 if (is.numeric(random_seed)) {
   set.seed(random_seed)
 }
+
+#Set parallelization.
+plan("multiprocess", workers = threads)
 
 # Load cell cycle markers signature from Tirosh et al, 2015.
 s.genes <- cc.genes$s.genes
@@ -67,7 +71,7 @@ if(normalization == "standard"){
   seurat <- FindVariableFeatures(seurat, selection.method = "vst", nfeatures = 2500)
 
   # Identify the 10 most highly variable genes.
-  top10 <- head(VariableFeatures(seurat), 15)
+  top10 <- head(VariableFeatures(seurat), 10)
   p1 <- VariableFeaturePlot(seurat) + theme(legend.position="bottom") 
   LabelPoints(plot = p1, points = top10, repel = TRUE) + theme(legend.position="bottom") 
   ggsave(paste0(dir.name, "/",folders[1], "/6_variable_features.pdf"), plot = p1)
@@ -83,8 +87,7 @@ if(normalization == "standard"){
   seurat <- RunPCA(seurat, features = VariableFeatures(object = seurat), npcs = 50)
 
   # Cell cycle scores and plots.
-  seurat <- CellCycleScoring(object = seurat, s.features = s.genes, g2m.features = g2m.genes, set.ident 
-= T)
+  seurat <- CellCycleScoring(object = seurat, s.features = s.genes, g2m.features = g2m.genes, set.ident = T)
   p4 <- FeaturePlot(object = seurat, features ="S.Score") + ggtitle("S phase score")
   ggsave(paste0(dir.name, "/", folders[2], "/4_sscore_featureplot.pdf"), plot = p4, scale = 1.5)
   p5 <- FeaturePlot(object = seurat, features ="G2M.Score") + ggtitle("G2/M phase score")
@@ -126,7 +129,7 @@ if(normalization == "standard"){
   seurat <- RunPCA(seurat, features = VariableFeatures(object = seurat), npcs = 50) # This result could all be saved in a table.
   
   # Cell cycle scores and plots.
-  seurat <- CellCycleScoring(object = seurat, s.features = s.genes, g2m.features = g2m.genes, set.ident = T)
+  seurat <- CellCycleScoring(object = seurat, s.features = s.genes, g2m.features = g2m.genes, set.ident = TRUE)
   p4 <- FeaturePlot(object = seurat, features ="S.Score") + ggtitle("S phase score")
   ggsave(paste0(dir.name, "/", folders[2], "/4_sscore_featureplot.pdf"), plot = p4, scale = 1.5)
   p5 <- FeaturePlot(object = seurat, features ="G2M.Score") + ggtitle("G2/M phase score")

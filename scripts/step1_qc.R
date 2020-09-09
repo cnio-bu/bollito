@@ -11,7 +11,7 @@ suppressMessages(library("stringr"))
 suppressMessages(library("Matrix"))
 
 # A. Parameters: folder configuration 
-data_dir = paste0(snakemake@params[["input_dir"]],"/Solo.out/Gene/filtered")
+data_dir = paste0(snakemake@params[["input_dir"]],"/Solo.out/Gene/raw")
 dir.name = snakemake@params[["output_dir"]]
 folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs", "6_traj_in", "7_func_analysis")
 
@@ -54,17 +54,15 @@ if (input_type == "fastq") {
 # If the input file are matrices (directly read from units.tsv).
 } else if (input_type == "matrix") { # units.tsv is loaded
   units <- read.csv(units_path, header = TRUE, sep = "\t", row.names = 1, comment.char = "#")
-  
+  message(units[sample,"unit"])  
   # If the expression matrix is in 10x like format (matrix, cell barcodes and genes).
-  if (units[sample,"matrix_type"] == "10x") { 
+  if (units[sample,"unit"] == "10x") { 
     expression_matrix <- readMM(toString(units[sample,"matrix"]))
     colnames(expression_matrix) <- read.table(toString(units[sample,"cell_names"]))[,1]
     row.names(expression_matrix) <- read.table(toString(units[sample,"gene_names"]))[,1]
-
   # If the expression matrix is in TSV format ((genes as row names and cells as column names).
-  } else if (units[sample,"matrix_type"] == "standard") { 
+  } else if (units[sample,"unit"] == "standard") { 
     expression_matrix = read.csv(toString(units[sample,"matrix"]), sep = "\t", header = TRUE, row.names = 1)
-
   } else {
     message("Please specify a correct unit input.")
   }
@@ -73,12 +71,16 @@ if (input_type == "fastq") {
 }
 
 # 1. Creating a seurat object. 
+expression_matrix <- expression_matrix[, colSums(expression_matrix != 0) > 100] # Take into account cells with more than 100 counts, since CreateSeuratObject function breaks.
 seurat = CreateSeuratObject(expression_matrix, project = sample, min.features = 200, min.cells = min_cells_per_gene)
 
 # 1.1 Add metadata from samples.tsv file.  
 samples_file = read.table(samples_path, sep = "\t", row.names = 1, header = TRUE)
-for (i in 1:length(colnames(samples_file))) {
-  seurat <- AddMetaData(seurat, samples_file[sample, i], col.name = colnames(samples_file)[i])
+message(print(dim(samples_file)[2]))
+if (dim(samples_file)[2] != 0){
+  for (i in 1:length(colnames(samples_file))) {
+    seurat <- AddMetaData(seurat, samples_file[sample, i], col.name = colnames(samples_file)[i])
+  }
 }
 
 # 1.1.1 Add specific cell metadata from metadata.tsv file.
@@ -96,7 +98,6 @@ if (input_type == "matrix") {
 
 #1.2 Set idents to avoid new idents based on shared CB names. 
 Idents(seurat) <- rep(sample, length(colnames(seurat$RNA@data)))
-
 
 # 2. Preprocessing: Filter out low-quality cells.
 # 2.1. Mitochondrial genes - check levels of expression for mt genes. 
@@ -118,6 +119,7 @@ scatter1 <- FeatureScatter(seurat, feature1 = "nCount_RNA", feature2 = "percent.
 scatter2 <- FeatureScatter(seurat, feature1 = "nCount_RNA", feature2 = "nFeature_RNA", pt.size = 0.25) + theme(legend.position="bottom") + labs(title = "Nº features vs Nº counts", x = "Nº counts", y = "Nº features")
 p3 <- CombinePlots(plots = list(scatter1, scatter2))
 ggsave(paste0(dir.name, "/", folders[1], "/2_geneplot_numi_vs_pctmit_ngene.pdf"), plot = p3, scale = 1.5)
+
 
 # 2.5. Save RDS: we can use this object to generate all the rest of the data.
 saveRDS(seurat, file = paste0(dir.name, "/" ,folders[1], "/seurat_pre-qc.rds"))

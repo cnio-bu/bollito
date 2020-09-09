@@ -6,6 +6,8 @@ suppressMessages(library("Seurat"))
 suppressMessages(library("ggplot2"))
 suppressMessages(library("RColorBrewer"))
 suppressMessages(library("stringr"))
+suppressMessages(library("future"))
+suppressMessages(library("stringr"))
 
 # A. Parameters: folder configuration.
 dir.name = snakemake@params[["output_dir"]]
@@ -17,7 +19,8 @@ random_seed = snakemake@params[["random_seed"]]
 velocyto = snakemake@params[["velocyto"]]
 outdir_config = snakemake@params[["outdir_config"]]
 case = snakemake@params[["case"]]
-ram = snakemake@res[["mem"]]
+ram = snakemake@resources[["mem"]]
+threads = snakemake@threads
 
 # C. Analysis.
 options(future.globals.maxSize = ram*1024^2)
@@ -26,6 +29,9 @@ options(future.globals.maxSize = ram*1024^2)
 if (is.numeric(random_seed)) {
   set.seed(random_seed)
 }
+
+# Set parallelization
+plan("multiprocess", workers = threads)
 
 # Load cell cycle genes.
 s.genes <- cc.genes$s.genes

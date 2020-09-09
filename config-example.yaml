@@ -36,26 +36,24 @@ parameters:
         # NOTE: leave value empty to ignore limit
         min_feat: 500 # minimum number of unique genes detected per cell
         max_feat: 2500 # maximum number of unique genes detected per cell
-        min_count: # minimum number of counts per cell
-        max_count: # maximum number of counts per cell
+        min_count: null # minimum number of counts per cell
+        max_count: null # maximum number of counts per cell
         mit_pct: 10 # minimum percentaje of reads mapping to the mitochondrial genome
         ribo_pct: 40 # minimum percentaje of reads mapping to the ribosomal genome
-    seurat_filter: # step 2.1: filter out cells based on positive or negative marker gene(s)
-        gene: #gene or list of genes
-        threshold: # expression level threshold
+    seurat_filter: #[OPTIONAL] step 2.1: filter out cells based on positive or negative marker gene(s)
+        genes: ["CD3", "CD4"] #gene or list of genes used to filter the dataset
+        threshold: 5 # expression level threshold (number of counts/cell)
         filter_out: False # True: keep cells with expression higher than *threshold*. False: the opposite.
-    seurat_merge: # step 2.5: merging all samples
+    seurat_merge: #[OPTIONAL] step 2.5: merging all samples
         enabled: True
     seurat_normalization: # step 3: normalization and generation of jackstraw and elbow plots 
-        normalization: "SCT" # normalisation strategy ("SCT" or "standard")
+        norm_type: "SCT" # normalization strategy ("SCT" or "standard")
         regress_out: True # if True, regress out biological or technical effects stored in the metadata table of the Seurat object
         vars_to_regress: "percent.mt" # vars_to_regress: some variables can be regressed out to minimize their effect on the samples. It needs to be written in a python list format (more than one variable).
         regress_cell_cycle: False # if True, regress out the cell cycle effect (check out the cell cycle plot first)
-        regress_merge_effect: False # if True, regress out the cell cycle effect (check out the cell cycle plot first)
-    seurat_integration: # step 3B: integration (equivalent to the step 3 (normalization), but creates an integrated object)
+        regress_merge_effect: False # if True, regress out the differences between the merged samples.
+    seurat_integration: #[OPTIONAL] step 3B: integration (equivalent to the step 3 (normalization), but creates an integrated object)
         enabled: True
-        norm_type: "SCT" # normalisation strategy ("SCT" or "standard")
-        vars_to_regress: "percent.mt" # vars_to_regress: some variables can be regressed out to minimize their effect on the samples. It needs to be written in a python list format (more than one variable).
     seurat_find_clusters: # step 4: clustering of your data
         principal_components: 10 # this number should be set based on the output of step 3 (normalization)
         resolutions: [0.2, 0.4, 0.8, 1.2, 1.6] # the resolution value(s) will set the granularity of the clustering (typicaly between 0.4-1.2).
@@ -63,27 +61,26 @@ parameters:
     seurat_degs: # step 5: marker and differentially expressed genes calculation
         selected_res: 0.4 # resolution to be used in the downstream analysis
         test: "wilcox" # statistical test to use for the DE analysis (see Seurat's FindMarkers function options)
-    seurat_gs: # step 6: gene set scoring will calculate the average expression levels of each specified regulatory program
-        geneset_collection: # gene set collections in GMT format to test
+    seurat_gs: #[OPTIONAL] step 6: gene set scoring will calculate the average expression levels of each specified regulatory program
+        geneset_collection: "/my/symbols.gmt" # geneset collections in GMT format to test
         geneset_percentage: 0.2 # minimum ratio (expressed genes / total genes) for a geneset to be tested
-    slingshot: # step 7: trajectory inference step
+    slingshot: #[OPTIONAL] step 7: trajectory inference step
         enabled: True
         selected_res: 0.4 # resolution (number of clusters) taken from Seurat object to perform the trajectory analysis.
-        start_clus: False # cluster from where the curve or lineage starts (optional)
-        end_clus: False # start_clus: last cluster of the curve or lienage (optional)
+        start_clus: False # cluster or clusters from where the curve or lineage start (optional)
+        end_clus: False # cluster or clusters where the curve or lineage end (optional)
         n_var_genes: 1000 # top n variable genes selected to fit the model
         n_plotted_genes: 50 # n top variable genes to plot in the heatmap
-    vision: # step 8: cell and cluster functional analysis based on molecular signatures
+    vision: #[OPTIONAL] step 8: cell and cluster functional analysis based on molecular signatures
         enabled: True
-        mol_signatures: "/my/symbols.gmt" # path to molecular signatures gmt file.
+        geneset_collection: "/my/symbols.gmt" # geneset collections in GMT format to test
         meta_columns: ["nCount_RNA", "nFeature_RNA", "percent.mt", "percent.ribo"] # metadata information to keep from the Seurat object
-        n_cores: 12 # cores given for the analysis
         selected_res: 0.4 # resolution at which to select clusters to be added as metadata
-    velocyto: # step 9: RNA velocity plots over single experiments samples.
+    velocyto: #[OPTIONAL] step 9: RNA velocity plots over single experiments samples.
         enabled: True
         selected_res: 0.4 # resolution (number of clusters) to represent in the velocity plot
         downsampling: False # cell downsampling (useful for samples with large number of cells)
-        n_cells: 3000 # number of cells used to perform the downsampling
+        n_cells: null # number of cells used to perform the downsampling
     fastq_screen:
         enabled: False
     fastq_screen_indexes:
@@ -128,18 +125,23 @@ resources:
     seurat_merge:
         mem: 16000
     seurat_normalization:
+        threads: 4
         mem: 16000
     seurat_integration:
+        threads: 4
         mem: 32000
     seurat_find_clusters:
+        threads: 4
         mem: 8000
     seurat_degs:
+        threads: 4
         mem: 64000
     seurat_gs:
         mem: 16000
     slingshot:
         mem: 8000
     vision:
+        threads: 4
         mem: 16000 
     velocyto:
         mem: 32000

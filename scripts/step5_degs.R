@@ -9,6 +9,7 @@ suppressMessages(library("reticulate"))
 suppressMessages(library("ggplot2"))
 suppressMessages(library("BiocParallel"))
 suppressMessages(library("openxlsx"))
+suppressMessages(library("future"))
 
 # A. Parameters: folder configuration. 
 dir.name = snakemake@params[["output_dir"]]
@@ -19,12 +20,16 @@ folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_g
 selected_res = snakemake@params[["selected_res"]]
 random_seed = snakemake@params[["random_seed"]]
 test = snakemake@params[["test"]]
-
+threads = snakemake@threads
+print(threads)
 # C. Analysis.
 # Set seed.
 if (is.numeric(random_seed)) {
   set.seed(random_seed)
 }
+
+# Set parallelization
+plan("multiprocess", workers = threads)
 
 # Load seurat object and set clustering resolution and assay type.
 seurat <- readRDS(input_data)
@@ -34,6 +39,12 @@ if (!(cluster_res %in% colnames(seurat@meta.data))){
   stop("Specified resolution is not available.")
 }
 
+# Check number of cells for the heatmap to avoid errors.
+if (length(colnames(seurat)) < 1000){
+  n_cells = length(colnames(seurat))
+} else {
+  n_cells = 1000
+}
 
 #Set styles for xlsx files.
 redStyle <- createStyle(fontColour = "#B60A1C", bgFill = "#FFF06A", textDecoration = c("BOLD"))
@@ -88,7 +99,7 @@ if (seurat@active.assay == "integrated") {
   
   # 8.3.1. HeatMap top10.
   # setting slim.col.label to TRUE will print just the cluster IDS instead of every cell name
-  p1 <- DoHeatmap(object = seurat, features = groupedby.clusters.markers$gene, cells = 1:length(colnames(seurat)), size = 8, angle = 45, 
+  p1 <- DoHeatmap(object = seurat, features = groupedby.clusters.markers$gene, cells = 1:n_cells, size = 8, angle = 45, 
 	    group.bar = TRUE, draw.lines = F, raster = FALSE) +
   scale_fill_gradientn(colors = c("blue", "white", "red")) + guides(color=FALSE) + theme(axis.text.y = element_text(size = 8)) + theme(legend.position="bottom") 
   ggsave(paste0(dir.name, "/", folders[4], "/1_heatmap_topmarkers.pdf"), plot = p1, scale = 3)

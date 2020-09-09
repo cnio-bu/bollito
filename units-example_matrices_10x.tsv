@@ -1,3 +1,3 @@
-sample	matrix_type	matrix	cell_names	gene_names	metadata
+sample	units	matrix	cell_names	gene_names	metadata
 heart	10x	data/matrices/heart/matrix.mtx	data/matrices/heart/cell_names.tsv	data/matrices/heart/gene_names.tsv	data/matrices/heart/metadata.tsv
 brain	10x	data/matrices/brain/matrix.mtx	data/matrices/brain/cell_names.tsv	data/matrices/brain/gene_names.tsv	data/matrices/brain/metadata.tsv

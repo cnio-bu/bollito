@@ -73,7 +73,7 @@ rule seurat_filter:
     params: 
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
         random_seed = config["random_seed"],
-        gene = config["parameters"]["seurat_filter"]["gene"],
+        genes = config["parameters"]["seurat_filter"]["genes"],
         filter_out = config["parameters"]["seurat_filter"]["filter_out"],
         threshold = config["parameters"]["seurat_filter"]["threshold"]
     conda: "../envs/seurat.yaml"
@@ -113,7 +113,7 @@ def norm_input(wc):
     #if wc.sample == "merged":
     #    return ""  
     else:
-        if config["parameters"]["seurat_filter"]["gene"]:
+        if config["parameters"]["seurat_filter"]["genes"]:
             return f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_post-qc-filtered.rds"
         else:
             return f"{OUTDIR}/seurat/{{sample}}/1_preprocessing/seurat_post-qc.rds"
@@ -135,16 +135,17 @@ rule seurat_normalization:
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
         random_seed = config["random_seed"],
         case = config["case"],
-        normalization = config["parameters"]["seurat_normalization"]["normalization"],
+        norm_type = config["parameters"]["seurat_normalization"]["norm_type"],
         regress_out = config["parameters"]["seurat_normalization"]["regress_out"],
         vars_to_regress = config["parameters"]["seurat_normalization"]["vars_to_regress"],
         regress_cell_cycle = config["parameters"]["seurat_normalization"]["regress_cell_cycle"],
-        regress_merge_effect = config["parameters"]["seurat_normalization"]["regress_merge_effect"]
-        
+        regress_merge_effect = config["parameters"]["seurat_normalization"]["regress_merge_effect"]        
     conda: "../envs/seurat.yaml"
     resources:
         mem=get_resource("seurat_normalization","mem"),
         walltime=get_resource("seurat_normalization","walltime")
+    threads: 
+        get_resource("seurat_normalization","threads")
     script:
         "../scripts/step3_normalization.R"
 
@@ -161,14 +162,16 @@ rule seurat_integration:
         output_dir = f"{OUTDIR}/seurat/integrated",
         random_seed = config["random_seed"],
         case = config["case"],
-        norm_type = config["parameters"]["seurat_integration"]["norm_type"],
-        vars_to_regress = config["parameters"]["seurat_integration"]["vars_to_regress"],  
+        norm_type = config["parameters"]["seurat_normalization"]["norm_type"],
+        vars_to_regress = config["parameters"]["seurat_normalization"]["vars_to_regress"],  
         velocyto = config["parameters"]["velocyto"]["enabled"],
         outdir_config = f"{OUTDIR}"
     conda: "../envs/seurat.yaml"
     resources:
         mem=get_resource("seurat_integration","mem"),
         walltime=get_resource("seurat_integration","walltime")
+    threads: 
+        get_resource("seurat_integration","threads")
     script:
         "../scripts/step3.2_integration.R"
 
@@ -191,6 +194,8 @@ rule seurat_find_clusters:
     resources:
         mem=get_resource("seurat_find_clusters","mem"),
         walltime=get_resource("seurat_find_clusters","walltime")
+    threads: 
+        get_resource("seurat_find_clusters","threads")
     script:
         "../scripts/step4_find-clusters.R"
 
@@ -212,6 +217,8 @@ rule seurat_degs:
     resources:
         mem=get_resource("seurat_degs","mem"),
         walltime=get_resource("seurat_degs","walltime")
+    threads: 
+        get_resource("seurat_degs","threads")
     script:
         "../scripts/step5_degs.R"
 
@@ -275,9 +282,8 @@ rule vision:
         output_dir = f"{OUTDIR}/vision/{{sample}}",
         random_seed = config["random_seed"],
         selected_res = config["parameters"]["vision"]["selected_res"],
-        mol_signatures = config["parameters"]["vision"]["mol_signatures"],
+        geneset_collection = config["parameters"]["vision"]["geneset_collection"],
         meta_columns = config["parameters"]["vision"]["meta_columns"],
-        n_cores = config["parameters"]["vision"]["n_cores"],
         regress_out = config["parameters"]["seurat_normalization"]["regress_out"],
         vars_to_regress = config["parameters"]["seurat_normalization"]["vars_to_regress"],
         regress_cell_cycle = config["parameters"]["seurat_normalization"]["regress_cell_cycle"]
@@ -285,5 +291,7 @@ rule vision:
     resources:
         mem=get_resource("vision","mem"),
         walltime=get_resource("vision","walltime")
+    threads: 
+        get_resource("vision","threads")
     script:
         "../scripts/step8_func_analysis.R"

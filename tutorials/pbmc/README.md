@@ -21,12 +21,12 @@ The first step is to download the data we will be analysing. In this case it wil
 You should download these files and put them in a directory of your choice. We will use the example directory `/my/data/files` throughout the tutorial. You should instead use the real path to your files.
 
 First pair of files, corresponding to lane 1 of the flowcell:
-- [3M_pbmc_1k_v3_S1_L001_R1_001.fastq.gz](https://bioinformatics.cnio.es/data/pipelines/single_cell/10x_sample_data/pbmc_1M/3M_pbmc_1k_v3_S1_L001_R1_001.fastq.gz)
-- [3M_pbmc_1k_v3_S1_L001_R2_001.fastq.gz](https://bioinformatics.cnio.es/data/pipelines/single_cell/10x_sample_data/pbmc_1M/3M_pbmc_1k_v3_S1_L001_R2_001.fastq.gz)
+- [5M_pbmc_1k_v3_S1_L001_R1_001.fastq.gz](https://bioinformatics.cnio.es/data/pipelines/single_cell/10x_sample_data/pbmc_5M/5M_pbmc_1k_v3_S1_L001_R1_001.fastq.gz)
+- [5M_pbmc_1k_v3_S1_L001_R2_001.fastq.gz](https://bioinformatics.cnio.es/data/pipelines/single_cell/10x_sample_data/pbmc_5M/5M_pbmc_1k_v3_S1_L001_R2_001.fastq.gz)
 
 Second pair of files, corresponding to lane 2 of the flowcell:
-- [3M_pbmc_1k_v3_S1_L002_R1_001.fastq.gz](https://bioinformatics.cnio.es/data/pipelines/single_cell/10x_sample_data/pbmc_1M/3M_pbmc_1k_v3_S1_L002_R1_001.fastq.gz)
-- [3M_pbmc_1k_v3_S1_L002_R2_001.fastq.gz](https://bioinformatics.cnio.es/data/pipelines/single_cell/10x_sample_data/pbmc_1M/3M_pbmc_1k_v3_S1_L002_R2_001.fastq.gz)
+- [5M_pbmc_1k_v3_S1_L002_R1_001.fastq.gz](https://bioinformatics.cnio.es/data/pipelines/single_cell/10x_sample_data/pbmc_5M/5M_pbmc_1k_v3_S1_L002_R1_001.fastq.gz)
+- [5M_pbmc_1k_v3_S1_L002_R2_001.fastq.gz](https://bioinformatics.cnio.es/data/pipelines/single_cell/10x_sample_data/pbmc_5M/5M_pbmc_1k_v3_S1_L002_R2_001.fastq.gz)
 
 > The files with *R1* (for *read 1*) in their names store the unique molecular identifiers (UMI) and the cell barcodes.
 > The files with *R2* (for *read 2*) in their names store the cDNA data.
@@ -58,8 +58,8 @@ Your units.tsv file should look like this:
 
 | sample | unit | fq1 | fq2 |
 | ------ | ---- | ---------- | ----- |
-| PBMC   | l1   | /my/data/files/3M_pbmc_1k_v3_S1_L001_R1_001.fastq.gz      | /my/data/files/3M_pbmc_1k_v3_S1_L001_R2_001.fastq.gz |
-| PBMC   | l2   | /my/data/files/3M_pbmc_1k_v3_S1_L002_R1_001.fastq.gz      | /my/data/files/3M_pbmc_1k_v3_S1_L002_R2_001.fastq.gz |
+| PBMC   | l1   | /my/data/files/5M_pbmc_1k_v3_S1_L001_R1_001.fastq.gz      | /my/data/files/5M_pbmc_1k_v3_S1_L001_R2_001.fastq.gz |
+| PBMC   | l2   | /my/data/files/5M_pbmc_1k_v3_S1_L002_R1_001.fastq.gz      | /my/data/files/5M_pbmc_1k_v3_S1_L002_R2_001.fastq.gz |
 
 > NOTE: remember to change the file paths to wherever you stored the downloaded fastq files.
 
@@ -112,8 +112,8 @@ In this section we will establish some thresholds for the inclusion and exclusio
 
 | Name             | Value |  Commentary                                             |
 |------------------|-------|---------------------------------------------------------|
-| min_feat         | 250  | Bottom limit for the number of expressed genes.         |
-| max_feat         | 1500  | Upper limit for the number of expressed genes.          |
+| min_feat         | 400  | Bottom limit for the number of expressed genes.         |
+| max_feat         | 2000  | Upper limit for the number of expressed genes.          |
 | mit_pct          | 18    | Upper limit for the mitochondrial percentage of counts. |
 
 #### Single-cell normalization (seurat_normalization)
@@ -159,14 +159,14 @@ Also, the metadata variables from the Seurat object were added and the chosen cl
 | mol_signatures  | Hallmarks.gmt | Upper limit for the number of expressed genes.          |
 | meta_colums     | ["nCount_RNA", "nFeature_RNA", "percent.mt", "percent.ribo"] | Metadata variables from Seurat. |
 | n_cores         | 8 | Threads provided to Vision.                                      |
-| selected_res    | 0.4 | Clustering resolution chosen. |
+| selected_res    | 0.8 | Clustering resolution chosen. |
 
 #### Single-cell differential expression analysis - “seurat_degs“
 We have also decided to focus on the resolution 0.4, for the differential expression analysis between clusters. For the differential expression analysis step, the statistical test must be specified. In our case, we decided to apply a  Wilcoxon test. The resolution must also be specified.
 
 | Name             | Value |  Commentary                                             |
 |------------------|-------|---------------------------------------------------------|
-| selected_res  | 0.4   | Clustering resolution chosen.  |
+| selected_res  | 0.8   | Clustering resolution chosen.  |
 | test   | "wilcox" | Statistical test to use for the DE analysis   |
 
 #### Resources per rule specification.
@@ -180,11 +180,11 @@ We have also decided to focus on the resolution 0.4, for the differential expres
 | multiqc                     | 8000       | 1          | 
 | seurat_qc                   | 3000       | 1          |
 | seurat_postqc               | 4000       | 1          |  
-| seurat_normalization        | 16000      | 1          |
-| seurat_find_clusters        | 8000       | 1          | 
-| seurat_degs                 | 64000      | 1          | 
+| seurat_normalization        | 16000      | 4          |
+| seurat_find_clusters        | 8000       | 4          | 
+| seurat_degs                 | 64000      | 4          | 
 | seurat_gs                   | 16000      | 1          | 
-| vision                      | 16000      | 1          | 
+| vision                      | 16000      | 8          | 
 
 
 ## Execute the pipeline
@@ -291,7 +291,7 @@ To study this correlation is useful to take a look at the "2\_geneplot\_numi\_vs
 In this case, we have chosen to filter both datasets according to
 the number of features (expressed genes) and the mitochondrial percentage:
 
-- The **number of features** thresholds were set to 250 for the bottom limit and 1500 for the upper limit.
+- The **number of features** thresholds were set to 400 for the bottom limit and 2000 for the upper limit.
 - The **mitochondrial percentage** upper threshold was set to 18.
 
 These values must be specified in the configuration file ("seurat_postqc" parameters). 
@@ -302,8 +302,8 @@ The **results** can be observed in the following table.
 
 |         | Number.of.cells | Count median | Expressed genes median | Mitochondrial percentage median | Ribosomal percentage median |
 | ------- | --------------- | ------------ | ---------------------- | ------------------------------- | --------------------------- |
-| Pre-QC  | 1125            | 1659         | 693                    | 10.6822880771881                | 25.8887876025524            |
-| Post-QC | 947             | 1689         | 703                    | 10.2786660575605                | 28.2079646017699            |
+| Pre-QC  | 1158            | 2477         | 949                    | 10.7102532951626                | 24.8831836277771            |
+| Post-QC | 1006            | 2521         | 958                    | 10.5033238004125                | 27.5509204415016            |
 
 > TIP: it is recommended to take a look at the new violin plots and the summary table,
 since the filtering might be too stringent or too lenient and it could be interesting to repeat the step.
@@ -320,7 +320,7 @@ The first one shows the variance explained by each component, while the second o
 
 <img src="./images/3_elbowplot.png" width="500"> <img src="./images/4_jackstrawplot.png" width="500">
 
-From the JackStraw plot, we have observed that the 9th component is the last significant one.
+From the JackStraw plot, we have observed that the 6th component is the last significant one.
 But if we focus on the elbow plot, we can see that the variance starts to be stable at the 7th component.
 For this reason, we prefer to be conservative and keep the first **7 components**.
 Since these are very few components, the execution time won't be compromised.
@@ -378,18 +378,20 @@ Here, the expression profile of each cluster is compared to the rest,
 obtaining the **marker genes** per cluster (filtered by logFC, and a minimum number of cells expressing each gene), but also complete differential expression analysis including all the genes of the dataset.
 The marker genes are a valuable information since they will be useful for the functional characterization of the clusters.
 
-In this **example**, we are showing the most significant marker genes of cluster 1:
+In this **example**, we are showing the most significant marker genes from cluster 3:
 
 |       | p_val                 | avg_logFC         | pct.1 | pct.2 | p_val_adj             |
 | ----- | --------------------- | ----------------- | ----- | ----- | --------------------- |
-| CD79A | 5.32087833368084e-186 | 1.42700908615358  | 0.897 | 0.007 | 6.11794590806623e-182 |
-| IGHM  | 3.01022077073716e-173 | 1.99322424976967  | 0.837 | 0.005 | 3.46115184219359e-169 |
-| MS4A1 | 4.87448047727648e-139 | 0.972719040822312 | 0.717 | 0.011 | 5.60467765277249e-135 |
-| IGKC  | 5.70790922879057e-128 | 2.47540301079358  | 0.696 | 0.018 | 6.56295403126339e-124 |
-| CD79B | 2.24742856656013e-114 | 0.899596004394067 | 0.734 | 0.047 | 2.58409336583084e-110 |
+| IGHM	| 2.5686639735559e-169 | 2.29518089668881	| 0.977	| 0.037	| 3.21853595886554e-165 |
+| IGHD	| 1.45515702056953e-163 | 1.40162395972261	| 0.832	| 0.011	| 1.82331174677362e-159 |
+| TCL1A	| 1.27868311379366e-160	| 1.41815326167382	| 0.786	| 0.005	| 1.60218994158345e-156 |
+| CD79A	| 1.16708815495879e-152	| 1.66319785231494	| 0.977	| 0.054	| 1.46236145816336e-148 |
+| MS4A1	| 2.78454609873788e-130	| 1.21769054352486	| 0.885	| 0.051	| 3.48903626171856e-126 |
+| LINC00926	| 9.28747846451509e-121	| 0.829780169292718	| 0.725	| 0.025	| 1.16372105160374e-116 |
+| CD79B	| 1.07135580540655e-105	| 1.13380354902644	| 0.863	| 0.088	| 1.34240882417441e-101 |
 
-Among these 5 genes, we can find *CD79A* and *CD79B*. These genes are known to form a complex with the BCR (present in all B cells).
-The result suggest that cells in cluster 1 are mainly *B cells*.
+Among these 7 genes, we can find *CD79A* and *CD79B*. These genes are known to form a complex with the BCR (present in all B cells).
+The result suggest that cells in cluster 3 are mainly *B cells*.
 This procedure should be applied to all clusters in order to characterize the sample.
 To obtain a quick view of the sample's biology, it is also interesting to take a look to the marker genes heatmap.
 
@@ -415,7 +417,7 @@ The user should take into account these three plots to hypothesize about the fun
 > NOTE: keep in mind that the clustree significance is generated by comparing 1 cluster vs the rest, so it is **difficult** for a signature to be significant if it is expressed equally in different clusters.
 
 Here, we can see both clustree plots obtained using the signature "Monocytes and its surface proteins" from [Biocarta](http://amp.pharm.mssm.edu/Harmonizome/dataset/Biocarta+Pathways).
-In this case, the results suggest that cluster 1 is formed by **monocytes**. 
+In this case, the results suggest that cluster 0 (at 0.8 resolution) is formed by **monocytes**. 
 
 
 <img src="./images/BIOCARTA_MONOCYTE_PATHWAY_clustree_mean_pval-1.png" width="900"> 

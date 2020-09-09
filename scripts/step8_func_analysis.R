@@ -15,14 +15,14 @@ input_data = snakemake@input[["seurat_obj"]]
 folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs", "6_traj_in", "7_func_analysis")
 
 # B. Parameters: analysis configuration.
-mol_signatures = snakemake@params[["mol_signatures"]]
+geneset_collection = snakemake@params[["geneset_collection"]]
 meta_columns = snakemake@params[["meta_columns"]]
-n_cores =  snakemake@params[["n_cores"]]
 selected_res = snakemake@params[["selected_res"]]
 random_seed = snakemake@params[["random_seed"]]
 regress_out = snakemake@params[["regress_out"]]
 vars_to_regress = snakemake@params[["vars_to_regress"]]
 regress_cell_cycle = snakemake@params[["regress_cell_cycle"]]
+threads = snakemake@threads
 
 # C. Analysis.
 # Set seed.
@@ -60,18 +60,18 @@ if (seurat@active.assay != "integrated"){
     }
   }
   suppressMessages(vis <- Vision(seurat,
-		  signatures = mol_signatures,
+		  signatures = geneset_collection,
                   meta = seurat@meta.data[,meta_columns],
                   projection_methods = NULL))
 } else {
   suppressMessages(vis <- Vision(rescale(seurat@assays$integrated@scale.data, c(0,10)),
-                    signatures = mol_signatures,
+                    signatures = geneset_collection,
                     meta = seurat@meta.data[,c(meta_columns, "assay_name")],
                     projection_methods = "UMAP"))
 }
 
 # 11.3. Vision analysis step.
-options(mc.cores = n_cores)
+options(mc.cores = threads)
 vis <- suppressMessages(analyze(vis))
 
 # 11.4. Outputs generation.

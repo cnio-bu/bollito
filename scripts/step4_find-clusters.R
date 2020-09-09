@@ -10,6 +10,7 @@ suppressMessages(library("clustree"))
 suppressMessages(library("ggplot2"))
 suppressMessages(library("cluster"))
 suppressMessages(library("writexl"))
+suppressMessages(library("future"))
 
 # A. Parameters: folder configuration. 
 input_file = snakemake@input[["seurat_obj"]]
@@ -21,12 +22,16 @@ pc = snakemake@params[["pc"]] # We should check the PCs using the Elbowplot and 
 res = as.vector(snakemake@params[["res"]])
 random_seed = snakemake@params[["random_seed"]]
 k_neighbors = snakemake@params[["k_neighbors"]]
+threads = snakemake@threads
 
 # C. Analysis.
 # Set seed.
 if (is.numeric(random_seed)) {
   set.seed(random_seed)
 }
+
+# Set parallelization
+plan("multiprocess", workers = threads)
 
 # Load seurat object.
 seurat <- readRDS(input_file)

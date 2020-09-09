@@ -123,7 +123,7 @@ for (i in 1:length(genesets)){
   #ggsave(paste0(dir.name, "/", folders[5], "/", names(genesets)[i], "_clustree_mean.pdf"), plot = p2, scale = 1)
   
   #P-val plot
-  p3 <- clustree(seurat, paste0(assay_type,"_snn_res."), node_colour = gs_name , node_colour_aggr = "mean") + ggtitle(label = names(genesets)[i]) + scale_colour_gradient2(low = "blue", mid = "white", high = "red", midpoint = 3) + theme(plot.title = element_text(size = 12, face = "bold"))
+  p3 <- clustree(seurat, paste0(assay_type,"_snn_res."), node_colour = gs_name , node_colour_aggr = "mean") + ggtitle(label = names(genesets)[i]) + scale_colour_gradient2(low = "blue", mid = "white", high = "red", midpoint = 1.3) + theme(plot.title = element_text(size = 12, face = "bold"))
   clustree_gs_colname = paste0("mean_",gs_name)
   p3$data[[clustree_gs_colname]] <- -log(df_pval[, names(genesets)[i]])
   p3$labels[["colour"]] <- "-log(p_value)"

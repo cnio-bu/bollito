@@ -72,9 +72,14 @@ Use git clone command to create a local copy.
     git clone https://gitlab.com/bu_cnio/bollito.git
 
 ### 3. Configure the pipeline.
+
+Before executing the pipeline, the users must configure it according to their samples. To do this, they must fill these files:
+
+> TIP: different analysis can be run using just one cloned repository. This is achieved by changing the outdir and logdir in the configuration file. Also different parameters values can be used in the different analysis.
+
 #### a. samples.tsv
 
-This file contains information on the samples to be analysed.
+This file contains information on the samples to be analyzed. The first column, called "sample", is mandatory, and defines the sample name for each sample. The other columns are used to define the samples. This information is stored as metadata in the Seurat object, so, every cell belonging to that sample is labeled with the value defined by the user.
 
 An example file ([samples-example.tsv)](https://gitlab.com/bu_cnio/bollito/-/blob/master/samples-example.tsv)) is included in the repository.
 
@@ -131,9 +136,15 @@ Here are some of the main available parameters:
 |**outdir** |Directory where to store the output files.|
 |**logdir** |Directory where to store the log files.|
 |**random_seed** |Seed parameter to allow for reproducible analyses.|
+|**case** |Type of case used to represent the gene names, must be use according the specie and genesets used.|
 |**annotation** |GTF file holding genetic features information.|
 |**idx** |Folder containing STAR genomes indexes.|
 |**whitelist** |Cell barcodes whitelist file needed for 10x experiments quantification and demultiplexing.|
+
+#### d. metadata.tsv (optional)
+
+This file is optional and it is only used when the input file used are matrices. The purpose of this file is to annotate each individual cell, storing that information in the Seurat object. It is a tsv file with two or more columns. The first column corresponds to each cell name specified in *cell_names.tsv* and the rest are the values of the metadata variables. First row of each column indicates the metadata variable name.
+
 
 ## Pipeline steps
 
@@ -210,8 +221,8 @@ bollito can perform an optional merging step.
 This step consists in combining all the sample's Seurat objects which come from the single-cell QC step.
 No normalization is performed in this step, since the merged object will be used as input in the normalization step.
 
-To enable this step, the following parameter needs to be adjusted via the configuration file:
-* Set *perform* to *TRUE*.
+To enable this step, the user just need to set the "enabled" parameter to TRUE in the configuration file.
+
 
 
 #### 4.c. Integration.
@@ -221,12 +232,10 @@ The integration method is based on the identification of *anchor cells* between 
 and the projection of datasets on each other by using these *anchors*.
 For more information regarding the integration step, please refer to the [Seurat Integration and Label Transfer documentation](https://satijalab.org/seurat/v3.1/integration.html).
 
-Normalization is also available on this step, as described above.
+Integration step also performs the normalization of the integrated samples. It uses the same normalization method and values specified for the normalization rule, so the user does not need to specify any extra parameter. 
 
-To enable this step, the following parameters need to be adjusted via the configuration file:
-* Set *perform* to *TRUE*.
-* Specify the normalization method.
-* Specify a variable to regress out (optional).
+To enable this step, the user just need to set the "enabled" parameter to TRUE in the configuration file.
+
 
 ### 5. Clustering.
 
@@ -264,7 +273,7 @@ bollito applies the [Vision](https://github.com/yoseflab/VISION) methodology in 
 different molecular signatures and their significance at a specific clustering resolution.
 
 To enable this step, the following parameters need to be adjusted via the configuration file:
-* Set *perform* to *TRUE*.
+* Set *enabled* to *TRUE*.
 * Set the path to the molecular signatures file to use (in .gmt format).
 * Select the desired metadata variables from Seurat.
 * Set the desired cluster resolution.
