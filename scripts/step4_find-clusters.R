@@ -69,9 +69,19 @@ for(i in 1:length(which(grepl(paste0(assay_type,"_snn_"),colnames(seurat@meta.da
 # Create a xlsx file to store the silhouette scores.
 write_xlsx(silhouette_scores, path = paste0(dir.name, "/", folders[3], "/3_silhouette_score.xlsx"),col_names = TRUE, format_headers = TRUE )
 
-# 7.4. Feature plot.
+# 7.4. Plots on vars to regress
 p3 <- FeaturePlot(seurat, 'nFeature_RNA', pt.size =  0.75) + labs(title = "Nº features") 
-ggsave(paste0(dir.name, "/", folders[3], "/4_featureplot.pdf"), plot = p3, scale = 1.5)
+ggsave(paste0(dir.name, "/", folders[3], "/4.1_featureplot.pdf"), plot = p3, scale = 1.5)
+p4 <- FeaturePlot(seurat, 'nCount_RNA', pt.size =  0.75) + labs(title = "Nº counts") 
+ggsave(paste0(dir.name, "/", folders[3], "/4.2_countplot.pdf"), plot = p4, scale = 1.5)
+p5 <- FeaturePlot(seurat, 'percent.mt', pt.size =  0.75) + labs(title = "% mitochondrial") 
+ggsave(paste0(dir.name, "/", folders[3], "/4.3_mitplot.pdf"), plot = p5, scale = 1.5)
+p6 <- FeaturePlot(seurat, 'percent.ribo', pt.size =  0.75) + labs(title = "% ribosomal") 
+ggsave(paste0(dir.name, "/", folders[3], "/4.4_riboplot.pdf"), plot = p6, scale = 1.5)
+p7 <- FeaturePlot(seurat, 'S.Score', pt.size =  0.75) + labs(title = "S phase score") 
+ggsave(paste0(dir.name, "/", folders[3], "/4.5_sscoreplot.pdf"), plot = p7, scale = 1.5)
+p8 <- FeaturePlot(seurat, 'G2M.Score', pt.size =  0.75) + labs(title = "G2M phase score") 
+ggsave(paste0(dir.name, "/", folders[3], "/4.5_g2mplot.pdf"), plot = p8, scale = 1.5)
 
 # 7.5. Dimplot for merged or integrated objects.
 if (seurat@active.assay == TRUE || seurat@project.name == "merged"){

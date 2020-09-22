@@ -103,6 +103,8 @@ if(normalization == "standard"){
       } else {
         seurat <- ScaleData(seurat, features = rownames(seurat), vars.to.regress = c(vars_to_regress, "S.Score", "G2M.Score"))
       }
+      p7 <- DimPlot(seurat, group.by = "Phase", reduction = "pca", pt.size = 0.5, label = TRUE, label.size = 5) + RotatedAxis()
+      ggsave(paste0(dir.name, "/", folders[2], "/6.1_cell_cycle_regressed_dimplot.pdf"), plot = p7, scale = 1.5)
     } else {
       if (seurat@project.name == "merged"){
         seurat <- ScaleData(seurat, features = rownames(seurat), vars.to.regress = c(vars_to_regress, merge_var))
@@ -152,6 +154,8 @@ if(normalization == "standard"){
         seurat <- SCTransform(seurat, assay = "RNA", new.assay = "SCT", vars.to.regress = c("S.Score", "G2M.Score"), verbose = FALSE)
       }
     }
+    p7 <- DimPlot(seurat, group.by = "Phase", reduction = "pca", pt.size = 0.5, label = TRUE, label.size = 5) + RotatedAxis()
+    ggsave(paste0(dir.name, "/", folders[2], "/6.1_cell_cycle_regressed_dimplot.pdf"), plot = p7, scale = 1.5)
   }
 } else {
 	message("Normalization method not found.")
