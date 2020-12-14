@@ -1,0 +1,13 @@
+channels:
+    - bu_cnio
+    - bioconda
+    - conda-forge
+
+dependencies:
+    - libgfortran
+    - r-seurat=3.2.2
+    - r-tidyverse
+    - r-ggplot2
+    - bioconductor-biocparalleL
+    - r-stringr
+    - r-patchwork

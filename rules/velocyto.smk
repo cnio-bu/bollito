@@ -11,7 +11,6 @@ rule STAR_to_velocyto:
         f"{LOGDIR}/star/{{sample}}/Solo.out/Velocyto/raw/spliced/{{sample}}.STAR_to_velocyto.bmk"
     params:
         input_dir= lambda wc: "{}/star/{}/Solo.out/Velocyto/raw".format(OUTDIR,wc.sample)
-    conda: "../envs/seurat.yaml"
     resources:
         mem=get_resource("STAR_to_velocyto","mem"),
         walltime=get_resource("STAR_to_velocyto","walltime")
@@ -34,8 +33,8 @@ rule velocyto:
         output_dir = f"{OUTDIR}/velocyto/{{sample}}",
         random_seed = config["random_seed"],
         selected_res = config["parameters"]["velocyto"]["selected_res"],
-        downsampling = config["parameters"]["velocyto"]["downsampling"],
-        n_cells = config["parameters"]["velocyto"]["n_cells"]
+        downsampling = config["parameters"]["velocyto"]["downsampling"]["enabled"],
+        n_cells = config["parameters"]["velocyto"]["downsampling"]["n_cells"]
     conda: "../envs/velocyto.yaml"
     resources:
         mem=get_resource("velocyto","mem"),

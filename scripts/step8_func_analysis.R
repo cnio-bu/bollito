@@ -22,9 +22,12 @@ random_seed = snakemake@params[["random_seed"]]
 regress_out = snakemake@params[["regress_out"]]
 vars_to_regress = snakemake@params[["vars_to_regress"]]
 regress_cell_cycle = snakemake@params[["regress_cell_cycle"]]
+ram = snakemake@resources[["mem"]]
 threads = snakemake@threads
 
 # C. Analysis.
+options(future.globals.maxSize = ram*1024^2)
+
 # Set seed.
 if (is.numeric(random_seed)) {
   set.seed(random_seed)

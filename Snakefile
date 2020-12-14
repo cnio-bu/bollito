@@ -54,8 +54,8 @@ def get_resource(rule,resource):
     except KeyError:
         return config["resources"]["default"][resource]
 
-def get_input_degs(wc):
-    if config["parameters"]["seurat_degs"]["selected_res"]:
+def get_output_degs(wc):
+    if config["parameters"]["seurat_degs"]["enabled"] == True:
         samples = [u.sample for u in units.itertuples()] 
         if config["parameters"]["seurat_integration"]["enabled"] == True:
             samples = samples + ['integrated']
@@ -66,8 +66,9 @@ def get_input_degs(wc):
         file = []
     return file
 
-def get_input_gs(wc):
-    if config["parameters"]["seurat_gs"]["geneset_collection"]:
+
+def get_output_gs(wc):
+    if config["parameters"]["seurat_gs"]["enabled"] == True:
         samples = [u.sample for u in units.itertuples()]
         if config["parameters"]["seurat_integration"]["enabled"] == True:
             samples = samples + ['integrated']
@@ -78,7 +79,7 @@ def get_input_gs(wc):
         file = []
     return file
 
-def get_input_ti(wc):
+def get_output_ti(wc):
     if config["parameters"]["slingshot"]["enabled"] == True:
         samples = [u.sample for u in units.itertuples()] 
         if config["parameters"]["seurat_integration"]["enabled"] == True:
@@ -90,7 +91,7 @@ def get_input_ti(wc):
         file = []
     return file
 
-def get_input_fa(wc):
+def get_output_fa(wc):
     if config["parameters"]["vision"]["enabled"] == True:
         samples = [u.sample for u in units.itertuples()] 
         if config["parameters"]["seurat_integration"]["enabled"] == True:
@@ -191,7 +192,7 @@ def seurat_input(wc):
         file = f"{OUTDIR}/star/{{sample}}/Solo.out/Gene/Summary.csv"
     return file
 
-def get_input_find_clus(wc):
+def get_output_normalization(wc):
     samples = [u.sample for u in units.itertuples()] 
     if config["parameters"]["seurat_integration"]["enabled"] == True:
         samples = samples + ['integrated']
@@ -200,15 +201,35 @@ def get_input_find_clus(wc):
     file = expand("{OUTDIR}/seurat/{sample}/2_normalization/seurat_normalized-pcs.rds", sample=samples,OUTDIR=OUTDIR)
     return file
 
+def get_output_find_clus(wc):
+    samples = [u.sample for u in units.itertuples()]
+    if config["parameters"]["seurat_integration"]["enabled"] == True:
+        samples = samples + ['integrated']
+    if config["parameters"]["seurat_merge"]["enabled"] == True:
+        samples = samples + ['merged']
+    file = expand("{OUTDIR}/seurat/{sample}/3_clustering/seurat_find-clusters.rds", sample=samples,OUTDIR=OUTDIR)
+    return file
+
+
+def get_output_qc(wc):
+    samples = [u.sample for u in units.itertuples()] 
+    if config["parameters"]["seurat_merge"]["enabled"] == True:
+        samples = samples + ['merged']
+    file = expand("{OUTDIR}/seurat/{sample}/1_preprocessing/seurat_post-qc.rds", sample=samples,OUTDIR=OUTDIR)
+    return file
+
+
+
 rule all:
     input:
         get_integration,
         get_merge,
         get_multiqc,
-        get_input_degs, 
-        get_input_gs,
-        get_input_ti,
-        get_input_fa,
+        get_output_find_clus,
+	get_output_degs, 
+        get_output_gs,
+        get_output_ti,
+        get_output_fa,
         do_velocity,
         get_velocity_matrices
 
@@ -217,37 +238,20 @@ rule expression_matrix:
         get_velocity_matrices,
         get_multiqc
 
+rule qc_expression_matrix:
+    input:
+        get_output_qc,
+        get_merge,
+        get_multiqc
+
 rule normalized_expression_matrix:
     input:
-        get_input_find_clus,
+        get_output_normalization,
         get_integration,
+        get_merge,
         get_multiqc
 
-rule differential_expression:
-    input:
-        get_input_degs,
-        get_multiqc
 
-rule functional_analysis:
-    input:
-        get_input_fa,
-        get_multiqc
-
-rule trajectory_inference:
-    input:
-        get_input_ti,
-        get_multiqc
-
-rule geneset_analysis:
-    input:
-        get_input_gs,
-        get_multiqc
-
-rule RNA_velocity:
-    input:
-        do_velocity,
-        get_velocity_matrices,
-        get_multiqc
 
 
 ##### setup singularity #####

@@ -23,8 +23,11 @@ units_path = snakemake@params[["units_path"]]
 sample = snakemake@params[["sample"]]
 random_seed = snakemake@params[["random_seed"]]
 case =  snakemake@params[["case"]]
+ram = snakemake@resources[["mem"]]
 
-# C. Analysis
+# C. Analysis.
+options(future.globals.maxSize = ram*1024^2)
+
 if (is.numeric(random_seed)) {
   set.seed(random_seed)
 }

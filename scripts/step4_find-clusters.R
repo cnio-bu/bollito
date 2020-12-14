@@ -22,15 +22,18 @@ pc = snakemake@params[["pc"]] # We should check the PCs using the Elbowplot and 
 res = as.vector(snakemake@params[["res"]])
 random_seed = snakemake@params[["random_seed"]]
 k_neighbors = snakemake@params[["k_neighbors"]]
+ram = snakemake@resources[["mem"]]
 threads = snakemake@threads
 
 # C. Analysis.
+options(future.globals.maxSize = ram*1024^2)
+
 # Set seed.
 if (is.numeric(random_seed)) {
   set.seed(random_seed)
 }
 
-# Set parallelization
+# Set parallelization.
 plan("multiprocess", workers = threads)
 
 # Load seurat object.

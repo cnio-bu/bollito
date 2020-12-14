@@ -21,8 +21,11 @@ max_count = snakemake@params[["max_count"]]
 mit = snakemake@params[["mit"]]
 ribo = snakemake@params[["ribo"]]
 random_seed = snakemake@params[["random_seed"]]
+ram = snakemake@resources[["mem"]]
 
 # C. Analysis.
+options(future.globals.maxSize = ram*1024^2)
+
 # Set seed.
 if (is.numeric(random_seed)) {
   set.seed(random_seed)

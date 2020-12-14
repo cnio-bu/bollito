@@ -23,9 +23,12 @@ random_seed = snakemake@params[["random_seed"]]
 regress_cell_cycle = snakemake@params[["regress_cell_cycle"]]
 regress_merge_effect = snakemake@params[["regress_merge_effect"]]
 case = snakemake@params[["case"]]
+ram = snakemake@resources[["mem"]]
 threads = snakemake@threads
 
 # C. Analysis.
+options(future.globals.maxSize = ram*1024^2)
+
 # Set seed.
 if (is.numeric(random_seed)) {
   set.seed(random_seed)
@@ -171,12 +174,15 @@ p3 <- DimPlot(seurat, reduction = "pca", pt.size = 0.5) + theme(legend.position=
 ggsave(paste0(dir.name, "/",folders[2], "/2_dimplot.pdf"), plot = p3, scale = 1.5)
 
 # 5.3. Determine the dimensionality of the dataset
-seurat <- JackStraw(seurat, num.replicate = 100, dims = 50)
-seurat <- ScoreJackStraw(seurat, dims = 1:50)
-p4 <- ElbowPlot(seurat, ndims = 50) + theme(legend.position="bottom") 
+p4 <- ElbowPlot(seurat, ndims = 50) + theme(legend.position="bottom")
 ggsave(paste0(dir.name, "/",folders[2], "/3_elbowplot.pdf"), plot = p4, scale = 1.5)
-p5 <- JackStrawPlot(seurat, dims = 1:50) + theme(legend.position="bottom") + guides(fill=guide_legend(nrow=2, byrow=TRUE)) + labs(y = "Empirical", x="Theoretical")
-ggsave(paste0(dir.name, "/",folders[2], "/4_jackstrawplot.pdf"), plot = p5, scale = 2)
+
+if (!(seurat@active.assay == "SCT")) {
+  seurat <- JackStraw(seurat, num.replicate = 100, dims = 50)
+  seurat <- ScoreJackStraw(seurat, dims = 1:50)
+  p5 <- JackStrawPlot(seurat, dims = 1:50) + theme(legend.position="bottom") + guides(fill=guide_legend(nrow=2, byrow=TRUE)) + labs(y = "Empirical", x="Theoretical")
+  ggsave(paste0(dir.name, "/",folders[2], "/4_jackstrawplot.pdf"), plot = p5, scale = 2)
+}
 
 if (seurat@project.name == "merged"){
   Idents(seurat) <- "assay_name"

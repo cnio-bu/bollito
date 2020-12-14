@@ -18,8 +18,12 @@ selected_res = snakemake@params[["selected_res"]]
 random_seed = snakemake@params[["random_seed"]]
 downsampling = snakemake@params[["downsampling"]]
 n_cells = snakemake@params[["n_cells"]]
+ram = snakemake@resources[["mem"]]
+threads = snakemake@threads
 
 # C. Analysis.
+options(future.globals.maxSize = ram*1024^2)
+
 # Set seed.
 if (is.numeric(random_seed)) {
   set.seed(random_seed)

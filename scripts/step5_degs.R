@@ -20,9 +20,12 @@ folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_g
 selected_res = snakemake@params[["selected_res"]]
 random_seed = snakemake@params[["random_seed"]]
 test = snakemake@params[["test"]]
+ram = snakemake@resources[["mem"]]
 threads = snakemake@threads
-print(threads)
+
 # C. Analysis.
+options(future.globals.maxSize = ram*1024^2)
+
 # Set seed.
 if (is.numeric(random_seed)) {
   set.seed(random_seed)

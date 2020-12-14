@@ -19,7 +19,7 @@ rule seurat_qc:
         case = config["case"],
         sample = f"{{sample}}",
         min_cells_per_gene = config["parameters"]["seurat_qc"]["min_cells_per_gene"]
-    conda: "../envs/seurat.yaml"
+    conda: "../envs/seurat_qc.yaml"
     resources:
         mem=get_resource("seurat_qc","mem"),
         walltime=get_resource("seurat_qc","walltime")
@@ -54,7 +54,7 @@ rule seurat_post_qc:
         max_count = config["parameters"]["seurat_postqc"]["max_count"],
         mit = config["parameters"]["seurat_postqc"]["mit_pct"],
         ribo = config["parameters"]["seurat_postqc"]["ribo_pct"]
-    conda: "../envs/seurat.yaml"
+    conda: "../envs/seurat_qc.yaml"
     resources:
         mem=get_resource("seurat_postqc","mem"),
         walltime=get_resource("seurat_postqc","walltime")
@@ -76,7 +76,7 @@ rule seurat_filter:
         genes = config["parameters"]["seurat_filter"]["genes"],
         filter_out = config["parameters"]["seurat_filter"]["filter_out"],
         threshold = config["parameters"]["seurat_filter"]["threshold"]
-    conda: "../envs/seurat.yaml"
+    conda: "../envs/seurat_qc.yaml"
     resources:
         mem=get_resource("seurat_filter", "mem"),
         walltime=get_resource("seurat_filter", "walltime")
@@ -98,7 +98,7 @@ rule seurat_merge:
         random_seed = config["random_seed"], 
         velocyto = config["parameters"]["velocyto"]["enabled"],
         outdir_config = f"{OUTDIR}"
-    conda: "../envs/seurat.yaml"
+    conda: "../envs/seurat_qc.yaml"
     resources:
         mem=get_resource("seurat_merge","mem"),
         walltime=get_resource("seurat_merge","walltime")
@@ -136,11 +136,11 @@ rule seurat_normalization:
         random_seed = config["random_seed"],
         case = config["case"],
         norm_type = config["parameters"]["seurat_normalization"]["norm_type"],
-        regress_out = config["parameters"]["seurat_normalization"]["regress_out"],
-        vars_to_regress = config["parameters"]["seurat_normalization"]["vars_to_regress"],
+        regress_out = config["parameters"]["seurat_normalization"]["regress_out"]["enabled"],
+        vars_to_regress = config["parameters"]["seurat_normalization"]["regress_out"]["vars_to_regress"],
         regress_cell_cycle = config["parameters"]["seurat_normalization"]["regress_cell_cycle"],
         regress_merge_effect = config["parameters"]["seurat_normalization"]["regress_merge_effect"]        
-    conda: "../envs/seurat.yaml"
+    conda: "../envs/seurat_norm.yaml"
     resources:
         mem=get_resource("seurat_normalization","mem"),
         walltime=get_resource("seurat_normalization","walltime")
@@ -163,10 +163,10 @@ rule seurat_integration:
         random_seed = config["random_seed"],
         case = config["case"],
         norm_type = config["parameters"]["seurat_normalization"]["norm_type"],
-        vars_to_regress = config["parameters"]["seurat_normalization"]["vars_to_regress"],  
+        vars_to_regress = config["parameters"]["seurat_normalization"]["regress_out"]["vars_to_regress"],  
         velocyto = config["parameters"]["velocyto"]["enabled"],
         outdir_config = f"{OUTDIR}"
-    conda: "../envs/seurat.yaml"
+    conda: "../envs/seurat_norm.yaml"
     resources:
         mem=get_resource("seurat_integration","mem"),
         walltime=get_resource("seurat_integration","walltime")
@@ -190,7 +190,7 @@ rule seurat_find_clusters:
         pc = config["parameters"]["seurat_find_clusters"]["principal_components"],
         res = config["parameters"]["seurat_find_clusters"]["resolutions"],
         k_neighbors = config["parameters"]["seurat_find_clusters"]["k_neighbors"]
-    conda: "../envs/seurat.yaml"
+    conda: "../envs/seurat_clustering.yaml"
     resources:
         mem=get_resource("seurat_find_clusters","mem"),
         walltime=get_resource("seurat_find_clusters","walltime")
@@ -213,7 +213,7 @@ rule seurat_degs:
         random_seed = config["random_seed"],
         selected_res = config["parameters"]["seurat_degs"]["selected_res"],
         test = config["parameters"]["seurat_degs"]["test"]
-    conda: "../envs/seurat.yaml"
+    conda: "../envs/seurat_degs.yaml"
     resources:
         mem=get_resource("seurat_degs","mem"),
         walltime=get_resource("seurat_degs","walltime")
@@ -237,7 +237,7 @@ rule seurat_gs:
         resolutions = config["parameters"]["seurat_find_clusters"]["resolutions"],
         gs_collection = config["parameters"]["seurat_gs"]["geneset_collection"],
         geneset_percentage = config["parameters"]["seurat_gs"]["geneset_percentage"]
-    conda: "../envs/seurat.yaml"
+    conda: "../envs/seurat_gs.yaml"
     resources:
         mem=get_resource("seurat_gs","mem"),
         walltime=get_resource("seurat_gs","walltime")
@@ -261,7 +261,8 @@ rule slingshot:
         end_clus = config["parameters"]["slingshot"]["end_clus"],
         n_var_genes = config["parameters"]["slingshot"]["n_var_genes"],
         n_plotted_genes = config["parameters"]["slingshot"]["n_plotted_genes"],
-        pc = config["parameters"]["seurat_find_clusters"]["principal_components"]
+        pc = config["parameters"]["seurat_find_clusters"]["principal_components"],
+	graphics = config["graphics"]
     conda: "../envs/slingshot.yaml"
     resources:
         mem=get_resource("slingshot","mem"),
@@ -284,8 +285,8 @@ rule vision:
         selected_res = config["parameters"]["vision"]["selected_res"],
         geneset_collection = config["parameters"]["vision"]["geneset_collection"],
         meta_columns = config["parameters"]["vision"]["meta_columns"],
-        regress_out = config["parameters"]["seurat_normalization"]["regress_out"],
-        vars_to_regress = config["parameters"]["seurat_normalization"]["vars_to_regress"],
+        regress_out = config["parameters"]["seurat_normalization"]["regress_out"]["enabled"],
+        vars_to_regress = config["parameters"]["seurat_normalization"]["regress_out"]["vars_to_regress"],
         regress_cell_cycle = config["parameters"]["seurat_normalization"]["regress_cell_cycle"]
     conda: "../envs/vision.yaml"
     resources:

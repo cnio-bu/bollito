@@ -286,4 +286,4 @@ rule multiqc:
         mem=get_resource("multiqc","mem"),
         walltime=get_resource("multiqc","walltime")
     wrapper:
-        "0.49.0/bio/multiqc"
+        "0.66.0/bio/multiqc"

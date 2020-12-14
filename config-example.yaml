@@ -7,7 +7,7 @@ units: units.tsv
 # input type: this variable is used to specify the input files nature ("matrix" or "fastq"). 
 input_type: "fastq"
 
-technology: "10x" # "10x" or "Drop-seq"
+technology: "10x" # "10x", "Drop-seq", "custom" 
 technology_version: "v3" # only if using 10x technology
 
 # Output and log files paths
@@ -48,8 +48,9 @@ parameters:
         enabled: True
     seurat_normalization: # step 3: normalization and generation of jackstraw and elbow plots 
         norm_type: "SCT" # normalization strategy ("SCT" or "standard")
-        regress_out: True # if True, regress out biological or technical effects stored in the metadata table of the Seurat object
-        vars_to_regress: "percent.mt" # vars_to_regress: some variables can be regressed out to minimize their effect on the samples. It needs to be written in a python list format (more than one variable).
+        regress_out:
+            enabled: True # if True, regress out biological or technical effects stored in the metadata table of the Seurat object
+            vars_to_regress: "percent.mt" # vars_to_regress: some variables can be regressed out to minimize their effect on the samples. It needs to be written in a python list format (more than one variable).
         regress_cell_cycle: False # if True, regress out the cell cycle effect (check out the cell cycle plot first)
         regress_merge_effect: False # if True, regress out the differences between the merged samples.
     seurat_integration: #[OPTIONAL] step 3B: integration (equivalent to the step 3 (normalization), but creates an integrated object)
@@ -58,10 +59,12 @@ parameters:
         principal_components: 10 # this number should be set based on the output of step 3 (normalization)
         resolutions: [0.2, 0.4, 0.8, 1.2, 1.6] # the resolution value(s) will set the granularity of the clustering (typicaly between 0.4-1.2).
         k_neighbors: 20 # number of neighbors (k) used to generate the SNN graph
-    seurat_degs: # step 5: marker and differentially expressed genes calculation
+    seurat_degs: # [OPTIONAL] step 5: marker and differentially expressed genes calculation
+        enabled: True
         selected_res: 0.4 # resolution to be used in the downstream analysis
         test: "wilcox" # statistical test to use for the DE analysis (see Seurat's FindMarkers function options)
     seurat_gs: #[OPTIONAL] step 6: gene set scoring will calculate the average expression levels of each specified regulatory program
+        enabled: True
         geneset_collection: "/my/symbols.gmt" # geneset collections in GMT format to test
         geneset_percentage: 0.2 # minimum ratio (expressed genes / total genes) for a geneset to be tested
     slingshot: #[OPTIONAL] step 7: trajectory inference step
@@ -79,8 +82,9 @@ parameters:
     velocyto: #[OPTIONAL] step 9: RNA velocity plots over single experiments samples.
         enabled: True
         selected_res: 0.4 # resolution (number of clusters) to represent in the velocity plot
-        downsampling: False # cell downsampling (useful for samples with large number of cells)
-        n_cells: null # number of cells used to perform the downsampling
+        downsampling:
+            enabled: False # cell downsampling (useful for samples with large number of cells)
+            n_cells: null # number of cells used to perform the downsampling
     fastq_screen:
         enabled: False
     fastq_screen_indexes:
@@ -95,6 +99,8 @@ parameters:
                 "--soloType Droplet --soloFeatures Gene Velocyto --outFilterMultimapNmax 50 --winAnchorMultimapNmax 50 --alignEndsType EndToEnd --outReadsUnmapped Fastx --soloUMIlen 12 --outSAMtype BAM SortedByCoordinate --outSAMattributes NH HI nM AS CR UR CB UB GX GN sS sQ sM"
         drop-seq:
             "--soloType Droplet --soloFeatures Gene Velocyto --outFilterMultimapNmax 50 --winAnchorMultimapNmax 50 --alignEndsType EndToEnd --outReadsUnmapped Fastx --soloUMIlen 8 --soloCBlen 12 --outSAMtype BAM SortedByCoordinate --outSAMattributes NH HI nM AS CR UR CB UB GX GN sS sQ sM" 
+        custom:
+            "--soloType Droplet --soloFeatures Gene Velocyto --outFilterMultimapNmax 50 --winAnchorMultimapNmax 50 --alignEndsType EndToEnd --outReadsUnmapped Fastx --soloUMIlen N --soloCBlen N --outSAMtype BAM SortedByCoordinate --outSAMattributes NH HI nM AS CR UR CB UB GX GN sS sQ sM" 
     multiqc: "--config res/config/multiqc_config.yaml"
 
 resources:

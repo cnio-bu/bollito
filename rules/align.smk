@@ -52,6 +52,9 @@ def extra_params(wc):
     elif config["technology"] == "drop-seq":
         extra = "--sjdbGTFfile {} --soloCBwhitelist None {}".format(config["ref"]["annotation"], config["parameters"]["star"]["drop-seq"])
         return extra
+    elif config["technology"] == "custom":
+        extra = "--sjdbGTFfile {} --soloCBwhitelist None {}".format(config["ref"]["annotation"], config["parameters"]["star"]["custom"])
+        return extra
     else:
         raise ValueError('Specified technology is not valid.')
 
