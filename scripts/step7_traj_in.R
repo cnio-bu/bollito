@@ -2,6 +2,9 @@ log <- file(snakemake@log[[1]], open = "wt")
 sink(log)
 sink(log, type = "message")
 
+message("CONFIGURATION STEP")
+# A. Parameters: 
+# 1. Load libraries. 
 suppressMessages(library("GenomeInfoDbData"))
 suppressMessages(library("Seurat"))
 suppressMessages(library("RColorBrewer"))
@@ -10,13 +13,16 @@ suppressMessages(library("SingleCellExperiment"))
 suppressMessages(library("rmarkdown"))
 suppressMessages(library("gam"))
 suppressMessages(library("pheatmap"))
+if (snakemake@params[["graphics"]]) {suppressMessages(library("rgl"))}
+message("1. Libraries were loaded.")
 
-# A. Parameters: folder configuration.
+# 2. Folder configuration. 
 dir.name = snakemake@params[["output_dir"]]
 input_data = snakemake@input[["seurat_obj"]]
 folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs", "6_traj_in", "7_func_analysis")
+message("2. Folder paths were set.")
 
-# B. Parameters: analysis configuration.
+# 3. Get variables from Snakemake.  
 selected_res = snakemake@params[["selected_res"]]
 start.clus = snakemake@params[["start_clus"]]
 end.clus = snakemake@params[["end_clus"]]
@@ -27,17 +33,20 @@ pc = snakemake@params[["pc"]]
 graphics = snakemake@params[["graphics"]]
 ram = snakemake@resources[["mem"]]
 threads = snakemake@threads
+message("3. Parameters were loaded.")
 
-# C. Analysis.
+# 4. Analysis configuration. 
+# RAM configuration.
 options(future.globals.maxSize = ram*1024^2)
-
 # Set seed.
 if (is.numeric(random_seed)) {
   set.seed(random_seed)
 }
+message(paste0("4. Seed was set at ", random_seed, "."))
+message("Configuration finished.")
+message("\n")
 
-if (graphics) {suppressMessages(library("rgl"))}
-
+message("PROCESSING STEP")
 # 10. Trajectory inference analysis using slingshot.
 # 10.1. Seurat object is converted to SingleCellExperiment object (required by slingshot) & cluster resolution is selected. 
 seurat <- readRDS(input_data)
@@ -47,16 +56,17 @@ if (!(cluster_res %in% colnames(seurat@meta.data))){
   stop("Specified resolution is not available.")
 }
 seurat.sim <- as.SingleCellExperiment(seurat)
-
+message("1. Seurat object was loaded.")
 
 if (graphics){
   # Running UMAP to get 3 dimensions.
   seurat3D <- RunUMAP(seurat,dims = 1:pc, n.components = 3, verbose = FALSE)
   seurat.sim <- as.SingleCellExperiment(seurat)
   seurat3D.sim <- as.SingleCellExperiment(seurat3D)
+  message("1.5. 3D UMAP was calculated.")
 }
 
-# 10.2. Slingshot algorithm (dimensions = PCA). There are 4 options depending of the start and end cluster in the following trajectory:
+# 10.2. Slingshot algorithm (dimensions = UMAP). There are 4 options depending of the start and end cluster in the following trajectory:
 if(is.numeric(start.clus) == FALSE && is.numeric(end.clus) == FALSE){
   seurat.sim <- slingshot(seurat.sim, clusterLabels=cluster_res, reducedDim="UMAP")
   if (graphics) {seurat3D.sim <- slingshot(seurat3D.sim, clusterLabels=cluster_res, reducedDim="UMAP")}
@@ -74,9 +84,9 @@ if(is.numeric(start.clus) == FALSE && is.numeric(end.clus) == FALSE){
   if (graphics) {seurat3D.sim <- slingshot(seurat3D.sim, clusterLabels=cluster_res, reducedDim="UMAP", start.clus = start.clus, end.clus=end.clus)}
   const = TRUE
 }
+message("2. Slingshot trajectories were calculated.")
 
 # 10.3. Plots generation.
-
 # 10.3.1. Set the number of colours from the palette and extend it.
 n_col <- length(levels(seurat.sim@colData[, cluster_res]))
 getPalette <- colorRampPalette(brewer.pal(9,'Set1'))
@@ -112,7 +122,7 @@ plot(reducedDims(seurat.sim)$UMAP, col = getPalette(n_col)[seurat.sim@colData[, 
 legend("topright", legend=paste0("Cluster - ", levels(seurat.sim@colData[, cluster_res])), pch=16, col=getPalette(n_col))
 lines(SlingshotDataSet(seurat.sim), lwd=2, type = 'lineages', col = 'black', show.constraints = const)
 dev.off()
-
+message("3. Trajectory lots were done.")
 
 # 10.4. Temporally expressed genes heatmap.
 # 10.4.1. Pseudotime is obtained.
@@ -145,7 +155,9 @@ pheatmap(heatdata, cluster_cols = FALSE,
          color =  colorRampPalette(c("yellow", "red"))(100),
          annotation_col = annotation, annotation_colors = ann_colors,
          show_colnames = FALSE, filename = paste0(dir.name, "/", folders[6], "/temporally_expressed_heatmaps_", selected_res, "_res.pdf"))
+message("4. Pseudotime heatmap was obtained.")
 
 # Save used objects.
 if (graphics) {save(seurat.sim, seurat3D.sim, file = paste0(dir.name, "/", folders[6], "/slingshot_sce_objects.RData"))
 } else {save(seurat.sim, file = paste0(dir.name, "/", folders[6], "/slingshot_sce_objects.RData"))}
+message("5. R objects were saved.")

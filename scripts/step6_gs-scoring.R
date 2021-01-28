@@ -2,6 +2,9 @@ log <- file(snakemake@log[[1]], open = "wt")
 sink(log)
 sink(log, type = "message")
 
+message("CONFIGURATION STEP")
+# A. Parameters: 
+# 1. Load libraries. 
 suppressMessages(library("Seurat"))
 suppressMessages(library("dplyr"))
 suppressMessages(library("data.table"))
@@ -10,11 +13,13 @@ suppressMessages(library("ggplot2"))
 suppressMessages(library("qusage"))
 suppressMessages(library("clustree"))
 suppressMessages(library("patchwork"))
+message("1. Libraries were loaded.")
 
-# A. Parameters: folder configuration 
+# 2. Folder configuration. 
 dir.name = snakemake@params[["output_dir"]]
 input_data = snakemake@input[["seurat_obj"]]
 folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs", "6_traj_in", "7_func_analysis")
+message("2. Folder paths were set.")
 
 # B. Parameters: analysis configuration 
 geneset_collection = snakemake@params[["gs_collection"]]
@@ -22,25 +27,32 @@ random_seed = snakemake@params[["random_seed"]]
 resolutions = snakemake@params[["resolutions"]]
 geneset_percentage <- snakemake@params[["geneset_percentage"]]
 ram = snakemake@resources[["mem"]]
+message("3. Parameters were loaded.")
 
-# C. Analysis.
+# 4. Analysis configuration. 
+# RAM configuration.
 options(future.globals.maxSize = ram*1024^2)
-
 # Set seed.
 if (is.numeric(random_seed)) {
   set.seed(random_seed)
 }
-# Load seurat object
-seurat <- readRDS(input_data)
+message(paste0("4. Seed was set at ", random_seed, "."))
+message("Configuration finished.")
+message("\n")
+
+message("PROCESSING STEP")
+# Load seurat object.
+seurat = readRDS(input_data)
 assay_type <- seurat@active.assay
 dir.create(paste0(dir.name, "/", folders[5]))
+message("1. Seurat object was loaded.")
 
 # 9. GS scoring
 # 9.1 Geneset loading, filtering and scoring.
 genesets <- read.gmt(geneset_collection) #should be a tab file, each row = pathway.
 genesets <- genesets[unlist(lapply(genesets, function(x) ((length(which(x%in% rownames(seurat)))/ length(x))> geneset_percentage)))]
 seurat <- AddModuleScore(object = seurat, features= genesets, name = names(genesets))
-
+message("2. Signatures were loaded and scores were calculated.")
 
 # 9.2 We create a vector containing the different combinations for each resolutions and each cluster.  
 res_clus_comb <- vector()  #Empty vector.
@@ -54,7 +66,6 @@ for (res in resolutions){
 
 # 9.3 We create a MxN matrix for the p-values, where M is the previous calculated combinations and N is the different gene sets used.
 mtx_pval <- matrix(nrow=length(res_clus_comb), ncol=length(names(genesets)))
-
 
 # 9.4 We fill the matrix with the p-value calculated at cluster level for each resolution and gene set.
 for (col in 1:length(genesets)) {
@@ -95,13 +106,15 @@ for (col in 1:length(genesets)) {
     }
   }
 }
+message("3. Significance per signature and cluster was calculated.")
 
-# 9.5 The p-values are corrected oer geneset.
+# 9.5 The p-values are corrected per geneset.
 mtx_corr_pval <- mtx_pval
 for (col in 1:length(genesets)) {
   p_val_vec_corr <- p.adjust(mtx_corr_pval[,col], "fdr") 
   mtx_corr_pval[,col] <- p_val_vec_corr
 }
+message("4. P-values were corrected.")
 
 # 9.6 We create a dataframe from a matrix
 df_pval <- data.frame(mtx_corr_pval)
@@ -111,6 +124,7 @@ df_pval <- df_pval[ order(row.names(df_pval)), ]
 
 # 9.7 Save p-value table
 write.csv(df_pval, file = paste0(dir.name, "/",folders[5], "/pval_table.tsv"), sep = "\t", quote = FALSE, row.names = TRUE, col.names = TRUE)
+message("5. P-value table was saved.")
 
 # 9.8 We loop for each geneset generating the plots
 for (i in 1:length(genesets)){
@@ -138,6 +152,9 @@ for (i in 1:length(genesets)){
   ggsave(paste0(dir.name, "/", folders[5], "/", names(genesets)[i], "_clustree_mean_pval.pdf"), plot = p4, scale = 1, width = 12, height=8, units = "in")
   
 }
+message("6. Clustree plots were produced.")
 
 #9.9 Save seurat object
 saveRDS(seurat, file = paste0(dir.name, "/",folders[5], "/seurat_complete.rds"))
+message("7. Seurat object was saved.")
+

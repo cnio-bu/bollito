@@ -14,6 +14,9 @@ technology_version: "v3" # only if using 10x technology
 outdir: "out"
 logdir: "log"
 
+# Graphics availability.
+graphics: True
+
 # keeping the same random seed allows the programs that use it to generate the same results
 random_seed:  4848
 
@@ -74,6 +77,7 @@ parameters:
         end_clus: False # cluster or clusters where the curve or lineage end (optional)
         n_var_genes: 1000 # top n variable genes selected to fit the model
         n_plotted_genes: 50 # n top variable genes to plot in the heatmap
+	graphics: True
     vision: #[OPTIONAL] step 8: cell and cluster functional analysis based on molecular signatures
         enabled: True
         geneset_collection: "/my/symbols.gmt" # geneset collections in GMT format to test

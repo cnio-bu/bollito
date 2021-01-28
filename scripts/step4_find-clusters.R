@@ -2,6 +2,9 @@ log <- file(snakemake@log[[1]], open = "wt")
 sink(log)
 sink(log, type = "message")
 
+message("CONFIGURATION STEP")
+# A. Parameters: 
+# 1. Load libraries. 
 suppressMessages(library("Seurat"))
 suppressMessages(library("dplyr"))
 suppressMessages(library("data.table"))
@@ -11,44 +14,55 @@ suppressMessages(library("ggplot2"))
 suppressMessages(library("cluster"))
 suppressMessages(library("writexl"))
 suppressMessages(library("future"))
+message("1. Libraries were loaded.")
 
-# A. Parameters: folder configuration. 
+# 2. Folder configuration. 
 input_file = snakemake@input[["seurat_obj"]]
 dir.name = snakemake@params[["output_dir"]]
 folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs", "6_traj_in", "7_func_analysis")
+message("2. Folder paths were set.")
 
-# B. Parameters: analysis configuration.
+# 3. Get variables from Snakemake.  
 pc = snakemake@params[["pc"]] # We should check the PCs using the Elbowplot and JackStraw plot.
 res = as.vector(snakemake@params[["res"]])
 random_seed = snakemake@params[["random_seed"]]
 k_neighbors = snakemake@params[["k_neighbors"]]
 ram = snakemake@resources[["mem"]]
 threads = snakemake@threads
+message("3. Parameters were loaded.")
 
-# C. Analysis.
+# 4. Analysis configuration. 
+# RAM configuration.
 options(future.globals.maxSize = ram*1024^2)
-
+#Set parallelization.
+plan("multiprocess", workers = threads)
+message(paste0("4. Threads were set at ", threads, "."))
 # Set seed.
 if (is.numeric(random_seed)) {
   set.seed(random_seed)
 }
+message(paste0("5. Seed was set at ", random_seed, "."))
+message("Configuration finished.")
+message("\n")
 
-# Set parallelization.
-plan("multiprocess", workers = threads)
 
+message("PROCESSING STEP")
 # Load seurat object.
 seurat <- readRDS(input_file)
 assay_type <- seurat@active.assay
+message("1. Seurat object was loaded.")
 
-# 7. Post-processing.
+# 7. Clustering.
 # 7.1. FindClusters using UMAP projection. We keep the significant PC obtained from PCA.
 seurat <- FindNeighbors(seurat, reduction = "pca", dims = 1:pc, k.param = k_neighbors)
 seurat <- FindClusters(seurat, resolution = res)
 seurat <- RunUMAP(seurat,dims = 1:pc, n.components = 2, verbose = FALSE)
+message("2. UMAP was done.")
 
 # 7.2. Clustree.
 p1 <- clustree(seurat, prefix = paste0(assay_type,"_snn_res."))
 ggsave(paste0(dir.name, "/", folders[3], "/1_clustree.pdf"), plot = p1, scale = 1.5)
+message("3. Clustree representation was obtained.")
 
 # 7.3. Clustering plots and silhouette parameters calculus.
 # An empty list is created to store silhouette values.
@@ -68,9 +82,9 @@ for(i in 1:length(which(grepl(paste0(assay_type,"_snn_"),colnames(seurat@meta.da
   silhouette_scores[[i]] <- as.data.frame(summary(sil)[2])
   names(silhouette_scores[[i]]) <- full_res
 }
-
 # Create a xlsx file to store the silhouette scores.
 write_xlsx(silhouette_scores, path = paste0(dir.name, "/", folders[3], "/3_silhouette_score.xlsx"),col_names = TRUE, format_headers = TRUE )
+message("4. Silhouette scores were calculated.")
 
 # 7.4. Plots on vars to regress
 p3 <- FeaturePlot(seurat, 'nFeature_RNA', pt.size =  0.75) + labs(title = "Nº features") 
@@ -85,6 +99,7 @@ p7 <- FeaturePlot(seurat, 'S.Score', pt.size =  0.75) + labs(title = "S phase sc
 ggsave(paste0(dir.name, "/", folders[3], "/4.5_sscoreplot.pdf"), plot = p7, scale = 1.5)
 p8 <- FeaturePlot(seurat, 'G2M.Score', pt.size =  0.75) + labs(title = "G2M phase score") 
 ggsave(paste0(dir.name, "/", folders[3], "/4.5_g2mplot.pdf"), plot = p8, scale = 1.5)
+message("4. Variable plots on UMAP dimension were produced.")
 
 # 7.5. Dimplot for merged or integrated objects.
 if (seurat@active.assay == TRUE || seurat@project.name == "merged"){
@@ -118,6 +133,9 @@ for(j in 1:length(resolutions)){
   colnames(joint_stats) = names(table(Idents(seurat)))
   write.table(t(joint_stats), file=paste0(dir.name, "/", folders[3], "/5_", colnames(seurat@meta.data)[resolutions[j]],"_stats.tsv"), sep="\t", col.names = NA, quote = FALSE)
 }
+message("5. Statistics table was done and saved.")
+
 
 # 7.6. Save RDS: we can use this object to generate all the rest of the data.
 saveRDS(seurat, file = paste0(dir.name, "/",folders[3], "/seurat_find-clusters.rds"))
+message("8. Seurat object was saved.")

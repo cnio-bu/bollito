@@ -11,3 +11,4 @@ dependencies:
     - r-ggplot2
     - bioconductor-biocparallel
     - r-openxlsx
+    - bioconductor-limma

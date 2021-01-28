@@ -2,32 +2,48 @@ log <- file(snakemake@log[[1]], open = "wt")
 sink(log)
 sink(log, type = "message")
 
+message("CONFIGURATION STEP")
+# A. Parameters: 
+# 1. Load libraries.
 suppressMessages(library("Seurat"))
 suppressMessages(library("velocyto.R"))
 suppressMessages(library("SeuratWrappers"))
 suppressMessages(library("RColorBrewer"))
+suppressMessages(library("future"))
+message("1. Libraries were loaded.")
 
-# A. Parameters: folder configuration.
+# 2. Folder configuration. 
 input_data = snakemake@input[["seurat_obj"]]
 velocyto_dir = snakemake@params[["velocyto_dir"]]
 dir.name = snakemake@params[["output_dir"]]
 folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_gs", "6_traj_in", "7_func_analysis", "8_RNA_velocity")
+message("2. Folder paths were set.")
 
-# B. Parameters: analysis configuration.
+# 3. Get variables from Snakemake.
 selected_res = snakemake@params[["selected_res"]]
 random_seed = snakemake@params[["random_seed"]]
 downsampling = snakemake@params[["downsampling"]]
 n_cells = snakemake@params[["n_cells"]]
 ram = snakemake@resources[["mem"]]
 threads = snakemake@threads
+message("3. Parameters were loaded.")
 
-# C. Analysis.
+# 4. Analysis configuration. 
+# RAM configuration.
 options(future.globals.maxSize = ram*1024^2)
-
+#Set parallelization.
+plan("multiprocess", workers = threads)
+message(paste0("4. Threads were set at ", threads, "."))
 # Set seed.
 if (is.numeric(random_seed)) {
   set.seed(random_seed)
 }
+message(paste0("5. Seed was set at ", random_seed, "."))
+message("Configuration finished.")
+message("\n")
+
+
+message("PROCESSING STEP")
 # Load seurat object
 seurat = readRDS(input_data)
 
@@ -38,6 +54,7 @@ cluster_res <- paste0(assay_type, "_snn_res.", selected_res)
 if (!(cluster_res %in% colnames(seurat@meta.data))){
   stop("Specified resolution is not available.")
 }
+message("1. Seurat object was loaded.")
 
 # If Seurat objects are not integrated we need to add the velocyto matrices.
 if (!(seurat@active.assay == "integrated" || seurat@project.name == "merged")) {
@@ -55,12 +72,14 @@ if (!(seurat@active.assay == "integrated" || seurat@project.name == "merged")) {
     seurat[[name]] <- CreateAssayObject(counts = vel_matrices[[name]])
   }
 }
+message("2. Seurat object was prepared to perform RNA velocity.")
 
 # 12.4. Downsampling (optional).
 if (downsampling == TRUE && n_cells < length(rownames(seurat@meta.data))){
   #n_total_cells = length(rownames(seurat@meta.data))
   random_sample = sample(x = rownames(seurat@meta.data), size = n_cells, replace = FALSE)
   seurat <- subset(x = seurat, cells = random_sample) 
+  message("2.5. Downsampling was performed.")
 }
 
 # 12.5. Set specific cluster labels as idents.
@@ -68,6 +87,7 @@ Idents(seurat) <- seurat@meta.data[[cluster_res]]
 
 # 12.6. Run velocyto from the wrapper.
 seurat <- RunVelocity(object = seurat, deltaT = 1, kCells = 25, fit.quantile = 0.02)
+message("3. RNA velocity was calculated.")
 
 # 12.7. Obtain palette.
 n_col <- length(levels(seurat))
@@ -93,6 +113,8 @@ plot(0, 0, type='n', bty='n', xaxt='n', yaxt='n')
 legend("topright", inset = c(0.05, 0.115), legend=paste0("Cluster - ", levels(seurat)),
        pch=16, col=getPalette(n_col))
 dev.off()
+message("4. Velocity plot was produced.")
+
 
 #12.10. This plot the sample coloring the cell by its origin assay (integrated objects).
 if (seurat@active.assay == "integrated") {
@@ -116,6 +138,8 @@ if (seurat@active.assay == "integrated") {
   legend("topright", inset = c(0.05, 0.115), legend=paste0("Assay - ", levels(seurat)),
          pch=16, col=getPalette(n_col))
   dev.off()
+  message("4.5. Velocity plot from integrated object was produced.")
+
 }
 
 #12.12. This plot the sample coloring the cell by its origin assay (mergedd objects).
@@ -140,7 +164,9 @@ if (seurat@project.name == "merged") {
   legend("topright", inset = c(0.05, 0.115), legend=paste0("Assay - ", levels(seurat)),
          pch=16, col=getPalette(n_col))
   dev.off()
+  message("4.5. Velocity plot from integrated object was produced.")
 }
 
 # 12.14. Save seurat object with RNA velocity slots. 
 saveRDS(seurat, file = paste0(dir.name, "/",folders[8], "/seurat_velocity.rds"))
+message("5. Seurat object was saved.")
