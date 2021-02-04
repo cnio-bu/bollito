@@ -119,8 +119,6 @@ if(normalization == "standard"){
       } else {
         seurat <- ScaleData(seurat, features = rownames(seurat), vars.to.regress = c(vars_to_regress, "S.Score", "G2M.Score"))
       }
-      p7 <- DimPlot(seurat, group.by = "Phase", reduction = "pca", pt.size = 0.5, label = TRUE, label.size = 5) + RotatedAxis()
-      ggsave(paste0(dir.name, "/", folders[2], "/6.1_cell_cycle_regressed_dimplot.pdf"), plot = p7, scale = 1.5)
     } else {
       if (seurat@project.name == "merged"){
         seurat <- ScaleData(seurat, features = rownames(seurat), vars.to.regress = c(vars_to_regress, merge_var))
@@ -170,15 +168,13 @@ if(normalization == "standard"){
         seurat <- SCTransform(seurat, assay = "RNA", new.assay = "SCT", vars.to.regress = c("S.Score", "G2M.Score"), verbose = FALSE)
       }
     }
-    p7 <- DimPlot(seurat, group.by = "Phase", reduction = "pca", pt.size = 0.5, label = TRUE, label.size = 5) + RotatedAxis()
-    ggsave(paste0(dir.name, "/", folders[2], "/6.1_cell_cycle_regressed_dimplot.pdf"), plot = p7, scale = 1.5)
   }
 } else {
 	message("Normalization method not found.")
 }
 message("3. Seurat object was scaled.")
 
-## 5.2. PCA metrics calculation.
+## 5.2. PCA & metrics calculation.
 Idents(seurat) <- seurat@project.name
 seurat <- RunPCA(seurat, features = VariableFeatures(object = seurat), npcs = 50) # This result could all be saved in a table. 
 # Visualizing PCA in Different Ways: elbow plot most variable genes 
@@ -186,13 +182,21 @@ p2 <- VizDimLoadings(seurat, dims = 1:2, reduction = "pca") + theme(legend.posit
 ggsave(paste0(dir.name, "/",folders[2], "/1_viz_dim_loadings.pdf"), plot = p2, scale = 1.5)#, height = height, width = height * aspect_ratio)
 p3 <- DimPlot(seurat, reduction = "pca", pt.size = 0.5) + theme(legend.position="bottom") 
 ggsave(paste0(dir.name, "/",folders[2], "/2_dimplot.pdf"), plot = p3, scale = 1.5)
+# Only if cell cycle was regressed.
+if (regress_cell_cycle) {
+  p7 <- FeaturePlot(object = seurat, features ="S.Score") + ggtitle("S phase score")
+  ggsave(paste0(dir.name, "/", folders[2], "/4_sscore_featureplot_regressed.pdf"), plot = p7, scale = 1.5)
+  p8 <- FeaturePlot(object = seurat, features ="G2M.Score") + ggtitle("G2/M phase score")
+  ggsave(paste0(dir.name, "/", folders[2], "/5_g2mscore_featureplot_regressed.pdf"), plot = p7, scale = 1.5)
+  p9 <- DimPlot(seurat, group.by = "Phase", reduction = "pca", pt.size = 0.5, label = TRUE, label.size = 5) + RotatedAxis()
+  ggsave(paste0(dir.name, "/", folders[2], "/6_cell_cycle_dimplot_regressed.pdf"), plot = p9, scale = 1.5)
+}
 message("4. PCA was calculated.")
 
 # 5.3. Determine the dimensionality of the dataset
 p4 <- ElbowPlot(seurat, ndims = 50) + theme(legend.position="bottom")
 ggsave(paste0(dir.name, "/",folders[2], "/3_elbowplot.pdf"), plot = p4, scale = 1.5)
 message("5. Elbowplot was generated.")
-
 
 if (!(seurat@active.assay == "SCT")) {
   seurat <- JackStraw(seurat, num.replicate = 100, dims = 50)
