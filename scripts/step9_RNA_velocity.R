@@ -62,7 +62,6 @@ if (!(seurat@active.assay == "integrated" || seurat@project.name == "merged")) {
   velo_names = c("spliced", "unspliced", "ambiguous")
   vel_matrices = list()
   for (name in velo_names) {
-    message(paste0(velocyto_dir, name))
     vel_matrices[[name]] <- Read10X(data.dir = paste0(velocyto_dir, name))
   }
 

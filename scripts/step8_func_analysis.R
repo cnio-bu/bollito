@@ -29,7 +29,6 @@ regress_out = snakemake@params[["regress_out"]]
 vars_to_regress = snakemake@params[["vars_to_regress"]]
 regress_cell_cycle = snakemake@params[["regress_cell_cycle"]]
 ram = snakemake@resources[["mem"]]
-random_seed = snakemake@resources[["random_seed"]]
 threads = snakemake@threads
 message("3. Parameters were loaded.")
 
@@ -59,20 +58,17 @@ message("1. Seurat object was loaded.")
 
 # 11.2. Vision object is created. 
 # If seurat object is not a integration.
-message(colnames(seurat@meta.data))
 if (seurat@active.assay != "integrated"){
 # To avoid negative values with SCT normalization we use the standard, keeping the information from the previous analysis.
   if (seurat@active.assay == "SCT") {
     seurat@active.assay <- "RNA"
     seurat <- NormalizeData(seurat, normalization.method = "LogNormalize", scale.factor = 10000, seed = TRUE)
-    print("here 1")
     all.genes <- rownames(seurat)
     if(regress_out == TRUE){
         if (regress_cell_cycle) {
             seurat <- ScaleData(seurat, features = rownames(seurat), vars.to.regress = c(vars_to_regress, "S.Score", "G2M.Score"))
         } else {
             seurat <- ScaleData(seurat, features = rownames(seurat), vars.to.regress = vars_to_regress)
-            print("here 2")
         }
     } else {
         seurat <- ScaleData(seurat, features = rownames(seurat))
@@ -82,7 +78,6 @@ if (seurat@active.assay != "integrated"){
 		  signatures = geneset_collection,
                   meta = seurat@meta.data[,meta_columns],
                   projection_methods = NULL))
-  print("here 3")
 } else {
   suppressMessages(vis <- Vision(rescale(seurat@assays$integrated@scale.data, c(0,10)),
                     signatures = geneset_collection,

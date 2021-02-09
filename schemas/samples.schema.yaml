@@ -1,0 +1,9 @@
+$schema: "http://json-schema.org/draft-06/schema#"
+description: sample.tsv is defined by the sample name and aditional optional metadata
+type: object
+properties:
+  sample:
+    type: string
+    description: sample ID from samples.tsv
+required:
+  - sample

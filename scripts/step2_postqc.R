@@ -90,7 +90,7 @@ p1 <- VlnPlot(seurat, features = c("nFeature_RNA"), pt.size = 0.25, cols = "#9CC
 p2 <- VlnPlot(seurat, features = c("nCount_RNA"), pt.size = 0.25, cols = "#8ADD56")  + ggtitle("Nº counts") + theme(legend.position="bottom")
 p3 <- VlnPlot(seurat, features = c("percent.mt"), pt.size = 0.25, cols = "#F07800") + ggtitle("Mitochondrial %") + theme(legend.position="bottom")
 p4 <- VlnPlot(seurat, features = c("percent.ribo"), pt.size = 0.25, cols = "#E44631") + ggtitle("Ribosomal %") + theme(legend.position="bottom")
-p_comp <- CombinePlots(list(p1,p2,p3,p4), ncol = 4)
+p_comp <- p1 + p2 + p3 + p4
 ggsave(paste0(dir.name, "/", folders[1], "/3_vlnplot_QC_variables_postfilt.pdf"), plot = p_comp, scale = 1.2, width = 10, height = 8)
 message("4. Combined violin plot post-filtering was generated.")
 
@@ -101,7 +101,6 @@ message("5. Post-filtering statistics were obtained.")
 # 3.5 Statistics table.
 filtering_df <- data.frame("Number of cells" = c(stats_pre[1],stats_post[1]), "Count median" = c(stats_pre[2],stats_post[2]),"Expressed genes median" = c(stats_pre[3],stats_post[3]), "Mitochondrial percentage median" = c(stats_pre[4],stats_post[4]), "Ribosomal percentage median" = c(stats_pre[5],stats_post[5]))
 row.names(filtering_df) <- c("Pre-QC", "Post-QC")
-message(row.names(filtering_df))
 write.table(filtering_df, file = paste0(dir.name, "/", folders[1], "/4_pre_vs_post_stats.tsv"), sep = "\t", col.names = NA, quote = FALSE)
 message("6. Statistics table was saved.")
 

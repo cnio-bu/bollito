@@ -7,8 +7,13 @@ units: units.tsv
 # input type: this variable is used to specify the input files nature ("matrix" or "fastq"). 
 input_type: "fastq"
 
-technology: "10x" # "10x", "Drop-seq", "custom" 
-technology_version: "v3" # only if using 10x technology
+# technology:
+# "10x", "Drop-seq" or "custom" if input_type is fastq.
+# "10x" or "standard" if input_type is matrix.
+technology: "10x"  
+
+# technology_version: only if using 10x technology (fastq)
+technology_version: "v3"
 
 # Output and log files paths
 outdir: "out"

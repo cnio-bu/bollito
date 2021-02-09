@@ -1,5 +1,5 @@
 import pandas as pd
-from snakemake.utils import min_version
+from snakemake.utils import min_version, validate
 ##### set minimum snakemake version #####
 min_version("5.10.0")
 
@@ -24,17 +24,25 @@ LOGDIR = config["logdir"]
 
 try:
     samples = pd.read_csv(config["samples"], sep="\t", comment="#").set_index("sample", drop=False)
+    validate(samples, schema="schemas/samples.schema.yaml")
 except FileNotFoundError:
     warning(f"ERROR: the samples file ({config['samples']}) does not exist. Please see the README file for details. Quitting now.")
     sys.exit(1)
 
 try:
-    units = pd.read_csv(config["units"], dtype=str, sep="\t", comment="#").set_index(["sample", "unit"], drop=False)
+    if config["input_type"] == "fastq":
+    	units = pd.read_csv(config["units"], dtype=str, sep="\t", comment="#").set_index(["sample", "unit"], drop=False)
+    	validate(units, schema="schemas/units_fastq.schema.yaml")
+        units.index = units.index.set_levels([i.astype(str) for i in units.index.levels])  # enforce str in index
+    if config["input_type"] == "matrix":
+        units = pd.read_csv(config["units"], dtype=str, sep="\t", comment="#").set_index("sample", drop=False)
+        if config["technology"] == "10x":   
+            validate(units, schema="schemas/units_matrix_10x.schema.yaml")
+        elif config["technology"] == "standard":   
+            validate(units, schema="schemas/units_matrix_standard.schema.yaml")
 except FileNotFoundError:
     warning(f"ERROR: the units file ({config['units']}) does not exist. Please see the README file for details. Quitting now.")
     sys.exit(1)
-
-units.index = units.index.set_levels([i.astype(str) for i in units.index.levels])  # enforce str in index
 
 def confirm():
     prompt = f"{ansitxt.BOLD}Continue anyway? [y/N]{ansitxt.ENDC} "

@@ -1,0 +1,21 @@
+$schema: "http://json-schema.org/draft-06/schema#"
+description: units.tsv is defined by sample, units, FASTQ1 (CB + UMI) and FASTQ2 (read sequence)
+type: object
+properties:
+  sample:
+    type: string
+    description: sample ID from samples.tsv
+  unit:
+    type: string
+    description: unit ID for merging
+  fq1:
+    type: string
+    description: Cell Barcode + UMI
+  fq2:
+    type: string
+    description: cDNA sequence
+required:
+  - sample
+  - unit
+  - fq1
+  - fq2

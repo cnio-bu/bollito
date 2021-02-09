@@ -44,7 +44,7 @@ message("PROCESSING STEP")
 # Load seurat object.
 seurat = readRDS(input_data)
 assay_type <- seurat@active.assay
-dir.create(paste0(dir.name, "/", folders[5]))
+dir.create(paste0(dir.name, "/", folders[5]), showWarnings = FALSE)
 message("1. Seurat object was loaded.")
 
 # 9. GS scoring
@@ -100,7 +100,6 @@ for (col in 1:length(genesets)) {
       
       # Wilcoxon test: paired, using a vectors of gene means for each Seurat subset.
       p_value <- wilcox.test(counts_in_gene_set_target_factor, counts_in_gene_set_offtarget_factor, paired = TRUE, alternative = "greater")$p.value
-      print(p_value)
       mtx_pval[row, col] <- p_value
       row = row + 1
     }
@@ -123,7 +122,7 @@ colnames(df_pval) <- names(genesets)
 df_pval <- df_pval[ order(row.names(df_pval)), ]
 
 # 9.7 Save p-value table
-write.csv(df_pval, file = paste0(dir.name, "/",folders[5], "/pval_table.tsv"), sep = "\t", quote = FALSE, row.names = TRUE, col.names = TRUE)
+write.table(df_pval, file = paste0(dir.name, "/",folders[5], "/pval_table.tsv"), sep = "\t", quote = FALSE, row.names = TRUE, col.names = TRUE)
 message("5. P-value table was saved.")
 
 # 9.8 We loop for each geneset generating the plots

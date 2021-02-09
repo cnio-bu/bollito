@@ -15,6 +15,7 @@ rule seurat_qc:
         samples_path = config["samples"],
         units_path = config["units"],
         input_type = config["input_type"],
+        technology = config["technology"],
         random_seed = config["random_seed"],
         case = config["case"],
         sample = f"{{sample}}",

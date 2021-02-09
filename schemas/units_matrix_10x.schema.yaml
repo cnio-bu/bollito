@@ -1,0 +1,25 @@
+$schema: "http://json-schema.org/draft-06/schema#"
+description: units.tsv is defined by sample, matrix, cell_names (10x only), gene_names(10x only) and metadata (optional) 
+type: object
+properties:
+  sample:
+    type: string
+    description: sample ID from samples.tsv
+  matrix:
+    type: string
+    description: count matrix
+  cell_names:
+    type: string
+    description: TSV file containing cell names
+  gene_names:
+    type: string
+    description: TSV file containing gene names
+  metadata:
+    type: string
+    description: TSV file containing cell information
+
+required:
+  - sample
+  - matrix
+  - cell_names
+  - gene_names
