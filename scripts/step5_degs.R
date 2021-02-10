@@ -122,8 +122,8 @@ if (seurat@active.assay == "integrated") {
   # setting slim.col.label to TRUE will print just the cluster IDS instead of every cell name
   p1 <- DoHeatmap(object = seurat, features = groupedby.clusters.markers$gene, cells = 1:n_cells, size = 8, angle = 45, 
 	    group.bar = TRUE, draw.lines = F, raster = FALSE) +
-  scale_fill_gradientn(colors = c("blue", "white", "red")) + guides(color=FALSE) + theme(axis.text.y = element_text(size = 8)) + theme(legend.position="bottom") 
-  ggsave(paste0(dir.name, "/", folders[4], "/1_heatmap_topmarkers.pdf"), plot = p1, scale = 3)
+  scale_fill_gradientn(colors = c("blue", "white", "red")) + guides(color=FALSE) + theme(axis.text.y = element_text(size = 12)) + theme(legend.position="bottom") 
+  ggsave(paste0(dir.name, "/", folders[4], "/1_heatmap_topmarkers.pdf"), plot = p1, scale = 2)
   message("4. Top marker heatmap was done.")
 }
 
