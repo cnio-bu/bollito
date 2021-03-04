@@ -10,6 +10,7 @@ suppressMessages(library("dplyr"))
 suppressMessages(library("data.table"))
 suppressMessages(library("reticulate"))
 suppressMessages(library("ggplot2"))
+suppressMessages(library("patchwork"))
 message("1. Libraries were loaded.")
 
 # 2. Folder configuration. 
@@ -90,7 +91,7 @@ p1 <- VlnPlot(seurat, features = c("nFeature_RNA"), pt.size = 0.25, cols = "#9CC
 p2 <- VlnPlot(seurat, features = c("nCount_RNA"), pt.size = 0.25, cols = "#8ADD56")  + ggtitle("Nº counts") + theme(legend.position="bottom")
 p3 <- VlnPlot(seurat, features = c("percent.mt"), pt.size = 0.25, cols = "#F07800") + ggtitle("Mitochondrial %") + theme(legend.position="bottom")
 p4 <- VlnPlot(seurat, features = c("percent.ribo"), pt.size = 0.25, cols = "#E44631") + ggtitle("Ribosomal %") + theme(legend.position="bottom")
-p_comp <- p1 + p2 + p3 + p4
+p_comp <- p1 + p2 + p3 + p4 + plot_layout(ncol = 4)
 ggsave(paste0(dir.name, "/", folders[1], "/3_vlnplot_QC_variables_postfilt.pdf"), plot = p_comp, scale = 1.2, width = 10, height = 8)
 message("4. Combined violin plot post-filtering was generated.")
 

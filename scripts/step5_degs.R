@@ -117,12 +117,20 @@ if (seurat@active.assay == "integrated") {
   # 8.3. Find TOP markers.
   seurat.markers <- FindAllMarkers(object = seurat, only.pos = TRUE, min.pct = 0.25, thresh.use = 0.25, test.use = test)
   groupedby.clusters.markers = seurat.markers %>% group_by(cluster) %>% top_n(10, avg_logFC)
-  
+
   # 8.3.1. HeatMap top10.
+  # setting heatmap text label sizes
+  ytext_value <- 70/(length(unique(seurat@meta.data[[cluster_res]]))*1.30)
+  if (ytext_value > 10) {ytext_value = 10}
+  xtext_value <- 50/(length(unique(seurat@meta.data[[cluster_res]]))*1.25)
+  if (xtext_value > 8) {xtext_value = 8}
+
   # setting slim.col.label to TRUE will print just the cluster IDS instead of every cell name
-  p1 <- DoHeatmap(object = seurat, features = groupedby.clusters.markers$gene, cells = 1:n_cells, size = 8, angle = 45, 
+  p1 <- DoHeatmap(object = seurat, features = groupedby.clusters.markers$gene, cells = 1:n_cells, size = xtext_value, angle = 45, 
 	    group.bar = TRUE, draw.lines = F, raster = FALSE) +
-  scale_fill_gradientn(colors = c("blue", "white", "red")) + guides(color=FALSE) + theme(axis.text.y = element_text(size = 12)) + theme(legend.position="bottom") 
+      scale_fill_gradientn(colors = c("blue", "white", "red")) + guides(color=FALSE) + 
+      theme(axis.text.y = element_text(size = ytext_value)) + 
+      theme(legend.position="bottom") 
   ggsave(paste0(dir.name, "/", folders[4], "/1_heatmap_topmarkers.pdf"), plot = p1, scale = 2)
   message("4. Top marker heatmap was done.")
 }
