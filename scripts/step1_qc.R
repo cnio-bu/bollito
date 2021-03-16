@@ -47,7 +47,7 @@ if (case == "lowercase") {
   mito_grep <- "^mt-"
   ribo_grep <- "^rp[sl][[:digit:]]"
 } else if (case == "titlecase") {
-  mito_grep <- "^mt-"
+  mito_grep <- "^Mt-"
   ribo_grep <- "^Rp[sl][[:digit:]]"
 } else if (case == "uppercase") {
   mito_grep <- "^MT-"
