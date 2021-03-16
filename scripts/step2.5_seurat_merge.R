@@ -27,7 +27,7 @@ options(future.globals.maxSize = ram*1024^2)
 if (is.numeric(random_seed)) {
   set.seed(random_seed)
 }
-message(paste0("4. Seed was set at ", random seed, "."))
+message(paste0("4. Seed was set at ", random_seed, "."))
 message("Configuration finished.")
 message("\n")
 
