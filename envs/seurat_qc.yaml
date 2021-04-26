@@ -5,9 +5,10 @@ channels:
 
 dependencies:
     - libgfortran
-    - r-seurat=3.2.2
+    - r-seurat=3.2.3
     - r-tidyverse
     - r-ggplot2
-    - bioconductor-biocparalleL
+    - bioconductor-biocparallel
     - r-stringr
     - r-patchwork
+    - r-spatstat=1.64_1

@@ -4,9 +4,10 @@ channels:
     - bioconda
 
 dependencies:
-    - r-seurat=3.1.2
-    - bioconductor-slingshot=1.4.0
-    - r-rgl=0.100.30
-    - r-rmarkdown=1.12
-    - r-gam=1.16.1
-    - r-pheatmap=1.0.12
+    - r-seurat=3.2.3
+    - bioconductor-slingshot
+    - r-rgl
+    - r-rmarkdown
+    - r-gam
+    - r-pheatmap
+    - r-spatstat=1.64_1

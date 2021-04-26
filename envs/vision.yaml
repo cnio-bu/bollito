@@ -4,10 +4,11 @@ channels:
     - bioconda
 
 dependencies:
-    - r-seurat=3.1.1
-    - r-ggplot2=3.1.1
-    - libopenblas=0.3.6
-    - r-devtools=2.2.1
-    - r-rtsne=0.15
-    - r-viridis=0.5.1
-    - r-vision=2.0.0
+    - r-seurat=3.2.3
+    - r-ggplot2
+    - libopenblas
+    - r-devtools
+    - r-rtsne
+    - r-viridis
+    - r-vision
+    - r-spatstat=1.64_1

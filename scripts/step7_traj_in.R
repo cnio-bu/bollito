@@ -14,6 +14,7 @@ suppressMessages(library("rmarkdown"))
 suppressMessages(library("gam"))
 suppressMessages(library("pheatmap"))
 if (snakemake@params[["graphics"]]) {suppressMessages(library("rgl"))}
+if (snakemake@params[["graphics"]]) {suppressMessages(library("htmltools"))}
 message("1. Libraries were loaded.")
 
 # 2. Folder configuration. 
@@ -97,15 +98,17 @@ if (graphics) {
   
   # 10.3.3. Curves 3D plot with legend --> HTML output.
   plot3d(reducedDims(seurat3D.sim)$UMAP[,1:3], col = getPalette(n_col)[seurat3D.sim@colData[, cluster_res]])
-  plot3d(SlingshotDataSet(seurat3D.sim), lwd = 3, add = TRUE)
-  legend3d("topright", legend=paste0("Cluster - ", levels(seurat3D.sim@colData[, cluster_res])), pch=16, col=getPalette(n_col), inset=c(0.001))
-  writeWebGL(dir = paste0(dir.name, "/", folders[6]), filename = file.path(paste0(dir.name, "/", folders[6]), paste0("3D_curves_", selected_res, "_res.html")),  width = 1024)
+  plot3d.SlingshotDataSet(SlingshotDataSet(seurat3D.sim), type = "curves", add = TRUE, lwd =3)
+  legend3d("topright", legend=paste0("Cluster - ", levels(seurat3D.sim@colData[, cluster_res])), pch=16, col=getPalette(n_col), inset=c(0))
+  p_curves <- rglwidget(width = 1240, height = 1024)
+  htmltools::save_html(htmltools::tagList(p_curves), file = paste0(dir.name, "/", folders[6], "/", paste0("3D_curves_", selected_res, "_res.html")))
 
   # 10.3.4. Lineage 3D plot with legend --> HTML output.
-  plot3d(reducedDims(seurat3D.sim)$UMAP[,1:3], col = getPalette(n_col)[seurat3D.sim@colData[, cluster_res]]) 
-  plot3d(SlingshotDataSet(seurat3D.sim), lwd = 3, type = "lineages", add = TRUE, show.constraints = const)
-  legend3d("topright", legend=paste0("Cluster - ", levels(seurat3D.sim@colData[, cluster_res])), pch=16, col=getPalette(n_col), inset=c(0.001))
-  writeWebGL(dir = paste0(dir.name, "/", folders[6]), filename = file.path(paste0(dir.name, "/", folders[6]), paste0("3D_lineages_", selected_res, "_res.html")),  width = 1024)
+  plot3d(reducedDims(seurat3D.sim)$UMAP[,1:3], col = getPalette(n_col)[seurat3D.sim@colData[, cluster_res]])
+  plot3d.SlingshotDataSet(SlingshotDataSet(seurat3D.sim), type = "lineages", add = TRUE, lwd =3)
+  legend3d("topright", legend=paste0("Cluster - ", levels(seurat3D.sim@colData[, cluster_res])), pch=16, col=getPalette(n_col), inset=c(0))
+  p_lineages <- rglwidget(width = 1240, height = 1024)
+  htmltools::save_html(htmltools::tagList(p_lineages), file = paste0(dir.name, "/", folders[6], "/", paste0("3D_lineages_", selected_res, "_res.html")))
 }
 # 10.3.5. Curves 2D plot with legend --> pdf output. 
 pdf(paste0(dir.name, "/", folders[6], "/2D_curves_", selected_res, "_res.pdf"), width = 11, height = 11)

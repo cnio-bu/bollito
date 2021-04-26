@@ -1,14 +1,15 @@
 channels:
     - bu_cnio
-    - bioconda
     - conda-forge
+    - bioconda
 
 dependencies:
     - libgfortran
-    - r-seurat=3.2.2
+    - r-seurat=3.2.3
     - r-dplyr
     - r-reticulate
     - r-ggplot2
     - bioconductor-biocparallel
     - r-openxlsx
     - bioconductor-limma
+    - r-spatstat=1.64_1

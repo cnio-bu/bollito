@@ -4,6 +4,7 @@ channels:
     - bioconda
 
 dependencies:
-    - r-seurat
+    - r-seurat=3.2.3
     - r-seuratwrappers
     - r-velocyto.r
+    - r-spatstat=1.64_1

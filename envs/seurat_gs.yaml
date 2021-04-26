@@ -5,11 +5,11 @@ channels:
 
 dependencies:
     - libgfortran
-    - r-seurat=3.1.2
+    - r-seurat=3.2.3
     - r-reticulate
-    - umap-learn
     - r-ggplot2
     - r-clustree
     - r-writexl
     - r-patchwork
     - bioconductor-qusage
+    - r-spatstat=1.64_1
