@@ -46,7 +46,7 @@ message("PROCESSING STEP")
 seurat = readRDS(paste0(dir.name, "/", folders[1], "/seurat_pre-qc.rds"))
 message("1. Seurat object was loaded.")
 
-# 3. Preprocessing: Filter out low-quality cells.
+#3. Preprocessing: Filter out low-quality cells.
 # 3.1 Pre-filtering stats calculus.
 stats_pre <- c(length(colnames(seurat)), median(seurat@meta.data[["nCount_RNA"]]), median(seurat@meta.data[["nFeature_RNA"]]), median(seurat@meta.data[["percent.mt"]]), median(seurat@meta.data[["percent.ribo"]]))
 message("2. Pre-filtering statistics were obtained.")
@@ -54,24 +54,21 @@ message("2. Pre-filtering statistics were obtained.")
 
 # 3.2 We should apply the filterings once the QC plots (GenePlot and Violin plots) have been checked.
 # 3.2.1 Feature filter.
-if (!is.null(min_feat)) { 
-  cells_seurat <- FetchData(object = seurat, vars = "nFeature_RNA") 
-    if (is.null(max_feat)) {
-      seurat <- seurat[, which(x = cells_seurat > min_feat)]                           
-    } else {
-      seurat <- seurat[, which(x = cells_seurat > min_feat & cells_seurat < max_feat)]
-   }
+min_feat <- ifelse(is.null(min_feat), 0, min_feat)
+max_feat <- ifelse(is.null(max_feat), 0, max_feat)
+if (min_feat != 0 | max_feat != 0) { 
+  cells_seurat <- FetchData(object = seurat, vars = "nFeature_RNA")
+  seurat <- seurat[, which(x = cells_seurat > min_feat & cells_seurat < max_feat)]
 }
 
 # 3.2.2 Count filter.
-if (!is.null(min_count)) {
+min_count <- ifelse(is.null(min_count), 0, min_count)
+max_count <- ifelse(is.null(max_count), 0, max_count)
+if (min_count != 0 | max_count != 0) { 
   cells_seurat <- FetchData(object = seurat, vars = "nCount_RNA")
-  if (!is.null(max_feat)) {
-    seurat <- seurat[, which(x = cells_seurat > min_count)] 
-  } else {
-    seurat <- seurat[, which(x = cells_seurat > min_count & cells_seurat < max_count)]
-  }
+  seurat <- seurat[, which(x = cells_seurat > min_count & cells_seurat < max_count)]
 }
+
 
 # 3.2.3 Mitochondrial filter.
 if (!is.null(mit)) {
