@@ -20,6 +20,8 @@ folders = c("1_preprocessing", "2_normalization", "3_clustering", "4_degs", "5_g
 message("2. Folder paths were set.")
 
 # 3. Get variables from Snakemake. 
+regress_out = snakemake@params[["regress_out"]]
+regress_cell_cycle = snakemake@params[["regress_cell_cycle"]]
 vars_to_regress = snakemake@params[["vars_to_regress"]]
 norm_type = snakemake@params[["norm_type"]]
 random_seed = snakemake@params[["random_seed"]]
@@ -68,43 +70,69 @@ message("\n")
 
 message("PROCESSING STEP")
 # 6. Integration.
-# 6.1. Define a function to read each input files and perform the early steps of integration.
-path_to_seurat_object <- function(x, vars_to_regress, norm_type, velocyto) {
-  experiment = head(tail(strsplit(x, "/")[[1]], n=3), n=1) #Assay name is stored to later use in integrated object metadata.
-  seurat_obj <- readRDS(x)
-  seurat_obj <- AddMetaData(object = seurat_obj,
-                            metadata = experiment,
-                            col.name = 'assay_name')
-  # If RNA velocity is going to be performed, we add the velocyto matrices in this step.
-  if (velocyto){
-    # Velocyto matrices path is infered. 
-    velocyto_dir = paste0(outdir_config,"/star/", experiment,"/Solo.out/Velocyto/raw/")
-    velo_names = c("spliced", "unspliced", "ambiguous")
-    vel_matrices = list()
-    # The matrices are read in 10x format.
-    for (name in velo_names) {
-      vel_matrices[[name]] <- Read10X(data.dir = paste0(velocyto_dir, name))
+# 6.1. This function will read each one of the input files and will perform the early normalization steps for each sample.
+path_to_seurat_object <- function(x, regress_out, vars_to_regress, regress_cell_cycle, norm_type, add_velocity) {
+    experiment = head(tail(strsplit(x, "/")[[1]], n=3), n=1) #Assay name is stored to later use in integrated object metadata.
+    seurat_obj <- readRDS(x)
+    seurat_obj <- AddMetaData(object = seurat_obj, metadata = experiment, col.name = 'assay_name')
+    # If RNA velocity is going to be performed, we add the velocyto matrices in this step.
+    if (add_velocity){
+        # Velocyto matrices path is infered. 
+        velocyto_dir = paste0(outdir_config,"/star/", experiment,"/Solo.out/Velocyto/raw/")
+        velo_names = c("spliced", "unspliced", "ambiguous")
+        vel_matrices = list()
+        # The matrices are read in 10x format.
+        vel_matrices <- setNames(lapply(velo_names, function(name) {
+            Read10X(data.dir = paste0(velocyto_dir, name))
+        }), nm = velo_names)
+        # The matrices are added as assays in the respective seurat object.
+        seurat_obj <- setNames(lapply(velo_names, function(name) {
+            vel_matrices[[name]] <- vel_matrices[[name]][, which(x = colnames(vel_matrices[[name]]) %in% colnames(seurat_obj))] 
+            CreateAssayObject(counts = vel_matrices[[name]])
+        }), nm = velo_names) 
     }
-    # The matrices are added as assays in the respective seurat object.
-    for (name in velo_names) {
-      vel_matrices[[name]] <- vel_matrices[[name]][, which(x = colnames(vel_matrices[[name]]) %in% colnames(seurat_obj))] 
-      seurat_obj[[name]] <- CreateAssayObject(counts = vel_matrices[[name]])
+    # Save regression parameters variable
+    regression_param <- c(regress_out, regress_cell_cycle)
+    vars_param <- list(vars_to_regress = vars_to_regress, cell_cycle = c("S.Score", "G2M.Score"))
+
+    # Normalization of the individual samples
+    if(norm_type == "standard"){
+        seurat_obj <- NormalizeData(seurat_obj, normalization.method = "LogNormalize", scale.factor = 10000)
+        message(paste0("2. Seurat object was normalized using the ", norm_type, " approach"))
+        seurat_obj <- FindVariableFeatures(seurat_obj, selection.method = "vst", nfeatures = 2500)
+        # Scaling to perform PCA.
+        seurat_obj <- ScaleData(seurat_obj, features = rownames(seurat_obj))
+        # PCA previous to cell cycle scoring.
+        seurat_obj <- RunPCA(seurat_obj, features = VariableFeatures(object = seurat_obj), npcs = 50)
+        # Cell cycle scores and plots.
+        seurat_obj <- CellCycleScoring(object = seurat_obj, s.features = s.genes, g2m.features = g2m.genes, set.ident = T)
+        # Scaling.
+        if(all(regression_param)){
+            seurat_obj <- ScaleData(seurat_obj, features = rownames(seurat_obj), vars.to.regress = c(vars_to_regress, "S.Score", "G2M.Score"))
+        } else if (any(regression_param)){
+            seurat_obj <- ScaleData(seurat_obj, features = rownames(seurat_obj), vars.to.regress = unlist(vars_param[regression_param]))
+        }
+    } else if (norm_type == "SCT"){
+        seurat_obj <- SCTransform(seurat_obj, verbose = FALSE)
+	    message(paste0("2. Seurat object was normalized using the ", norm_type, " approach"))
+        # PCA previous to cell cycle scoring.
+        seurat_obj <- RunPCA(seurat_obj, features = VariableFeatures(object = seurat_obj), npcs = 50)
+        # Cell cycle scores and plots.
+        seurat_obj <- CellCycleScoring(object = seurat_obj, s.features = s.genes, g2m.features = g2m.genes, set.ident = TRUE)
+        # If cell cycle regression is needed, a new SCT transformation is performed.
+        if(all(regression_param)){
+            seurat_obj <- SCTransform(seurat_obj, assay = "RNA", new.assay = "SCT", vars.to.regress = c(vars_to_regress, "S.Score", "G2M.Score"), verbose = FALSE)
+        } else if (any(regression_param)){
+            seurat_obj <- SCTransform(seurat_obj, assay = "RNA", new.assay = "SCT", vars.to.regress = unlist(vars_param[regression_param]), verbose = FALSE)
+        }
+    } else {
+	    message("Normalization method not found.")
     }
-  }
-  
-  # The normalization is chosen.
-  if (norm_type == "SCT"){
-    seurat_obj <- SCTransform(seurat_obj, vars.to.regress = vars_to_regress, return.only.var.genes = FALSE, verbose = FALSE)
-  } else if (norm_type == "standard") {
-    seurat_obj <- NormalizeData(seurat_obj, verbose = FALSE)
-    seurat_obj <- FindVariableFeatures(seurat_obj, selection.method = "vst", 
-                                       nfeatures = length(rownames(seurat_obj@assays$RNA@counts)), verbose = FALSE)
-  }
-  return(assign(paste0(experiment[[1]][6]),seurat_obj))
+    return(assign(paste0(experiment[[1]][6]),seurat_obj))
 }
 
 # 6.2. The function is applied obtaining a list with all the seurat objects.
-seurat_object_list <- lapply(input_data, function(x) path_to_seurat_object(x, vars_to_regress, norm_type, velocyto))
+seurat_object_list <- lapply(input_data, function(x) path_to_seurat_object(x, regress_out = regress_out, vars_to_regress = vars_to_regress, regress_cell_cycle = regress_cell_cycle, norm_type = norm_type, add_velocity = velocyto))
 message("1. All Seurat objects were loaded.")
 
 # 6.3. The minimum number of features between assays is obtained to get an aproximate feature number and keep as much genes as possible.
@@ -120,17 +148,15 @@ n_features <- min(unlist(lapply(seurat_object_list, function(x) n_feat_calc(x)))
 # 6.4. Final integration steps and integration object creation.
 if (norm_type == "SCT") {
   seurat.features <- SelectIntegrationFeatures(object.list = seurat_object_list, nfeatures = n_features, verbose = FALSE)
-  seurat.list <- PrepSCTIntegration(object.list = seurat_object_list, anchor.features = seurat.features, 
-                                    verbose = FALSE)
-  seurat.anchors <- FindIntegrationAnchors(object.list = seurat.list, normalization.method = "SCT", 
-                                           anchor.features = seurat.features, verbose = FALSE)
+  seurat.list <- PrepSCTIntegration(object.list = seurat_object_list, anchor.features = seurat.features, verbose = FALSE)
+  seurat.anchors <- FindIntegrationAnchors(object.list = seurat.list, normalization.method = "SCT", anchor.features = seurat.features, verbose = FALSE)
   seurat.integrated <- IntegrateData(anchorset = seurat.anchors, normalization.method = "SCT", verbose = FALSE)
   message(paste0("2. All Seurat objects were integrated following the ", norm_type, " approach."))
 } else if (norm_type == "standard") {
   seurat.features <- SelectIntegrationFeatures(object.list = seurat_object_list, nfeatures = n_features, verbose = FALSE)
   seurat.anchors <- FindIntegrationAnchors(object.list = seurat_object_list, dims = 1:100, anchor.features = seurat.features, verbose = FALSE)
   seurat.integrated <- IntegrateData(anchorset = seurat.anchors, dims = 1:100, verbose = FALSE)
-  seurat.integrated <- ScaleData(seurat.integrated, verbose = TRUE, vars.to.regress = vars_to_regress)
+  seurat.integrated <- ScaleData(seurat.integrated, verbose = TRUE)
   message(paste0("2. All Seurat objects were integrated following the ", norm_type, " approach."))
 }
 
@@ -145,18 +171,11 @@ p2 <- DimPlot(seurat.integrated, reduction = "pca", group.by = "assay_name", col
 ggsave(paste0(dir.name, "/", folders[2], "/2_dimplot_PCA.pdf"), plot = p2)
 message("3. PCA was done.")
 
-# 6.7. Principal component study using Elbow plot and Jack Straw Plot.
+# 6.7. Principal component study using Elbow plot.
 p3 <- ElbowPlot(seurat.integrated, ndims = 50) + theme(legend.position="bottom")
 ggsave(paste0(dir.name, "/",folders[2], "/3_elbowplot.pdf"), plot = p3, scale = 1.5)
 message("4. Elbowplot was generated.")
 
-if (!(seurat@active.assay == "SCT")) {
-  seurat.integrated <- JackStraw(seurat.integrated, num.replicate = 100, dims = 50)
-  seurat.integrated <- ScoreJackStraw(seurat.integrated, dims = 1:50)
-  p4 <- JackStrawPlot(seurat.integrated, dims = 1:50) + theme(legend.position="bottom") + guides(fill=guide_legend(nrow=2, byrow=TRUE)) 
-  ggsave(paste0(dir.name, "/",folders[2], "/4_jackstrawplot.pdf"), plot = p4, scale = 2)
-  message("5. JackStraw plot was generated.")
-}
 
 # 6.8. Cell cycle scores and plots.
 seurat.integrated <- CellCycleScoring(object = seurat.integrated, s.features = s.genes, g2m.features = g2m.genes, set.ident = T)
