@@ -212,7 +212,7 @@ rule seurat_degs:
     params:
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
         random_seed = config["random_seed"],
-        selected_res = config["parameters"]["seurat_degs"]["selected_res"],
+        selected_cond = config["parameters"]["seurat_degs"]["selected_cond"],
         ranking = config["parameters"]["seurat_degs"]["ranking"],
         test = config["parameters"]["seurat_degs"]["test"]
     conda: "../envs/seurat_degs.yaml"

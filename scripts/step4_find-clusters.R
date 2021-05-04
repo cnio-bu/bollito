@@ -79,7 +79,11 @@ for(i in 1:length(which(grepl(paste0(assay_type,"_snn_"),colnames(seurat@meta.da
   dist.matrix <- dist(x = Embeddings(object = seurat[["pca"]])[, 1:pc])
   clusters <- slot(seurat, "meta.data")[,full_res]
   sil <- silhouette(x = as.numeric(x = as.factor(x = clusters)), dist = dist.matrix)
-  silhouette_scores[[i]] <- as.data.frame(summary(sil)[2])
+  if(is.null(dim(sil))){
+	      silhouette_scores[[i]] <- as.data.frame(NA)
+    } else {
+	        silhouette_scores[[i]] <- as.data.frame(summary(sil)[2])
+      }
   names(silhouette_scores[[i]]) <- full_res
 }
 # Create a xlsx file to store the silhouette scores.

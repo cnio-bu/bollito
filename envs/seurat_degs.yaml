@@ -13,3 +13,4 @@ dependencies:
     - r-openxlsx
     - bioconductor-limma
     - r-spatstat=1.64_1
+    - r-metap=1.1
