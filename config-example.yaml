@@ -70,7 +70,6 @@ parameters:
     seurat_degs: # [OPTIONAL] step 5: marker and differentially expressed genes calculation
         enabled: True
         selected_cond: [0.2, "condition"] # resolution or condition to be used in the downstream analysis. Resolutions can be written as follows: 0.2, 0.4... Conditions must be character vectors.
-        selected_res: 0.4 # resolution to be used in the downstream analysis
         ranking: True # gene ranking for all the genes to perform as GSEA
         test: "wilcox" # statistical test to use for the DE analysis (see Seurat's FindMarkers function options)
     seurat_gs: #[OPTIONAL] step 6: gene set scoring will calculate the average expression levels of each specified regulatory program
