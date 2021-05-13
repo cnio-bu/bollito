@@ -77,19 +77,20 @@ path_to_seurat_object <- function(x, regress_out, vars_to_regress, regress_cell_
     seurat_obj <- AddMetaData(object = seurat_obj, metadata = experiment, col.name = 'assay_name')
     # If RNA velocity is going to be performed, we add the velocyto matrices in this step.
     if (add_velocity){
-        # Velocyto matrices path is infered. 
-        velocyto_dir = paste0(outdir_config,"/star/", experiment,"/Solo.out/Velocyto/raw/")
+   	# Velocyto matrices path is infered. 
+	velocyto_dir = paste0(outdir_config,"/star/", experiment,"/Solo.out/Velocyto/raw/")
         velo_names = c("spliced", "unspliced", "ambiguous")
-        vel_matrices = list()
-        # The matrices are read in 10x format.
-        vel_matrices <- setNames(lapply(velo_names, function(name) {
-            Read10X(data.dir = paste0(velocyto_dir, name))
-        }), nm = velo_names)
-        # The matrices are added as assays in the respective seurat object.
-        seurat_obj <- setNames(lapply(velo_names, function(name) {
-            vel_matrices[[name]] <- vel_matrices[[name]][, which(x = colnames(vel_matrices[[name]]) %in% colnames(seurat_obj))] 
-            CreateAssayObject(counts = vel_matrices[[name]])
-        }), nm = velo_names) 
+	vel_matrices = list()
+	# The matrices are read in 10x format.
+	for (name in velo_names) {
+		vel_matrices[[name]] <- Read10X(data.dir = paste0(velocyto_dir, name))
+	}
+	# The matrices are added as assays in the respective seurat object.
+	for (name in velo_names) {
+		vel_matrices[[name]] <- vel_matrices[[name]][, which(x = colnames(vel_matrices[[name]]) %in% colnames(seurat_obj))] 
+		seurat_obj[[name]] <- CreateAssayObject(counts = vel_matrices[[name]])
+	}
+
     }
     # Save regression parameters variable
     regression_param <- c(regress_out, regress_cell_cycle)
