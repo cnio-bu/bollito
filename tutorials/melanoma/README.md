@@ -1,13 +1,9 @@
 # Melanoma tutorial (Ho et al., 2018)
 ## Tutorial overview
 
-In this tutorial we will analyze the melanoma dataset from *Ho et al*.
-This dataset is composed by cells from the 451Lu cell line.
-There are two samples in this dataset: the parental cell line and a vemurafenib-resistant sample treated with targeted BRAF inhibitors.
+In this tutorial we will analyze the melanoma dataset from *Ho et al*. This dataset is composed by cells from the 451Lu cell line and there are two samples: the parental cell line and a vemurafenib-resistant sample treated with targeted BRAF inhibitors.
 
-The sample was published by [Ho et al.](https://genome.cshlp.org/content/28/9/1353) and it is available in GEO database under the accession number [GSE108394](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE108394).  
-In this case the dataset has been
-downsampled to 10 million reads per sample in order to reduce the execution time required to complete the tutorial.
+The dataset was published by [Ho et al.](https://genome.cshlp.org/content/28/9/1353) and it is available in GEO database under the accession number [GSE108394](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE108394). All images in this tutorial have been generated from a downsampled version of the dataset, were only 10 million reads per sample have been considered.
 
 The tutorial will analyse the dataset using the following steps:
 - sequencing QC
@@ -23,8 +19,9 @@ The tutorial will analyse the dataset using the following steps:
 ## Input file configuration
 
 The first step is to download the data we will be analysing. In this case it will be composed of two pairs of paired-end, FASTQ-formatted files.
+You should download these files and put them in a directory of your choice. 
 
-You should download these files and put them in a directory of your choice. We will use the example directory `/my/data/files` throughout the tutorial. You should instead use the real path to your files.
+We will use the example directory `/my/data/files` throughout the tutorial. You should instead use the real path to your files. Note we have generated an even smaller version or the samples in order to reduce the execution time required to complete the tutorial. 
 
 Parental sample - 451LU:
 - [2500K_451LU_L003_R1_001.fastq.gz](https://bioinformatics.cnio.es/data/pipelines/single_cell/10x_sample_data/melanoma_10M/2500K_451LU_L003_R1_001.fastq.gz)
@@ -95,36 +92,41 @@ The following parameters affect the pipeline as a whole. Use the following table
 |--------------------|-------|--------------------------------------------------------|
 | input_type         | fastq | Input files are FASTQ in fastq format.                                 |
 | technology         | 10x   | Input files are generated with 10x Genomics technology. |
-| case               | uppercase | Human genes are generally written using upper case letters.              |
+| technology_version         | v2   | Input files are generated with 10x Genomics technology. |
+| graphics           | True   | Graphic card available. |
 | random_seed        | 4848  | A random seed. Using the same seed allows us to have replicable results between pipeline runs.                                  |
-| annotation         | /my/data/files/gencode.v34.annotation.gtf | The GENCODE annotation file you just downloaded.  |
-| fasta              | /my/data/files/GRCh38.primary_assembly.genome.fa | The GENCODE sequence file you just downloaded.         |
-| idx                | /my/data/files/GRCh38.primary_assembly.genome_index  | The path where to store the genome index.                  |
+| case               | uppercase | Human genes are generally written using upper case letters.              |
+| ref-annotation         | /my/data/files/gencode.v35.annotation.gtf | The GENCODE annotation file you just downloaded.  |
+| ref-fasta              | /my/data/files/GRCh38.primary_assembly.genome.fa | The GENCODE sequence file you just downloaded.         |
+| ref-idx                | /my/data/files/GRCh38.primary_assembly.genome_index  | The path where to store the genome index.                  |
 | whitelist          | /my/data/files/737K-august-2016.txt | Barcode whitelist for 10x Chromium v2 chemistry. |
 
 ### Step-specific parameters
 
-#### Alignment step (star)
-The STAR alignment parameters are selected depending on the single-cell technology and version. In this case, since the Chromium V3 chemistry was used for sequencing the samples, the system will automatically apply the following STAR parameters:
+#### Alignment step - "star"
+The STAR alignment parameters are selected depending on the single-cell technology and version. In this case, since the Chromium V2 chemistry was used for sequencing the samples, the system will automatically apply the following STAR parameters:
 "--soloType Droplet --soloFeatures Gene Velocyto --outFilterMultimapNmax 50 --winAnchorMultimapNmax 50 --alignEndsType EndToEnd --outReadsUnmapped Fastx --soloUMIlen 12 --outSAMtype BAM SortedByCoordinate --outSAMattributes NH HI nM AS CR UR CB UB GX GN sS sQ sM"
 
-#### Single-cell pre-QC (seurat_qc)
+#### Single-cell pre-QC - "seurat_qc"
 For the purpose of this tutorial, we have downsampled our data. This operation reduces the number of genes and cells we will be using. Because of this, we will set the required number of cells in which a gene must be detected to just 1.
 
 | Parameter        | Value |  Commentary                                             |
 |------------------|-------|---------------------------------------------------------|
 | min_cells_per_gene | 1 | Require a gene to be detected in at least 1 cell for it to be included in the analysis |
 
-#### Single-cell post-QC (seurat_postqc)
+#### Single-cell post-QC - "seurat_postqc"
 In this section we will establish some thresholds for the inclusion and exclusion of cells, based on the results from the seurat_qc rule.
 
 | Name             | Value |  Commentary                                             |
 |------------------|-------|---------------------------------------------------------|
 | min_feat         | 400   | Bottom limit for the number of expressed genes.         |
 | max_feat         | 1700  | Upper limit for the number of expressed genes.          |
+| min_count        | null  | Unused filtering.                                       |
+| max_count        | null  | Unused filtering.                                       |
 | mit_pct          | 12    | Upper limit for the mitochondrial percentage of counts. |
+| ribo_pct         | null  | Unused filtering.                                       |
 
-#### Merging (seurat_merging)
+#### Merging - "seurat_merge"
 
 This step merges all samples, generating a combined Seurat object.
 The "enable" parameter must be set to true in the configuration file.
@@ -134,51 +136,53 @@ The "enable" parameter must be set to true in the configuration file.
 | enabled         | True   | Merging is perfomed.           |
 
 
-#### Single-cell normalization (seurat_normalization)
+#### Single-cell normalization - "seurat_normalization"
 
 For the normalization, we have chosen to run the *standard* method. In our case, as the QC parameters (features, counts, mitochondrial percent and ribosomal percent) did not heavily affect the sample, their regression was not needed. The cell cycle was not regressed out either, as it also did not seem to drive the differences in expression between the cells.
 
 | Name             | Value |  Commentary                                             |
 |------------------|-------|---------------------------------------------------------|
 | normalization         | standard   | Standard normalization method used.           |
-| regress_out           | False | Upper limit for the number of expressed genes.          |
-| vars_to_regress       | Empty | Unused filtering.                                       |
-| regress_cell_cycle    | Empty | Unused filtering.                                       |
-| regress_merge_effect  | Empty | Upper limit for the mitochondrial percentage of counts. |
+| regress_out - enabled | False | Upper limit for the number of expressed genes.          |
+| regress_out - vars_to_regress | Empty | Unused filtering.                               |
+| regress_cell_cycle    | False | Unused filtering.                                       |
+| regress_merge_effect  | False | Upper limit for the mitochondrial percentage of counts. |
 
 
-#### Integrating (seurat_integrating)
+#### Integrating - "seurat_integration"
 
 This step integrates all samples through the Seurat integration methodology. The method is able to project one sample over other using a selection of shared cells called *anchors*. We've decided to "enable" this step, to analyze the differences between the merging and the integration steps.
-For this purpose, the "enable" parameter must be set to true in the configuration file. Also, as in the previous rule, the normalization parameters must be set.
+For this purpose, the "enable" parameter must be set to true in the configuration file.
 
 | Name             | Value |  Commentary                                             |
 |------------------|-------|---------------------------------------------------------|
-| enabled          | False   | Integration is performed. |
-| norm_type           | standard | Standard normalization method used.               |
-| vars_to_regress       | Empty | Unused filtering.                                  |
+| enabled          | True   | Integration is performed. |
 
 
-#### Single-cell clustering - “seurat_clustering“
-After taking a look at the elbow and jack-stat plots (both output files from the previous rule), we have decided to consider the 1-10 significant PCA components for the clustering analysis. We have also selected a set of resolutions to analyze. The k parameter was set to default. 
+
+#### Single-cell clustering - "seurat_find_clusters"
+After taking a look at the elbow plot, we have decided to consider the 1-10 significant PCA components for the clustering analysis. We have also selected a set of resolutions to analyze. The k parameter was set to default. 
 
 | Name                  | Value                   | Commentary                          |
 |-----------------------|-------------------------|-------------------------------------|
-| principal_components  | 10                       | Significant principal components.   |
-| resolutions           | [0.2, 0.4, 0.8, 1.2, 1.6] | Set of tested resolutions.          |
+| principal_components  | 10                      | Significant principal components.  |
+| resolutions           | [0.2, 0.4, 0.8, 1.2, 1.6] | Set of tested resolutions.        |
 | k_neighbors           | 20                      | Number of *k* neighbors.            |
 
-#### Single-cell functional analysis Seurat-based - “seurat_gs“
+#### Single-cell functional analysis Seurat-based - "seurat_gs"
 In this step, both the path to a GMT file storing molecular signatures (or gene sets) and a threshold value are required.
 The threshold value reflects the minimum ratio (expressed genes / total genes) that a gene set needs in order to be considered for testing.
 In our case, we have decided to test the whole Hallmarks signature collection, obtained from MSigDB.
 
 | Name             | Value |  Commentary                                             |
 |----------------|-------|---------------------------------------------------------|
+| enabled         | True   | Set to "True" to execute the analysis.          
 | geneset_collection | Hallmarks.gmt | Molecular signatures GMT file.    |
 | geneset_percentage  | 0.2 |Minimum ratio (expressed genes / total genes) for a geneset to be tested |
 
-#### Single-cell functional analysis Vision-based - “vision“
+> If you are using the reduced version of the dataset, set the functional analysis to False.
+
+#### Single-cell functional analysis Vision-based - “vision"
 After carefully considering our previous results, we decided to focus on the resolution 0.8 for the functional analysis of the samples. 
 In this step, we have also tested the Hallmarks signatures, in order to compared the results from both seurat_gs and vision rules.
 Also, the metadata variables from the Seurat object were added. The chosen clustering resolution was set to 0.8.
@@ -188,16 +192,19 @@ Also, the metadata variables from the Seurat object were added. The chosen clust
 | enabled         | True   | Set to "True" to execute the analysis.          |
 | mol_signatures  | Hallmarks.gmt | Upper limit for the number of expressed genes.          |
 | meta_colums     | ["nCount_RNA", "nFeature_RNA", "percent.mt", "percent.ribo"] | Metadata variables from Seurat. |
-| n_cores         | 8 | Threads provided to Vision.                                      |
 | selected_res    | 0.8 | Clustering resolution chosen. |
 
 #### Single-cell differential expression analysis - “seurat_degs“
-We have also decided to focus on the resolution 0.8, for the differential expression analysis between clusters. In this step, the statistical test to use must be specified. In our case, we have decided to apply a Wilcoxon test. The resolution must also be specified.
+Since a differential expression analysis is usefulto analyze the data, this step is set to True. We have also decided to focus on the resolution 0.8, for the differential expression analysis between clusters. In this step, the statistical test to use must be specified. In our case, we have decided to apply a Wilcoxon test. The resolution must also be specified. Also, ranking parameter is set to True to obtain the complete differential expression ranking. 
 
 | Name             | Value |  Commentary                                             |
 |------------------|-------|---------------------------------------------------------|
-| selected_res  | 0.8   | Clustering resolution chosen.  |
-| test   | "wilcox" | Statistical test to use for the DE analysis   |
+| enabled  | True   | Perform differential expression analysis.  |
+| selected_cond  | 0.8   | Condition or clustering resolution chosen.  |
+| ranking   | True | Create the complete DEG ranking.   |
+| test   | "wilcox" | Statistical test to use for the DE analysis.   |
+
+> If you are using the reduced version of the dataset, set the selected_cond to 0.2 as there aren't enough cells to consider all clusters generated at resolution 0.8.
 
 #### Trajectory inference study - "slingshot"
 
@@ -210,8 +217,8 @@ Finally, the user must select the number of variable genes (to create the GAM mo
 |------------------|-------|---------------------------------------------------------|
 | enabled | True | Activate the step. |
 | selected_res | 0.8 | Clustering resolution chosen. |
-| start_clus | Empty | Starting cluster according to previous information. |
-| end_clus | Empty | End clusters according to previous information. |
+| start_clus | False | Starting cluster according to previous information. |
+| end_clus | False | End clusters according to previous information. |
 | n_var_genes | 1000 | Number of genes chosen to create the GAM. |
 | n_plotted_genes  | 50 | Number of genes chosen to be repressented in the heatmap. |
 
@@ -224,8 +231,8 @@ The user needs to specify the clustering resolution of interest and whether to p
 |------------------|-------|---------------------------------------------------------|
 | enabled | True | Activate the step. |
 | selected_res | 0.8 | Clustering resolution chosen. |
-| downsampling | False | Downsampling deactivated. |
-| n_cells | Empty | Empty. |
+| downsampling - enabled | False | Downsampling deactivated. |
+| downsampling - n_cells | null | Empty. |
 
 
 
@@ -241,6 +248,8 @@ The user needs to specify the clustering resolution of interest and whether to p
 | seurat_qc                   | 3000       | 1          |
 | seurat_postqc               | 4000       | 1          |  
 | seurat_normalization        | 16000      | 1          |
+| seurat_merge                | 16000      | 1          |
+| seurat_integration          | 32000      | 1          |
 | seurat_find_clusters        | 12000      | 1          | 
 | seurat_degs                 | 64000      | 1          | 
 | seurat_gs                   | 16000      | 1          | 
@@ -338,14 +347,13 @@ The dataset was normalized using the **standard method** proposed by Seurat.
 This method uses a global-scaling normalization. During this step the sample is also scaled.
 
 A **dimensionality reduction** is performed using a Principal Components Analysis (PCA). In our case, we studied the first 50 components.
-To study which of those components is significant, bollito produces both an elbow plot and a JackStraw plot.
+To study which of those components is significant, bollito produces both an elbow plot.
 The first one shows the variance explained by each component, while the second one shows the significance of each component.
 
-<img src="./images/3_elbowplot.png" width="500"> <img src="./images/4_jackstrawplot.png" width="500">
+<img src="./images/3_elbowplot.png" width="500"> 
 
-From the JackStraw plot, we can be observe that the last significant component is the 9th component. 
-But if we focus on the elbow plot, we can see that the variance starts to be stable at the 10th component.
-For this reason, we have preferred to be conservative and keep **10 components**.
+If we focus on the elbow plot, we can see that the variance starts to be stable at the 10th component.
+For this reason, we have selected the first **10 components** to continue with the analysis.
 Since these are very few components, the execution time won't be compromised.
 
 > NOTE: the number of significant components chosen in this step is **fundamental** for the following steps of the analysis. 
@@ -410,7 +418,7 @@ since analysing too many clusters could have a negative effect in the trajectory
 ### 7. Diferential expression analysis
 
 This step is **fundamental** to characterize the dataset. 
-Here, the expression profile of each cluster is compared to the rest,
+Here, the expression profile of each cluster (or condition) is compared to the rest,
 obtaining the **marker genes** per cluster (filtered by logFC, and a minimum number of cells expressing each gene), but also a complete differential expression analysis including all the genes of the dataset.
 The marker genes are a valuable information since they will be useful for the functional characterization of the clusters.
 
