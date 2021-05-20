@@ -79,16 +79,16 @@ Before executing the pipeline, the users must configure it according to their sa
 
 #### a. samples.tsv
 
-This file contains information on the samples to be analyzed. The first column, called "sample", is mandatory, and defines the sample name for each sample. The other columns are used to define the samples. This information is stored as metadata in the Seurat object, so, every cell belonging to that sample is labeled with the value defined by the user.
+This file contains information on the samples to be analyzed. The first column, called "sample", is mandatory, and defines the sample name for each sample. The other columns are used to define the samples. This information is stored as metadata in the Seurat object, so, every cell belonging to that sample is labeled with the value defined by the user, meanwhile the column heaeder will correspond to the condition name. 
 
-An example file ([samples-example.tsv)](https://gitlab.com/bu_cnio/bollito/-/blob/master/samples-example.tsv)) is included in the repository.
+An example file ([samples-example.tsv)](https://gitlab.com/bu_cnio/bollito/-/blob/master/samples-example.tsv) is included in the repository.
 
 Rename it to `samples.tsv` and edit its contents to list the sample names and the features 
 related to each sample. 
 
 #### b. units.tsv
 
-This file contains information about the data files associated to each sample.
+This file is used to configure the input files.
 
 There are two example files, depending on the type of input data:
 
@@ -101,7 +101,7 @@ Rename it to `units.tsv` and edit its contents according to the following table:
 | **Field name** 	| **Description**                                         	|
 |------------	|-----------------------------------------------------	|
 | **sample**     	| Sample name (must match the sample name specified in *samples.tsv*).         	|
-| **unit**       	| A distinct name for each pair of files associated to the same sample (for example in the case of replicates). 	|
+| **unit**       	| A distinct name for each pair of files associated to the same sample (for example in the case of replicates).|
 | **fq1**        	| FASTQ file for read 1, containing the Cell Barcode and UMI.  	|
 | **fq2**        	| FASTQ file for read 2, containing the transcriptomic sequence.       	|
 
@@ -115,7 +115,6 @@ Rename it to `units.tsv` and edit its contents according to the following table:
 | **Field name**            	| **Description**                                                                                                                                                                                     	|
 |-----------------------	|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	|
 | **sample**                	| Sample name (must match the sample name specified in *samples.tsv*).                                                                                                                                                     	|
-| **unit**                  	| Type of input matrix (*10x* or *standard*).                                                                                                                                                         	|
 | **matrix**                	| Matrix file (.mtx for 10x or .tsv for standard) storing the counts.                                                                                                                             	|
 | **cell_names** (10x only) 	| tsv file containing one cell name per row.                                                                                                                                                      	|
 | **gene_names** (10x only) 	| tsv file containing one gene name per row.                                                                                                                                                      	|
@@ -135,6 +134,7 @@ Here are some of the main available parameters:
 |**technology** |Technology used to get the reads files (*10x* or *Drop-seq*).|
 |**outdir** |Directory where to store the output files.|
 |**logdir** |Directory where to store the log files.|
+|**graphics**|Graphic card availability.|
 |**random_seed** |Seed parameter to allow for reproducible analyses.|
 |**case** |Type of case used to represent the gene names, must be use according the specie and genesets used.|
 |**annotation** |GTF file holding genetic features information.|
@@ -145,6 +145,23 @@ Here are some of the main available parameters:
 
 This file is optional and it is only used when the input file used are matrices. The purpose of this file is to annotate each individual cell, storing that information in the Seurat object. It is a tsv file with two or more columns. The first column corresponds to each cell name specified in *cell_names.tsv* and the rest are the values of the metadata variables. First row of each column indicates the metadata variable name.
 
+### 4. Create the Conda environments.
+
+To run the pipeline, the user needs to create the conda environments first, which will take some minutes.
+This step is done automatically using this command:
+
+    snakemake --use-conda --conda-create-envs-only --conda-frontend mamba
+
+
+### 5. Run the pipeline.
+
+Once the pipeline is configured and conda environments are created, the user just needs to run bollito.
+
+    snakemake --use-conda -j 32 
+
+The mandatory arguments are:
+* **--use-conda**: to install and use the conda environemnts.
+* **-j**: number of threads/jobs provided to snakemake.
 
 ## Pipeline steps
 
@@ -176,10 +193,12 @@ The alignment tool implemented in bollito is [STAR](https://github.com/alexdobin
 
 This step requires the following parameters, defined in the configuration file:
 
-* an annotation file containing the features of interest (in GTF format, must match the target genome)
-* one of the following options for the genome:
+* An annotation file containing the features of interest (in GTF format, must match the target genome)
+* One of the following options for the genome:
     * a FASTA file (will be indexed by bollito).
     * a STAR genome index.
+* Technology, which includes Drop-seq, 10x (chemistry version also needs to be specified), or a custom technology where the user will need to set the CB and UMI length.
+* The corresponding CB whitelist.
 
 Example parameters for different STAR configurations are available in the example config file.
 
@@ -240,15 +259,17 @@ To enable this step, the user just need to set the "enabled" parameter to TRUE i
 ### 5. Clustering.
 
 Clustering of cells uses the normalized expression profiles. 
-After, a dimensionality reduction by PCA, the K-nearest-neightbor graphs embedded in this lower dimensional space, are obtained.
-Once the graph is created, clusters are captured by using a community detection method.
+After, a dimensionality reduction by PCA, the _k_-nearest-neightbor (KNN) graph embedded in this lower dimensional space, is obtained.
+Then a Shared Nearest Neighbour (SNN) graph is constructed calculating the nearest neighbour cells overlapping using
+the Jaccard index.
+Once the graph is created, clusters are captured by using a the Louvain algorithm.
 
 To explore the clusters along the resolutions, bollito uses [Clustree](https://github.com/lazappi/clustree). Cluster validation is achieved by calculating silhouette scores
 for each cluster. 
 
 For this step, the following parameters need to be adjusted via the configuration file:
 * Number of significant components based on the elbow plot or JackStraw analysis obtained in previous steps.
-* Number of neighbours (*k*) used to generate the KNN graph (optional).
+* Number of neighbours (*k*) used to generate the KNN graph (default = 20).
 * Resolutions to be used in the community detection method.
 
 > NOTE: the best resolution obtained should be specified in the configuration file,
@@ -256,55 +277,70 @@ since it is used in posterior effects.
 
 ### 6. Differential expression analysis.
 
-Differential expression analysis is based on the clusters obtained during the previous step. For each cluster, two analyses are performed:
-* Marker gene detection per cluster (for this test, only genes with a logFC threshold of 0.25, that are expressed in at least 10% of the cells are included).
+Differential expression analysis is based on the condition that the user requieres, including a specific cluster resolution or some annotation information. For each condition, two analyses are performed:
+* Marker gene detection (for this test, only genes with a logFC threshold of 0.25, that are expressed in at least 10% of the cells are included).
 * Differential expression for all genes (no thresholds applied).
 
-Output from this step includes a heatmap of top marker genes per cluster, and a .rnk file that may be used for a downstream gene enrichment analysis with [GSEA](https://www.gsea-msigdb.org/gsea/index.jsp),
+Output from this step includes a heatmap of top marker genes per condition, and a .rnk file that may be used for a downstream gene enrichment analysis with [GSEA](https://www.gsea-msigdb.org/gsea/index.jsp),
 
 The following parameters of this step need to be adjusted via the configuration file:
-* Cluster resolution to analyze.
+* Set *enabled* to *True*.
+* Condition to analyze (cluster resolution or annotation information).
 * Differential expression test to apply.
 
 For a list of available tests see the Seurat [FindMarkers](https://rdrr.io/github/satijalab/seurat/man/FindMarkers.html) function documentation.
 
-### 7. Functional analysis.
+### 7. Functional analysis - Seurat-based.
+bollito uses Seurat to apply the AddModuleScore function to the molecular signatures specified by the user. A paired Wilcoxon test is applied to compare the expression of the genes from the signature between the clusters.
+
+To enable this step, the following parameters need to be adjusted via the configuration file:
+* Set *enabled* to *True*.
+* Set the path to the molecular signatures file to use (in .gmt format).
+* Set the ratio of expressed genes / total genes from a geneset to be tested (default is 0.2).
+
+### 8. Functional analysis - Vision-based.
 bollito applies the [Vision](https://github.com/yoseflab/VISION) methodology in order to study
 different molecular signatures and their significance at a specific clustering resolution.
 
 To enable this step, the following parameters need to be adjusted via the configuration file:
-* Set *enabled* to *TRUE*.
+* Set *enabled* to *True*.
 * Set the path to the molecular signatures file to use (in .gmt format).
 * Select the desired metadata variables from Seurat.
 * Set the desired cluster resolution.
 
-### 8. Trajectory inference.
+### 9. Trajectory inference.
 
 This step analyses the cell lineages of your sample by inferring a pseudotime variable from the data and sorting the clusters according to it. 
 The trajectory inference step is implemented by using the [Slingshot](https://github.com/kstreet13/slingshot) package.
 
 To enable it, the following parameters need to be adjusted via the configuration file:
-* Set *perform* to *TRUE*.
+* Set *enabled* to *True*.
 * Cluster resolution must be specified.
 * Specifiy start and end cluster(s) (optional).
 * Number of genes for the heatmap representation.
 * Number of most variable genes (allows you to generate the general additive model of the heatmap).
 
-### 9. RNA velocity.
+### 10. RNA velocity.
 The analysis of RNA velocity allows you to capture the expression dynamics of your data by
 estimating the spliced and unspliced mRNA abundances on each of the available splicing sites.
 Based on this information, future state of single-cells can be inferred.
 This step is implemented using the [Velocyto](http://velocyto.org/) wrapper.
 
 To enable this step, the following parameters need to be adjusted via the configuration file:
-* Set *perform* to *TRUE*.
+* Set *enabled* to *True*.
 * Cluster resolution must be specified.
+* If the dataset is large, a downsampling should be considered (optional).
 
 > NOTE: RNA velocity step can not be performed if we use a matrix as input of the pipeline,
 since it needs the BAM files to generate the three count matrices (spliced, unspliced and ambiguous).
 
+## Configuration of computation resources
+
+The user can configure bollito to optimise the available computational resources, to reduce the computational time. The optimization is achieved thanks to Snakemake's ability to run several samples at the same time and single-cell script optimization using the future package implementation. Resources configuration is done through the configuration file.  This file has a field called _resources_, where the user can define the RAM memory usage and the number of threads (if the rule admits multithreading) provided to a specific step. Additionally, if the user does not provide any value for some of these fields, the pipeline will use the default values.
+
+
 ## Shortcuts
-bollito has implemented a shortcut system based on specfic target related to steps. 
+bollito has implemented a shortcut system based on specfic targets related to the pipeline's steps.
 Each target calls a end point rule which terminate the pipeline execution.
 
 To use the shorcuts, you only need to run the pipeline as usual, but with the --until option.
@@ -313,12 +349,10 @@ To use the shorcuts, you only need to run the pipeline as usual, but with the --
 
 The available targets are:
 * **expression_matrix**: run bollito until alignment step included.
-* **normalized_expression_matrix**: run bollito until normalization step included.
-* **differential_expression**: run bollito until clustering sdifferential expresion steps included.
-* **functional_analysis**: run bollito until clustering and functional analysis steps included. 
-* **trajectory_inference**: run bollito until clustering and trajectoty inference steps included.
-* **geneset_analysis**: run bollito until clustering and geneset analysis steps included.
-* **RNA_velocity**: run bollito until clustering and RNA velocity steps included. 
+* **qc_expression_matrix**: run bollito until single-cell QC step included (rules: seurat_qc, seurat_postqc & seurat_merge).
+* **normalized_expression_matrix**: run bollito until single-cell normalization step included (rules: seurat_qc, seurat_postqc, seurat_merge, seurat_normalization & seurat_integration).
+
+Additionally, the user might use the Snakemake rules names as targets, which are available in the config.yaml file.
 
 ## Report
 bollito produces a HTML report using Snakemake automatic report generaration.

@@ -1,10 +1,11 @@
 # PBMC tutorial
 ## Tutorial overview
 
-In this tutorial we will analyze the *PBMC* dataset. This dataset is composed of various types of *human* blood cells including T cells, B cells, NK cells, and monocytes.
+In this tutorial we will analyze the *PBMC* dataset. This dataset is composed of various types of **human blood cells** including T cells, B cells, NK cells, and monocytes.
 
-The sample is part of [10x Genomics example datasets](https://support.10xgenomics.com/single-cell-gene-expression/datasets). In this case the dataset has been
-downsampled to 1 million reads in order to reduce the execution time required to complete the tutorial.
+The sample is part of [10x Genomics example datasets](https://support.10xgenomics.com/single-cell-gene-expression/datasets).
+In this case the dataset has been
+downsampled to 5 million reads in order to reduce the execution time required to complete the tutorial.
 
 The tutorial will analyse the dataset using the following steps:
 - sequencing QC
@@ -85,14 +86,16 @@ The following parameters affect the pipeline as a whole. Use the following table
 
 | Name               | Value | Notes                                             |
 |--------------------|-------|--------------------------------------------------------|
-| input_type         | fastq | Input files are FASTQ in fastq format.                                 |
+| input_type         | fastq | Input files are FASTQ in fastq format. |
 | technology         | 10x   | Input files are generated with 10x Genomics technology. |
-| case               | uppercase | Human genes are generally written using upper case letters.              |
-| random_seed        | 4848  | A random seed. Using the same seed allows us to have replicable results between pipeline runs.                                  |
+| technology_version | v3 | Input files are generated with v3 10x chemistry. |
+| case               | uppercase | Human genes are generally written using upper case letters. |
+| graphics           | True | True or False depending on graphic card availability. |
+| random_seed        | 4848  | A random seed. Using the same seed allows us to have replicable results between pipeline runs. |
 | annotation         | /my/data/files/gencode.v34.annotation.gtf | The GENCODE annotation file you just downloaded.  |
 | fasta              | /my/data/files/GRCh38.primary_assembly.genome.fa | The GENCODE sequence file you just downloaded.         |
 | idx                | /my/data/files/GRCh38.primary_assembly.genome_index  | The path where to store the genome index.                  |
-| whitelist           | /my/data/files/3M-February-2018.txt | Barcode whitelist for 10x Chromium v3 chemistry. |
+| whitelist          | /my/data/files/3M-February-2018.txt | Barcode whitelist for 10x Chromium v3 chemistry. |
 
 ### Step-specific parameters
 
@@ -112,7 +115,7 @@ In this section we will establish some thresholds for the inclusion and exclusio
 
 | Name             | Value |  Commentary                                             |
 |------------------|-------|---------------------------------------------------------|
-| min_feat         | 400  | Bottom limit for the number of expressed genes.         |
+| min_feat         | 400   | Bottom limit for the number of expressed genes.         |
 | max_feat         | 2000  | Upper limit for the number of expressed genes.          |
 | mit_pct          | 18    | Upper limit for the mitochondrial percentage of counts. |
 
@@ -123,21 +126,21 @@ did not heavily affect the sample, so their regression was not needed. The cell 
 
 | Name             | Value |  Commentary                                             |
 |------------------|-------|---------------------------------------------------------|
-| normalization         | SCT   | SCT method           |
-| regress_out           | False | Upper limit for the number of expressed genes.          |
-| vars_to_regress       | Empty | Unused filtering.                                       |
-| regress_cell_cycle    | Empty | Unused filtering.                                       |
-| regress_merge_effect  | Empty | Upper limit for the mitochondrial percentage of counts. |
+| norm_type             | SCT   | SCT method. |
+| regress_out - enabled | False | Varaible regression is not needed. |
+| regress_out - vars_to_regress | Empty | No variables are regressed. |
+| regress_cell_cycle    | Empty | Cell cycle is not regressed. |
+| regress_merge_effect  | Empty | Merge effect is not regressed. |
 
 #### Single-cell clustering - “seurat_clustering“
-After taking a look at the elbow and jack-stat plots (outputs from the previous rule), we selected the 1-7 significant PCA components. 
-We also selected a set of resolutions to analyze. The k parameter was set to default. 
+After taking a look at the elbow plot (output from the previous rule), we selected the 1-7 significant PCA components. 
+We also selected a set of resolutions to analyze. The *k* parameter was set to default. 
 
 | Name                  | Value                   | Commentary                          |
 |-----------------------|-------------------------|-------------------------------------|
-| principal_components  | 7                       | Significant principal components.   |
-| resolutions           | [0.2, 0.4, 0.8, 1.2, 1.6] | Set of tested resolutions.          |
-| k_neighbors           | 20                      | Number of *k* neighbors.            |
+| principal_components  | 7                       | Significant principal components. |
+| resolutions           | [0.2, 0.4, 0.8, 1.2, 1.6] | Set of tested resolutions. |
+| k_neighbors           | 20                      | Number of *k* neighbors. |
 
 #### Single-cell functional analysis Seurat-based - “seurat_gs“
 In this step, both the path to a GMT file storing the molecular signatures and a threshold value are required.
@@ -146,28 +149,28 @@ In this case, some PBMC related signatures were tested.
 
 | Name             | Value |  Commentary                                             |
 |----------------|-------|---------------------------------------------------------|
-| geneset_collection  | PBMC_related_msigs.gmt   | Molecular signatures GMT file.    |
-| geneset_percentage  | 0.2 |Minimum ratio (expressed genes / total genes) for a geneset to be tested |
+| geneset_collection  | PBMC_related_msigs.gmt   | Molecular signatures GMT file. |
+| geneset_percentage  | 0.2 |Minimum ratio (expressed genes / total genes) for a geneset to be tested. |
 
 #### Single-cell functional analysis Vision-based - “vision“
-To obtain a wider explanation of the functional characteristics of our  sample, we decided to test the Hallmarks signatures from MSigDB.
-Also, the metadata variables from the Seurat object were added and the chosen clustering resolution was set to 0.4.
+To obtain a wider explanation of the functional characteristics of our sample, we decided to test the Hallmarks signatures from MSigDB.
+Also, the metadata variables from the Seurat object were added and the chosen clustering resolution was set to 0.8.
 
 | Name             | Value |  Commentary                                             |
 |------------------|-------|---------------------------------------------------------|
-| perform         | True   | Set to "True" to execute the analysis.          |
-| mol_signatures  | Hallmarks.gmt | Upper limit for the number of expressed genes.          |
+| perform         | True   | Set to "True" to execute the analysis. |
+| mol_signatures  | Hallmarks.gmt | Hallmark geneset from MSigDB. |
 | meta_colums     | ["nCount_RNA", "nFeature_RNA", "percent.mt", "percent.ribo"] | Metadata variables from Seurat. |
-| n_cores         | 8 | Threads provided to Vision.                                      |
+| n_cores         | 8 | Threads provided to Vision. |
 | selected_res    | 0.8 | Clustering resolution chosen. |
 
 #### Single-cell differential expression analysis - “seurat_degs“
-We have also decided to focus on the resolution 0.4, for the differential expression analysis between clusters. For the differential expression analysis step, the statistical test must be specified. In our case, we decided to apply a  Wilcoxon test. The resolution must also be specified.
+We have also decided to use the resolution 0.8, for the differential expression analysis between clusters. For the differential expression analysis step, the statistical test must be specified. In our case, we decided to apply a  Wilcoxon test. The resolution must also be specified.
 
 | Name             | Value |  Commentary                                             |
 |------------------|-------|---------------------------------------------------------|
 | selected_res  | 0.8   | Clustering resolution chosen.  |
-| test   | "wilcox" | Statistical test to use for the DE analysis   |
+| test   | "wilcox" | Statistical test to use for the DE analysis. |
 
 #### Resources per rule specification.
 
@@ -202,9 +205,11 @@ The pipeline requires its execution at least two times (three recommended). It i
 1. **First execution - Single-cell QC filtering parameters**:
 A first execution would allow us setting the values for the filtering rule "seurat_postqc".
 Once the pipeline has completed both the "seurat_preqc" and the "seurat_postqc" steps, the user should take a look at the QC plots and choose the proper filtering values (later explained).
-After setting these filters in the configuration file, the user should remove the previous seurat_postqc outputs (just the ones found in these specific folders) in order to repeat the single-cell QC. In order to run the pipeline until the normalization step we use the "until" parameter from Snakemake.
+After setting these filters in the configuration file, the user should remove the previous seurat_postqc outputs (just the ones found in these specific folders) in order to repeat the single-cell QC. 
 
-`snakemake --use-conda -j N --until normalized_expression_matrix`
+In order to run the pipeline until the normalization step (not included) we use the "until" parameter from Snakemake:
+
+`snakemake --use-conda -j N --until qc_expression_matrix`
 
 
 2. **Second execution - Single-cell normalization parameters parameters**: 
@@ -213,7 +218,8 @@ It is also recommended to check the effect of other QC variables such as the dif
 Once the user has decided the number of significant components to include in the analysis and the variables to be regressed out (if any),
 these values should be set in the configuration file.
 Following the indications defined in the previous section, the user must remove the output files in the normalization folder, in order to repeat the step (if needed).
-To run the pipeline only until the normalization step, we use the "until" parameter from Snakemake.
+
+To run the pipeline only until the normalization step (included), we use the "until" parameter from Snakemake:
 
 `snakemake --use-conda -j N --until normalized_expression_matrix`
 
@@ -221,7 +227,8 @@ To run the pipeline only until the normalization step, we use the "until" parame
 3. **Third execution - Clustering resolution selection and final execution**: 
 With the third execution, the user will study the clustering results and decide the clustering resolution to use in the following steps.
 Once, the UMAPs, silhouette scores and clustree plots are analysed. The clustering resolution of interest should be set in the configuration file.
-To run the pipeline we use the following command: 
+
+To run the complete pipeline we use this command: 
 
 `snakemake --use-conda -j N`
 
@@ -237,11 +244,11 @@ focusing on the main results and the parameter values that need to be specified 
 
 In this step, the user will get the **quality control** information at sequence level produced by FastQC.
 This information includes: per base quality, per base sequence content, per base GC-content, duplication levels or adapter content.
-As we can see in the figures, the sequence quality is fine (quality score = 37) (right figure),
-but the higher content of A-T bases could mean the presence of poli-A tails (left figure).
+As we can see in the figures, the sequence quality is fine (quality score = 37) (top figure),
+but the higher content of A-T bases could mean the presence of poli-A tails (bottom figure).
 
 
-<img src="./images/per_base_quality.png" width="500"> <img src="./images/per_base_sequence_content.png" width="500">
+<img src="images/per_base_quality.png" width="500"> <img src="images/per_base_sequence_content.png" width="500">
 
 > NOTE: remember to process the FASTQ files if their quality is not good enough.
 
@@ -257,7 +264,7 @@ The main outputs are:
 - Splicing expression matrix (from Velocyto mode).
 - Alignment and quantification summaries.
 
-It is reccomended to check the alignment statistics to detect posible errors. 
+It is recommended to check the alignment statistics to detect posible errors. 
 
 
 ### 3. Single-cell QC
@@ -268,7 +275,7 @@ Single-cell QC is performed by Seurat and it is divided in two rules:
 In this rule, a Seurat object is created from the expression matrix, and it is filtered out twice.
 1. CBs expressing less than 200 genes are filtered out, since they might be broken cells or debris.
 2. Genes that are expressed in less than *n* CBs are filtered out.
-In our case, genes that are not expressed in any cells were also removed (**n** = 1).
+In our case, genes that are not expressed in any cells were also removed (n = 1).
 
 > TIP: Filtering out genes is recommended when the user wants to reduce the dimensionality of the dataset.
 
@@ -278,7 +285,7 @@ These thresholds are meant to help the user avoiding both doublets (detected by 
 
 > NOTE: features refers to genes and viceversa. 
 
-<img src="./images/1_vlnplot_QC_variables_prefilt.png" width="750">
+<img src="images/1_vlnplot_QC_variables_prefilt.png" width="750">
 
 > TIP:  A good criteria for establishing the thresholds for both the features and the counts, consists on choosing twice the 
 median of the distribution for the upper threshold and half the median for the bottom threshold.
@@ -300,10 +307,10 @@ These values must be specified in the configuration file ("seurat_postqc" parame
 This rule filters the dataset according to the previously defined thresholds.
 The **results** can be observed in the following table.
 
-|         | Number.of.cells | Count median | Expressed genes median | Mitochondrial percentage median | Ribosomal percentage median |
+|         | Number.of.cells | Count.median | Expressed.genes.median | Mitochondrial.percentage.median | Ribosomal.percentage.median |
 | ------- | --------------- | ------------ | ---------------------- | ------------------------------- | --------------------------- |
-| Pre-QC  | 1158            | 2477         | 949                    | 10.7102532951626                | 24.8831836277771            |
-| Post-QC | 1006            | 2521         | 958                    | 10.5033238004125                | 27.5509204415016            |
+| Pre-QC  | 1158            | 2480         | 950.5                  | 10.7058491904124                | 24.8854045919509            |
+| Post-QC | 1005            | 2521         | 959                    | 10.4966139954853                | 27.5566442131047            |
 
 > TIP: it is recommended to take a look at the new violin plots and the summary table,
 since the filtering might be too stringent or too lenient and it could be interesting to repeat the step.
@@ -318,18 +325,17 @@ A **dimensionality reduction** is performed using a Principal Components Analysi
 To study which of those components is significant, bollito produces both an elbow plot and a JackStraw plot.
 The first one shows the variance explained by each component, while the second one shows the significance of each component.
 
-<img src="./images/3_elbowplot.png" width="500"> <img src="./images/4_jackstrawplot.png" width="500">
+<img src="images/3_elbowplot.png" width="500">
 
-From the JackStraw plot, we have observed that the 6th component is the last significant one.
-But if we focus on the elbow plot, we can see that the variance starts to be stable at the 7th component.
-For this reason, we prefer to be conservative and keep the first **7 components**.
+In this case, since we use SCT method to normalize the data, only the elbow plot must be taken into account.
+At this plot, we can see that the variance starts to be stable at the 7th component, so we keep the first seven components.
 Since these are very few components, the execution time won't be compromised.
 
 > NOTE: the number of significant components chosen in this step is **fundamental** for the following steps of the analysis. 
 This parameter does have a high impact in the outcome of the analysis since both the clustering (one of the most important steps) and the visualization, depend directly on it.
 We recommend to be cautious choosing this value.
 
-<p align="center"><img src="./images/6_cell_cycle_dimplot.png" width="400"></p>
+<p align="center"><img src="images/6_cell_cycle_dimplot.png" width="550"></p>
 
 Next, we should check the **cell cycle effect**. 
 The plot shows that the sample is not affected by the differences in the cell cycle of the cells, since the labels are not clusterized.
@@ -355,7 +361,8 @@ The analysis can be applied to one or more resolutions. And it is always interes
 
 Here we can see the clusters obtained after applying a clustering analysis using the resolutions 0.2 (left) and 1.6 (right).
 
-<img src="./images/2_umap_SCT_snn_res.0.2.PNG" width="450"> <img src="./images/2_umap_SCT_snn_res.1.6.PNG" width="450">
+<img src="images/2_umap_SCT_snn_res.0.2.png" width="400">
+<img src="images/2_umap_SCT_snn_res.1.6.png" width="400">
 
 It is important that the user **chooses the resolution of interest** at this point,
 since it will be used in later steps (differential expression analysis or functional analysis).
@@ -369,6 +376,7 @@ choose the resolution that better adapts to the expected biology).
 - Information from downstream analyses (sometimes it is necessary to study serveral resolutions before choosing the one that reflects better the biology of your data).
 
 In our case we decided to choose the **0.8 resolution**, since it better described the biological groups that we were expecting.
+<img src="images/2_umap_SCT_snn_res.0.8.png" width="800">
 
 
 ### 6. Diferential expression analysis
@@ -380,18 +388,21 @@ The marker genes are a valuable information since they will be useful for the fu
 
 In this **example**, we are showing the most significant marker genes from cluster 3:
 
-|       | p_val                 | avg_logFC         | pct.1 | pct.2 | p_val_adj             |
-| ----- | --------------------- | ----------------- | ----- | ----- | --------------------- |
-| IGHM	| 2.5686639735559e-169 | 2.29518089668881	| 0.977	| 0.037	| 3.21853595886554e-165 |
-| IGHD	| 1.45515702056953e-163 | 1.40162395972261	| 0.832	| 0.011	| 1.82331174677362e-159 |
-| TCL1A	| 1.27868311379366e-160	| 1.41815326167382	| 0.786	| 0.005	| 1.60218994158345e-156 |
-| CD79A	| 1.16708815495879e-152	| 1.66319785231494	| 0.977	| 0.054	| 1.46236145816336e-148 |
-| MS4A1	| 2.78454609873788e-130	| 1.21769054352486	| 0.885	| 0.051	| 3.48903626171856e-126 |
-| LINC00926	| 9.28747846451509e-121	| 0.829780169292718	| 0.725	| 0.025	| 1.16372105160374e-116 |
-| CD79B	| 1.07135580540655e-105	| 1.13380354902644	| 0.863	| 0.088	| 1.34240882417441e-101 |
+|            | p_val                 | avg_logFC          | pct.1 | pct.2 | p_val_adj             |
+| ---------- | --------------------- | ------------------ | ----- | ----- | --------------------- |
+| TCL1A      | 1.56713569647048e-181 | 1.49505816990942   | 0.861 | 0.002 | 1.96487473623469e-177 |
+| IGHD       | 1.11175956482475e-170 | 1.45089812794525   | 0.877 | 0.014 | 1.39392414237727e-166 |
+| IGHM       | 2.77797941004571e-165 | 2.2791891990235    | 1     | 0.043 | 3.48303058431531e-161 |
+| CD79A      | 9.17133421852395e-141 | 1.6188293340222    | 0.975 | 0.062 | 1.14990188431853e-136 |
+| MS4A1      | 7.21563289892697e-115 | 1.18280693596634   | 0.869 | 0.062 | 9.04696052867463e-111 |
+| LINC00926  | 6.21815569362352e-105 | 0.81377727841728   | 0.705 | 0.035 | 7.79632360866517e-101 |
+| CD79B      | 5.85084793975915e-95  | 1.09738745382891   | 0.852 | 0.096 | 7.33579314687003e-91  |
+| IGLC2      | 8.58340820136531e-89  | 1.7914555419746    | 0.525 | 0.014 | 1.07618772028718e-84  |
+| CD74       | 1.87974633576756e-67  | 1.76713979899347   | 1     | 0.591 | 2.35682595578536e-63  |
+| CD22       | 2.09911614475675e-67  | 0.530767485873592  | 0.525 | 0.035 | 2.63187182229602e-63  |
 
 Among these 7 genes, we can find *CD79A* and *CD79B*. These genes are known to form a complex with the BCR (present in all B cells).
-The result suggest that cells in cluster 3 are mainly *B cells*.
+The result suggest that cells in cluster 3 are mainly **B cells**.
 This procedure should be applied to all clusters in order to characterize the sample.
 To obtain a quick view of the sample's biology, it is also interesting to take a look to the marker genes heatmap.
 
@@ -399,7 +410,7 @@ To obtain a quick view of the sample's biology, it is also interesting to take a
 classifying a cluster as a specific cell type or subtype.
 
 
-<img src="./images/1_heatmap_topmarkers.png" width="600"> 
+<img src="images/1_heatmap_topmarkers.png" width="800"> 
 
 
 ### 7. Functional analysis - Seurat-based
@@ -417,10 +428,10 @@ The user should take into account these three plots to hypothesize about the fun
 > NOTE: keep in mind that the clustree significance is generated by comparing 1 cluster vs the rest, so it is **difficult** for a signature to be significant if it is expressed equally in different clusters.
 
 Here, we can see both clustree plots obtained using the signature "Monocytes and its surface proteins" from [Biocarta](http://amp.pharm.mssm.edu/Harmonizome/dataset/Biocarta+Pathways).
-In this case, the results suggest that cluster 0 (at 0.8 resolution) is formed by **monocytes**. 
+In this case, the results suggest that clusters 1 and 5 (at 0.8 resolution) are formed by **monocytes**. 
 
 
-<img src="./images/BIOCARTA_MONOCYTE_PATHWAY_clustree_mean_pval-1.png" width="900"> 
+<img src="images/BIOCARTA_MONOCYTE_PATHWAY_clustree_mean_pval-1.png" width="900"> 
 
 > NOTE: remember that these clustree plots show the clusters along the different analyzed resolutions.
 Each circle is a cluster, which has different colours and sizes
@@ -450,7 +461,7 @@ In this case the user will just have to select:
 
 For this tutorial, we tested the Hallmarks molecular signature collection from MSigDB, in order to give us a wider understanding of the sample. 
 
-<img src="./images/HALLMARK_COMPLEMENT_UMAP-1.png" width="450"> <img src="./images/HALLMARK_MYC_TARGETS_V1_UMAP-1.png" width="450"> 
+<img src="images/HALLMARK_COMPLEMENT_UMAP.png" width="450"> <img src="images/HALLMARK_MYC_TARGETS_V1_UMAP.png" width="450"> 
 
 
 

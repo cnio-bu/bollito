@@ -161,6 +161,7 @@ For this purpose, the "enable" parameter must be set to true in the configuratio
 
 
 #### Single-cell clustering - "seurat_find_clusters"
+<<<<<<< HEAD
 After taking a look at the elbow plot, we have decided to consider the 1-10 significant PCA components for the clustering analysis. We have also selected a set of resolutions to analyze. The k parameter was set to default. 
 
 | Name                  | Value                   | Commentary                          |
