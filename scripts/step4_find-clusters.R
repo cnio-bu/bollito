@@ -68,24 +68,33 @@ message("3. Clustree representation was obtained.")
 # An empty list is created to store silhouette values.
 silhouette_scores <- vector(mode = "list", length = length(res))
 
-# Loop for each resolution.
-for(i in 1:length(which(grepl(paste0(assay_type,"_snn_"),colnames(seurat@meta.data))))){
-  full_res = colnames(seurat@meta.data[which(grepl(paste0(assay_type,"_snn_"),colnames(seurat@meta.data)))][i])
-  Idents(seurat) <- full_res 
-  p2 <- DimPlot(seurat, reduction = "umap", label = TRUE, label.size = 5) + theme_minimal() #+ theme(legend.position="bottom") 
-  ggsave(paste0(dir.name, "/", folders[3], "/2_umap_",full_res,".pdf"), plot = p2, scale = 1.5)
- 
-  # Silhhouettes calculus.
-  dist.matrix <- dist(x = Embeddings(object = seurat[["pca"]])[, 1:pc])
-  clusters <- slot(seurat, "meta.data")[,full_res]
-  sil <- silhouette(x = as.numeric(x = as.factor(x = clusters)), dist = dist.matrix)
-  if(is.null(dim(sil))){
-	      silhouette_scores[[i]] <- as.data.frame(NA)
-    } else {
-	        silhouette_scores[[i]] <- as.data.frame(summary(sil)[2])
-      }
-  names(silhouette_scores[[i]]) <- full_res
+# If the seurat object contains more than 50K samples, a subset is done to
+if (dim(seurat@meta.data)[1] > 50000){
+	  message("Downsampling seurat object to perform silhouette analysis")
+  seurat_sil <- seurat[, sample(colnames(seurat), size = 50000, replace=F)]
+} else {
+	  seurat_sil <- seurat
 }
+
+# Loop for each resolution.
+for(i in 1:length(which(grepl(paste0(assay_type,"_snn_"),colnames(seurat_sil@meta.data)))))
+	full_res = colnames(seurat_sil@meta.data[which(grepl(paste0(assay_type,"_snn_"),colnames(seurat_sil@meta.data)))][i])
+	Idents(seurat_sil) <- full_res
+	p2 <- DimPlot(seurat_sil, reduction = "umap", label = TRUE, label.size = 5) + theme_minimal() #+ theme(legend.position="bottom") 
+	ggsave(paste0(dir.name, "/", folders[3], "/2_umap_",full_res,".pdf"), plot = p2, scale = 1.5)
+
+	# Silhhouettes calculus.
+	dist.matrix <- dist(x = Embeddings(object = seurat_sil[["pca"]])[, 1:pc]) #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	clusters <- slot(seurat_sil, "meta.data")[,full_res]
+	sil <- silhouette(x = as.numeric(x = as.factor(x = clusters)), dist = dist.matrix)
+	if(is.null(dim(sil))){
+		silhouette_scores[[i]] <- as.data.frame(NA)
+	} else {
+		silhouette_scores[[i]] <- as.data.frame(summary(sil)[2])
+	}
+	names(silhouette_scores[[i]]) <- full_res
+}
+
 # Create a xlsx file to store the silhouette scores.
 write_xlsx(silhouette_scores, path = paste0(dir.name, "/", folders[3], "/3_silhouette_score.xlsx"),col_names = TRUE, format_headers = TRUE )
 message("4. Silhouette scores were calculated.")
