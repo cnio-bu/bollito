@@ -30,6 +30,7 @@ outdir_config = snakemake@params[["outdir_config"]]
 case = snakemake@params[["case"]]
 ram = snakemake@resources[["mem"]]
 threads = snakemake@threads
+write_table = as.logical(snakemake@params[["write_table"]])
 message("3. Parameters were loaded.")
 
 # 4. Analysis configuration. 
@@ -189,8 +190,12 @@ ggsave(paste0(dir.name, "/", folders[2], "/7_no_umap_pca.pdf"), plot = p7, scale
 message("6. Cell-cycle analysis plot was done.")
 
 # 6.9. Save expression matrix.
-write.table(as.matrix(seurat.integrated@assays$integrated@scale.data), file = paste0(dir.name, "/", folders[2], "/normalized_expression_matrix.tsv"), sep = "\t", row.names = TRUE, col.names = TRUE, quote = FALSE)
-message("7. Integrated expression matrix was saved.")
+if(write_table){
+	write.table(as.matrix(seurat.integrated@assays$integrated@scale.data), file = paste0(dir.name, "/", folders[2], "/normalized_expression_matrix.tsv"), sep = "\t", row.names = TRUE, col.names = TRUE, quote = FALSE)
+	message("7. Integrated expression matrix was saved.")
+} else {
+	message("7. Integrated expression matrix was not saved, as specified in the configuration file.")
+}
 
 # 6.10. Save Seurat object.
 saveRDS(object = seurat.integrated, file = paste0(dir.name, "/", folders[2], "/seurat_normalized-pcs.rds"))

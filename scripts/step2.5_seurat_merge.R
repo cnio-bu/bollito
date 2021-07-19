@@ -18,6 +18,7 @@ random_seed = snakemake@params[["random_seed"]]
 velocyto = snakemake@params[["velocyto"]]
 outdir_config = snakemake@params[["outdir_config"]]
 ram = snakemake@resources[["mem"]]
+write_table = as.logical(snakemake@params[["write_table"]])
 message("3. Parameters were loaded.")
 
 # 4. Analysis configuration. 
@@ -33,7 +34,7 @@ message("\n")
 
 # B. Analysis.
 message("PROCESSING STEP")
-# 2.5 Merging all samples in the execution. 
+# 2.5 Merging all samples in the execution.
 # Loading seurat object function.
 combine_object <- function(x, velocyto) {
   experiment = head(tail(strsplit(x, "/")[[1]], n=3), n=1) #Assay name is stored to later use in integrated object metadata.
@@ -82,8 +83,12 @@ seurat <- merge(x_seurat, y = as.vector(y_seurat), add.cell.ids = cells_id, proj
 message("3. Seurat objects were merged.")
 
 # Save expression matrix.
-write.table(as.matrix(seurat@assays$RNA@counts), file = paste0(dir.name, "/", folders[1], "/expression_matrix.tsv"), sep = "\t", row.names = TRUE, col.names = TRUE, quote = FALSE)
-message("4. Merged expression matrix was saved.")
+if (write_table){
+	write.table(as.matrix(seurat@assays$RNA@counts), file = paste0(dir.name, "/", folders[1], "/expression_matrix.tsv"), sep = "\t", row.names = TRUE, col.names = TRUE, quote = FALSE)
+	message("4. Merged expression matrix was saved.")
+} else {
+	message("4. Merged expression matrix was not saved, as specified in the configuration file.")
+}
 
 # Save merged Seurat object.
 saveRDS(seurat, file = paste0(dir.name, "/", folders[1], "/seurat_post-qc.rds"))

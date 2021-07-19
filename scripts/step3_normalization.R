@@ -30,6 +30,7 @@ regress_merge_effect = snakemake@params[["regress_merge_effect"]]
 case = snakemake@params[["case"]]
 ram = snakemake@resources[["mem"]]
 threads = snakemake@threads
+write_table = as.logical(snakemake@params[["write_table"]])
 message("3. Parameters were loaded.")
 
 # 4. Analysis configuration. 
@@ -110,6 +111,7 @@ if(normalization == "standard"){
   ggsave(paste0(dir.name, "/", folders[2], "/5_g2mscore_featureplot.pdf"), plot = p5, scale = 1.5)
   p6 <- DimPlot(seurat, reduction = "pca", pt.size = 0.5, label = TRUE, label.size = 5) + RotatedAxis() #+ theme(legend.position    ="bottom") 
   ggsave(paste0(dir.name, "/", folders[2], "/6_cell_cycle_dimplot.pdf"), plot = p6, scale = 1.5)
+  
   message(paste0("2. Seurat object was normalized using the ", normalization, " approach"))
   # Scaling.
   if(regress_out == TRUE){
@@ -213,13 +215,18 @@ if (seurat@project.name == "merged"){
 }
 
 # 5.4. Save the expresion matrix.
-if (normalization == "SCT") {
-  write.table(as.matrix(seurat@assays$SCT@data), file = paste0(dir.name, "/", folders[2], "/normalized_expression_matrix.tsv"), sep = "\t", row.names = TRUE, col.names = TRUE, quote = FALSE)
+if(write_table){
+	if (normalization == "SCT") {
+		write.table(as.matrix(seurat@assays$SCT@data), file = paste0(dir.name, "/", folders[2], "/normalized_expression_matrix.tsv"), sep = "\t", row.names = TRUE, col.names = TRUE, quote = FALSE)
+        }
+        if (normalization == "standard") {
+		write.table(as.matrix(seurat@assays$RNA@data), file = paste0(dir.name, "/", folders[2], "/normalized_expression_matrix.tsv"), sep = "\t", row.names = TRUE, col.names = TRUE, quote = FALSE)
+	}
+	message("7. Normalized expression matrix was saved.")
+} else {
+	message("7. Normalized expression matrix was not saved, as specified in the configuration file.")
 }
-if (normalization == "standard") {
-  write.table(as.matrix(seurat@assays$RNA@data), file = paste0(dir.name, "/", folders[2], "/normalized_expression_matrix.tsv"), sep = "\t", row.names = TRUE, col.names = TRUE, quote = FALSE)
-}
-message("7. Normalized expression matrix was saved.")
+
 
 # 5.5. Save RDS: we can use this object to generate all the rest of the data.
 saveRDS(seurat, file = paste0(dir.name, "/",folders[2], "/seurat_normalized-pcs.rds"))

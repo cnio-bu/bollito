@@ -54,7 +54,8 @@ rule seurat_post_qc:
         min_count = config["parameters"]["seurat_postqc"]["min_count"],
         max_count = config["parameters"]["seurat_postqc"]["max_count"],
         mit = config["parameters"]["seurat_postqc"]["mit_pct"],
-        ribo = config["parameters"]["seurat_postqc"]["ribo_pct"]
+        ribo = config["parameters"]["seurat_postqc"]["ribo_pct"],
+	write_table=config["write_table"]
     conda: "../envs/seurat_qc.yaml"
     resources:
         mem=get_resource("seurat_postqc","mem"),
@@ -98,7 +99,8 @@ rule seurat_merge:
         output_dir = f"{OUTDIR}/seurat/merged",
         random_seed = config["random_seed"], 
         velocyto = config["parameters"]["velocyto"]["enabled"],
-        outdir_config = f"{OUTDIR}"
+        outdir_config = f"{OUTDIR}",
+	write_table=config["write_table"]
     conda: "../envs/seurat_qc.yaml"
     resources:
         mem=get_resource("seurat_merge","mem"),
@@ -140,7 +142,8 @@ rule seurat_normalization:
         regress_out = config["parameters"]["seurat_normalization"]["regress_out"]["enabled"],
         vars_to_regress = config["parameters"]["seurat_normalization"]["regress_out"]["vars_to_regress"],
         regress_cell_cycle = config["parameters"]["seurat_normalization"]["regress_cell_cycle"],
-        regress_merge_effect = config["parameters"]["seurat_normalization"]["regress_merge_effect"]        
+        regress_merge_effect = config["parameters"]["seurat_normalization"]["regress_merge_effect"],
+	write_table=config["write_table"]
     conda: "../envs/seurat_norm.yaml"
     resources:
         mem=get_resource("seurat_normalization","mem"),
@@ -166,7 +169,8 @@ rule seurat_integration:
         norm_type = config["parameters"]["seurat_normalization"]["norm_type"],
         vars_to_regress = config["parameters"]["seurat_normalization"]["regress_out"]["vars_to_regress"],  
         velocyto = config["parameters"]["velocyto"]["enabled"],
-        outdir_config = f"{OUTDIR}"
+        outdir_config = f"{OUTDIR}",
+	write_table=config["write_table"]
     conda: "../envs/seurat_norm.yaml"
     resources:
         mem=get_resource("seurat_integration","mem"),

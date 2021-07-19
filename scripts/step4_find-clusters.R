@@ -77,7 +77,7 @@ if (dim(seurat@meta.data)[1] > 50000){
 }
 
 # Loop for each resolution.
-for(i in 1:length(which(grepl(paste0(assay_type,"_snn_"),colnames(seurat_sil@meta.data)))))
+for(i in 1:length(which(grepl(paste0(assay_type,"_snn_"),colnames(seurat_sil@meta.data))))){
 	full_res = colnames(seurat_sil@meta.data[which(grepl(paste0(assay_type,"_snn_"),colnames(seurat_sil@meta.data)))][i])
 	Idents(seurat_sil) <- full_res
 	p2 <- DimPlot(seurat_sil, reduction = "umap", label = TRUE, label.size = 5) + theme_minimal() #+ theme(legend.position="bottom") 

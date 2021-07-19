@@ -27,6 +27,7 @@ mit = snakemake@params[["mit"]]
 ribo = snakemake@params[["ribo"]]
 random_seed = snakemake@params[["random_seed"]]
 ram = snakemake@resources[["mem"]]
+write_table = as.logical(snakemake@params[["write_table"]])
 message("3. Parameters were loaded.")
 
 # 4. Analysis configuration. 
@@ -103,8 +104,12 @@ write.table(filtering_df, file = paste0(dir.name, "/", folders[1], "/4_pre_vs_po
 message("6. Statistics table was saved.")
 
 # 3.6 Save expression matrix.
-write.table(as.matrix(seurat@assays$RNA@counts), file = paste0(dir.name, "/", folders[1], "/expression_matrix.tsv"), sep = "\t", row.names = TRUE, col.names = TRUE, quote = FALSE)
-message("7. Post-qc expression matrix was saved.")
+if(write_table){
+	write.table(as.matrix(seurat@assays$RNA@counts), file = paste0(dir.name, "/", folders[1], "/expression_matrix.tsv"), sep = "\t", row.names = TRUE, col.names = TRUE, quote = FALSE)
+	message("7. Post-qc expression matrix was saved.")
+} else {
+	message("7. Post-qc expression matrix was not saved, as specified in the configuration file.")
+}
 
 # 3.7 Save RDS: we can use this object to generate all the rest of the data.
 saveRDS(seurat, file = paste0(dir.name, "/",folders[1], "/seurat_post-qc.rds"))

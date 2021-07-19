@@ -28,6 +28,10 @@ random_seed:  4848
 # gene case format: uppercase (TP53), lowercase (tp53), and titlecase (Tp53)
 case: "uppercase"
 
+# If there are to many samples, R might yield an error when writing count data in tsv files, in that case set as False.
+# Possible values: True/False
+write_table: True
+
 # genomic reference sequences and annotations
 ref:
     annotation: "/my/annotation.gtf"
