@@ -36,13 +36,17 @@ try:
         units.index = units.index.set_levels([i.astype(str) for i in units.index.levels])  # enforce str in index
     if config["input_type"] == "matrix":
         units = pd.read_csv(config["units"], dtype=str, sep="\t", comment="#").set_index("sample", drop=False)
-        if config["technology"] == "10x":   
+        if config["technology"] == "10x": 
             validate(units, schema="schemas/units_matrix_10x.schema.yaml")
         elif config["technology"] == "standard":   
             validate(units, schema="schemas/units_matrix_standard.schema.yaml")
 except FileNotFoundError:
     warning(f"ERROR: the units file ({config['units']}) does not exist. Please see the README file for details. Quitting now.")
     sys.exit(1)
+
+if config["single_samples"] == True and any([config["parameters"]["seurat_merge"]["enabled"], config["parameters"]["seurat_integration"]["enabled"]]) == False:
+    warning("WARNING: 'single_samples' option is set as True while not asking for merge or integration.\nSetting 'single_samples' option to False.")
+
 
 def confirm():
     prompt = f"{ansitxt.BOLD}Continue anyway? [y/N]{ansitxt.ENDC} "
@@ -62,13 +66,26 @@ def get_resource(rule,resource):
     except KeyError:
         return config["resources"]["default"][resource]
 
+def process_samples(samples):
+    integrated = []
+    merged = []
+
+    if config["single_samples"] == True:
+        if any([config["parameters"]["seurat_merge"]["enabled"], config["parameters"]["seurat_integration"]["enabled"]]) == False:
+            return samples
+        else:
+            if config["parameters"]["seurat_merge"]["enabled"] == True:
+                merged = ["merged"]
+            if config["parameters"]["seurat_integration"]["enabled"] == True:
+                integrated = ["integrated"]
+            return merged + integrated
+    else:
+        return samples
+        
+
 def get_output_degs(wc):
     if config["parameters"]["seurat_degs"]["enabled"] == True:
-        samples = [u.sample for u in units.itertuples()] 
-        if config["parameters"]["seurat_integration"]["enabled"] == True:
-            samples = samples + ['integrated']
-        if config["parameters"]["seurat_merge"]["enabled"] == True:
-            samples = samples + ['merged']
+        samples = process_samples([u.sample for u in units.itertuples()])
         file = expand("{OUTDIR}/seurat/{sample}/4_degs/seurat_degs.rds", sample=samples,OUTDIR=OUTDIR)
     else:
         file = []
@@ -77,11 +94,7 @@ def get_output_degs(wc):
 
 def get_output_gs(wc):
     if config["parameters"]["seurat_gs"]["enabled"] == True:
-        samples = [u.sample for u in units.itertuples()]
-        if config["parameters"]["seurat_integration"]["enabled"] == True:
-            samples = samples + ['integrated']
-        if config["parameters"]["seurat_merge"]["enabled"] == True:
-            samples = samples + ['merged']
+        samples = process_samples([u.sample for u in units.itertuples()])
         file = expand("{OUTDIR}/seurat/{sample}/5_gs/seurat_complete.rds", sample=samples,OUTDIR=OUTDIR)
     else:
         file = []
@@ -89,11 +102,7 @@ def get_output_gs(wc):
 
 def get_output_ti(wc):
     if config["parameters"]["slingshot"]["enabled"] == True:
-        samples = [u.sample for u in units.itertuples()] 
-        if config["parameters"]["seurat_integration"]["enabled"] == True:
-            samples = samples + ['integrated']
-        if config["parameters"]["seurat_merge"]["enabled"] == True:
-            samples = samples + ['merged']
+        samples = process_samples([u.sample for u in units.itertuples()])
         file = expand("{OUTDIR}/slingshot/{sample}/6_traj_in/slingshot_sce_objects.RData", sample=samples,OUTDIR=OUTDIR)
     else:
         file = []
@@ -101,11 +110,7 @@ def get_output_ti(wc):
 
 def get_output_fa(wc):
     if config["parameters"]["vision"]["enabled"] == True:
-        samples = [u.sample for u in units.itertuples()] 
-        if config["parameters"]["seurat_integration"]["enabled"] == True:
-            samples = samples + ['integrated']
-        if config["parameters"]["seurat_merge"]["enabled"] == True:
-            samples = samples + ['merged']
+        samples = process_samples([u.sample for u in units.itertuples()])
         file = expand("{OUTDIR}/vision/{sample}/7_func_analysis/vision_object.rds", sample=samples,OUTDIR=OUTDIR)
     else:
         file = []
@@ -174,11 +179,7 @@ def do_velocity(wc):
         file = []
     elif config["input_type"] == "fastq":
         if config["parameters"]["velocyto"]["enabled"] == True:
-            samples = [u.sample for u in units.itertuples()]
-            if config["parameters"]["seurat_integration"]["enabled"] == True:
-                samples = samples + ['integrated']
-            if config["parameters"]["seurat_merge"]["enabled"] == True:
-                samples = samples + ['merged']
+            samples = process_samples([u.sample for u in units.itertuples()])
             file = expand("{OUTDIR}/velocyto/{sample}/8_RNA_velocity/seurat_velocity.rds", sample=samples,OUTDIR=OUTDIR)
         else:
             file = []
@@ -201,20 +202,12 @@ def seurat_input(wc):
     return file
 
 def get_output_normalization(wc):
-    samples = [u.sample for u in units.itertuples()] 
-    if config["parameters"]["seurat_integration"]["enabled"] == True:
-        samples = samples + ['integrated']
-    if config["parameters"]["seurat_merge"]["enabled"] == True:
-        samples = samples + ['merged']
+    samples = process_samples([u.sample for u in units.itertuples()])
     file = expand("{OUTDIR}/seurat/{sample}/2_normalization/seurat_normalized-pcs.rds", sample=samples,OUTDIR=OUTDIR)
     return file
 
 def get_output_find_clus(wc):
-    samples = [u.sample for u in units.itertuples()]
-    if config["parameters"]["seurat_integration"]["enabled"] == True:
-        samples = samples + ['integrated']
-    if config["parameters"]["seurat_merge"]["enabled"] == True:
-        samples = samples + ['merged']
+    samples = process_samples([u.sample for u in units.itertuples()])
     file = expand("{OUTDIR}/seurat/{sample}/3_clustering/seurat_find-clusters.rds", sample=samples,OUTDIR=OUTDIR)
     return file
 

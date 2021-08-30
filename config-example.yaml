@@ -32,6 +32,9 @@ case: "uppercase"
 # Possible values: True/False
 write_table: True
 
+# Perform the analysis using only single samples (for merged or integrated)
+single_samples: TRUE
+
 # genomic reference sequences and annotations
 ref:
     annotation: "/my/annotation.gtf"
@@ -40,6 +43,7 @@ ref:
 
 # barcodes whitelist (10x only)
 whitelist: "/my/barcodes.txt"  
+
 
 parameters:
     seurat_qc: # step 1: Examine your results with the most commonly used single-cell QC metrics.
