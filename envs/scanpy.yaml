@@ -1,0 +1,8 @@
+channels:
+  - bu_cnio
+  - conda-forge
+  - bioconda
+
+dependencies:
+  - scanpy
+

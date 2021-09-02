@@ -81,7 +81,7 @@ def process_samples(samples):
             return merged + integrated
     else:
         return samples
-        
+
 
 def get_output_degs(wc):
     if config["parameters"]["seurat_degs"]["enabled"] == True:
@@ -211,6 +211,10 @@ def get_output_find_clus(wc):
     file = expand("{OUTDIR}/seurat/{sample}/3_clustering/seurat_find-clusters.rds", sample=samples,OUTDIR=OUTDIR)
     return file
 
+def get_anndata_check(wc):
+    samples = process_samples([u.sample for u in units.itertuples()])
+    file = expand("{OUTDIR}/scanpy/{sample}/check.txt", sample=samples,OUTDIR=OUTDIR)
+    return file
 
 def get_output_qc(wc):
     samples = [u.sample for u in units.itertuples()] 
@@ -227,12 +231,14 @@ rule all:
         get_merge,
         get_multiqc,
         get_output_find_clus,
-	get_output_degs, 
+	    get_output_degs, 
         get_output_gs,
         get_output_ti,
         get_output_fa,
         do_velocity,
-        get_velocity_matrices
+        get_velocity_matrices,
+        get_anndata_check
+
 
 rule expression_matrix:
     input:

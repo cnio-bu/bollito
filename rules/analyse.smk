@@ -186,7 +186,8 @@ rule seurat_find_clusters:
     input:
         seurat_obj=f"{OUTDIR}/seurat/{{sample}}/2_normalization/seurat_normalized-pcs.rds"
     output:
-        seurat_obj=f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds"
+        seurat_obj=f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.rds",
+        anndata_obj=f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.h5ad"
     log:
         f"{LOGDIR}/seurat/{{sample}}/3_clustering/{{sample}}.find-clusters.log"
     benchmark:
@@ -205,6 +206,26 @@ rule seurat_find_clusters:
         get_resource("seurat_find_clusters","threads")
     script:
         "../scripts/step4_find-clusters.R"
+
+rule scanpy_load_anndata:
+    input:
+        anndata_obj=f"{OUTDIR}/seurat/{{sample}}/3_clustering/seurat_find-clusters.h5ad"
+    output:
+        check=f"{OUTDIR}/scanpy/{{sample}}/check.txt"
+    log:
+        f"{LOGDIR}/scanpy/{{sample}}/check.log"
+    benchmark:
+        f"{LOGDIR}/scanpy/{{sample}}/check.bmk"
+    params:
+        output_dir = f"{OUTDIR}/scanpy/{{sample}}",
+    conda: "../envs/scanpy.yaml"
+    resources:
+        mem=get_resource("seurat_find_clusters","mem"),
+        walltime=get_resource("seurat_find_clusters","walltime")
+    threads: 
+        get_resource("seurat_find_clusters","threads")
+    script:
+        "../scripts/readAnnData.py"
 
 rule seurat_degs:
     input:

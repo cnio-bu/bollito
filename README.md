@@ -21,6 +21,8 @@ bollito has two main modes of execution depending on the input data:
 We've built bollito for flexibility, with the aim of allowing the user to adjust the pipeline to different experiments using configuration parameters.
 This includes adjusting the cell filtering, normalization, variables regression, number of significant components, clustering resolution, etc.
 When in doubt, the default parameters were calculated to offer a good starting configuration.
+Additionally, once the main steps of the pipeline are finished, bollito creates a AnnData file from the Seurat file and test if it is correctly formatted.
+This feature improves the interconnection between R and Python, helping users which might want to perform analysis with tools from both languages.
 
 ## Workflow overview
 
@@ -266,6 +268,7 @@ Once the graph is created, clusters are captured by using a the Louvain algorith
 
 To explore the clusters along the resolutions, bollito uses [Clustree](https://github.com/lazappi/clustree). Cluster validation is achieved by calculating silhouette scores
 for each cluster. 
+Additionally, once the main steps of the pipeline are finished, bollito creates a AnnData file from the Seurat file and test if it is correctly formatted.
 
 For this step, the following parameters need to be adjusted via the configuration file:
 * Number of significant components based on the elbow plot or JackStraw analysis obtained in previous steps.
@@ -361,6 +364,13 @@ This report includes the multiQC report and some quality control and normalizati
 To generate the report, you only need to use --report option when the analysis is finished.
 
     snakemake --report report.html 
+
+
+## Scanpy interoperability
+Despite bollito is based on Seurat, it provides a AnnData file to help the users who prefer to work using Scanpy and python-based packages.
+This AnnData file is obtained from the post-clustering Seurat object, so it stores all the annotations and cell filterings applied until that step.
+To check whether the AnnData file was created successfuly or not, bollito runs a step which loads the file to see if any error is reported.
+
 
 ## References
 * Andrews S. (2010). FastQC: a quality control tool for high throughput sequence data. Available at: <http://www.bioinformatics.babraham.ac.uk/projects/fastqc> [Accessed 13 March 2020]

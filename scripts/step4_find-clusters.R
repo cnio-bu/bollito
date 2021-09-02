@@ -6,6 +6,7 @@ message("CONFIGURATION STEP")
 # A. Parameters: 
 # 1. Load libraries. 
 suppressMessages(library("Seurat"))
+suppressMessages(library("SeuratDisk"))
 suppressMessages(library("dplyr"))
 suppressMessages(library("data.table"))
 suppressMessages(library("reticulate"))
@@ -54,9 +55,9 @@ message("1. Seurat object was loaded.")
 
 # 7. Clustering.
 # 7.1. FindClusters using UMAP projection. We keep the significant PC obtained from PCA.
-seurat <- FindNeighbors(seurat, reduction = "pca", dims = 1:pc, k.param = k_neighbors)
-seurat <- FindClusters(seurat, resolution = res)
-seurat <- RunUMAP(seurat,dims = 1:pc, n.components = 2, verbose = FALSE)
+seurat <- FindNeighbors(seurat, reduction = "pca", dims = 1:pc, k.param = k_neighbors, future.seed = NULL)
+seurat <- FindClusters(seurat, resolution = res, future.seed = NULL)
+seurat <- RunUMAP(seurat,dims = 1:pc, n.components = 2, verbose = FALSE, future.seed = NULL)
 message("2. UMAP was done.")
 
 # 7.2. Clustree.
@@ -148,7 +149,10 @@ for(j in 1:length(resolutions)){
 }
 message("5. Statistics table was done and saved.")
 
+# 7.6. Save Seurat object in AnnData
+SaveH5Seurat(seurat, filename = paste0(dir.name, "/", folders[3], "/seurat_find-clusters.h5Seurat"))
+Convert(paste0(dir.name, "/",folders[3], "/seurat_find-clusters.h5Seurat"), dest = "h5ad")
 
-# 7.6. Save RDS: we can use this object to generate all the rest of the data.
+# 7.7. Save RDS: we can use this object to generate all the rest of the data.
 saveRDS(seurat, file = paste0(dir.name, "/",folders[3], "/seurat_find-clusters.rds"))
 message("8. Seurat object was saved.")
