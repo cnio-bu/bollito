@@ -143,7 +143,8 @@ rule seurat_normalization:
         vars_to_regress = config["parameters"]["seurat_normalization"]["regress_out"]["vars_to_regress"],
         regress_cell_cycle = config["parameters"]["seurat_normalization"]["regress_cell_cycle"],
         regress_merge_effect = config["parameters"]["seurat_normalization"]["regress_merge_effect"],
-	write_table=config["write_table"]
+        variable_features = config["parameters"]["seurat_normalization"]["variable_features"],
+        write_table=config["write_table"]
     conda: "../envs/seurat_norm.yaml"
     resources:
         mem=get_resource("seurat_normalization","mem"),
@@ -167,6 +168,7 @@ rule seurat_integration:
         random_seed = config["random_seed"],
         case = config["case"],
         norm_type = config["parameters"]["seurat_normalization"]["norm_type"],
+        variable_features = config["parameters"]["seurat_normalization"]["variable_features"],
         vars_to_regress = config["parameters"]["seurat_normalization"]["regress_out"]["vars_to_regress"],  
         velocyto = config["parameters"]["velocyto"]["enabled"],
         outdir_config = f"{OUTDIR}",

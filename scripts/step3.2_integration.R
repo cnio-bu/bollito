@@ -24,6 +24,7 @@ regress_out = snakemake@params[["regress_out"]]
 regress_cell_cycle = snakemake@params[["regress_cell_cycle"]]
 vars_to_regress = snakemake@params[["vars_to_regress"]]
 norm_type = snakemake@params[["norm_type"]]
+vf = snakemake@params[["variable_features"]] 
 random_seed = snakemake@params[["random_seed"]]
 velocyto = snakemake@params[["velocyto"]]
 outdir_config = snakemake@params[["outdir_config"]]
@@ -105,7 +106,7 @@ path_to_seurat_object <- function(x, regress_out, vars_to_regress, regress_cell_
         # Scaling to perform PCA.
         seurat_obj <- ScaleData(seurat_obj, features = rownames(seurat_obj))
         # PCA previous to cell cycle scoring.
-        seurat_obj <- RunPCA(seurat_obj, features = VariableFeatures(object = seurat_obj), npcs = 50)
+        seurat_obj <- RunPCA(seurat_obj, features = if(vf) VariableFeatures(object = seurat_obj) else rownames(seurat_obj), npcs = 50)
         # Cell cycle scores and plots.
         seurat_obj <- CellCycleScoring(object = seurat_obj, s.features = s.genes, g2m.features = g2m.genes, set.ident = T)
         # Scaling.
@@ -118,7 +119,7 @@ path_to_seurat_object <- function(x, regress_out, vars_to_regress, regress_cell_
         seurat_obj <- SCTransform(seurat_obj, verbose = FALSE)
 	    message(paste0("2. Seurat object was normalized using the ", norm_type, " approach"))
         # PCA previous to cell cycle scoring.
-        seurat_obj <- RunPCA(seurat_obj, features = VariableFeatures(object = seurat_obj), npcs = 50)
+        seurat_obj <- RunPCA(seurat_obj, features = if(vf) VariableFeatures(object = seurat_obj) else rownames(seurat_obj), npcs = 50)
         # Cell cycle scores and plots.
         seurat_obj <- CellCycleScoring(object = seurat_obj, s.features = s.genes, g2m.features = g2m.genes, set.ident = TRUE)
         # If cell cycle regression is needed, a new SCT transformation is performed.
@@ -163,7 +164,7 @@ if (norm_type == "SCT") {
 }
 
 # 6.5. PCA and Visualize Dimensional Reduction genes.
-seurat.integrated <- RunPCA(seurat.integrated, ncps = 100, verbose = FALSE)
+seurat.integrated <- RunPCA(seurat.integrated, features = if(vf) VariableFeatures(object = seurat.integrated) else rownames(seurat.integrated), ncps = 100, verbose = FALSE)
 p1 <- VizDimLoadings(seurat.integrated, dims = 1:2, reduction = "pca") + theme(legend.position="bottom") 
 ggsave(paste0(dir.name, "/",folders[2], "/1_viz_dim_loadings.pdf"), plot = p1, scale = 1.5)
 

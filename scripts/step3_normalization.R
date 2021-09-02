@@ -22,8 +22,9 @@ message("2. Folder paths were set.")
 
 # 3. Get variables from Snakemake.  
 normalization = snakemake@params[["norm_type"]] # "SCT" or "standard"
+vf = snakemake@params[["variable_features"]] # TO ADD
 regress_out = snakemake@params[["regress_out"]] # true or false
-vars_to_regress = c(snakemake@params[["vars_to_regress"]]) # check if null 
+vars_to_regress = c(snakemake@params[["vars_to_regress"]]) # check if null
 random_seed = snakemake@params[["random_seed"]]
 regress_cell_cycle = snakemake@params[["regress_cell_cycle"]]
 regress_merge_effect = snakemake@params[["regress_merge_effect"]]
@@ -89,9 +90,9 @@ if(normalization == "standard"){
 
   # Identify the 10 most highly variable genes.
   top10 <- head(VariableFeatures(seurat), 10)
-  p1 <- VariableFeaturePlot(seurat) + theme(legend.position="bottom") 
-  LabelPoints(plot = p1, points = top10, repel = TRUE) + theme(legend.position="bottom") 
-  ggsave(paste0(dir.name, "/",folders[1], "/6_variable_features.pdf"), plot = p1)
+  p1 <- VariableFeaturePlot(seurat) + theme(legend.position="bottom")
+  p1 <- p1 + LabelPoints(plot = p1, points = top10, repel = TRUE) + theme(legend.position="bottom") 
+  ggsave(paste0(dir.name, "/",folders[1], "/6_variable_features.pdf"), plot = p1, scale = 1.5)
   
   # Scaling to perform PCA.
   # Merged object check.
@@ -101,7 +102,7 @@ if(normalization == "standard"){
     seurat <- ScaleData(seurat, features = rownames(seurat))
   }
   # PCA previous to cell cycle scoring.
-  seurat <- RunPCA(seurat, features = VariableFeatures(object = seurat), npcs = 50)
+  seurat <- RunPCA(seurat, features = if(vf) VariableFeatures(object = seurat) else rownames(seurat), npcs = 50) 
 
   # Cell cycle scores and plots.
   seurat <- CellCycleScoring(object = seurat, s.features = s.genes, g2m.features = g2m.genes, set.ident = T)
@@ -178,7 +179,7 @@ message("3. Seurat object was scaled.")
 
 ## 5.2. PCA & metrics calculation.
 Idents(seurat) <- seurat@project.name
-seurat <- RunPCA(seurat, features = VariableFeatures(object = seurat), npcs = 50) # This result could all be saved in a table. 
+seurat <- RunPCA(seurat, features = if(vf) VariableFeatures(object = seurat) else rownames(seurat), npcs = 50) # This result could all be saved in a table. 
 # Visualizing PCA in Different Ways: elbow plot most variable genes 
 p2 <- VizDimLoadings(seurat, dims = 1:2, reduction = "pca") + theme(legend.position="bottom") 
 ggsave(paste0(dir.name, "/",folders[2], "/1_viz_dim_loadings.pdf"), plot = p2, scale = 1.5)#, height = height, width = height * aspect_ratio)
@@ -200,13 +201,13 @@ p4 <- ElbowPlot(seurat, ndims = 50) + theme(legend.position="bottom")
 ggsave(paste0(dir.name, "/",folders[2], "/3_elbowplot.pdf"), plot = p4, scale = 1.5)
 message("5. Elbowplot was generated.")
 
-if (!(seurat@active.assay == "SCT")) {
-  seurat <- JackStraw(seurat, num.replicate = 100, dims = 50)
-  seurat <- ScoreJackStraw(seurat, dims = 1:50)
-  p5 <- JackStrawPlot(seurat, dims = 1:50) + theme(legend.position="bottom") + guides(fill=guide_legend(nrow=2, byrow=TRUE)) + labs(y = "Empirical", x="Theoretical")
-  ggsave(paste0(dir.name, "/",folders[2], "/4_jackstrawplot.pdf"), plot = p5, scale = 2)
-  message("6. JackStraw plot was generated.")
-}
+#if (!(seurat@active.assay == "SCT")) {
+#  seurat <- JackStraw(seurat, num.replicate = 100, dims = 50)
+#  seurat <- ScoreJackStraw(seurat, dims = 1:50)
+#  p5 <- JackStrawPlot(seurat, dims = 1:50) + theme(legend.position="bottom") + guides(fill=guide_legend(nrow=2, byrow=TRUE)) + labs(y = "Empirical", x="Theoretical")
+#  ggsave(paste0(dir.name, "/",folders[2], "/4_jackstrawplot.pdf"), plot = p5, scale = 2)
+#  message("6. JackStraw plot was generated.")
+#}
 
 if (seurat@project.name == "merged"){
   Idents(seurat) <- "assay_name"
@@ -222,12 +223,12 @@ if(write_table){
         if (normalization == "standard") {
 		write.table(as.matrix(seurat@assays$RNA@data), file = paste0(dir.name, "/", folders[2], "/normalized_expression_matrix.tsv"), sep = "\t", row.names = TRUE, col.names = TRUE, quote = FALSE)
 	}
-	message("7. Normalized expression matrix was saved.")
+	message("6. Normalized expression matrix was saved.")
 } else {
-	message("7. Normalized expression matrix was not saved, as specified in the configuration file.")
+	message("6. Normalized expression matrix was not saved, as specified in the configuration file.")
 }
 
 
 # 5.5. Save RDS: we can use this object to generate all the rest of the data.
 saveRDS(seurat, file = paste0(dir.name, "/",folders[2], "/seurat_normalized-pcs.rds"))
-message("8. Seurat object was saved.")
+message("7. Seurat object was saved.")

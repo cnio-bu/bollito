@@ -127,6 +127,7 @@ did not heavily affect the sample, so their regression was not needed. The cell 
 | Name             | Value |  Commentary                                             |
 |------------------|-------|---------------------------------------------------------|
 | norm_type             | SCT   | SCT method. |
+| variable_features     | True  | PCA calculated using variable features only. |
 | regress_out - enabled | False | Varaible regression is not needed. |
 | regress_out - vars_to_regress | Empty | No variables are regressed. |
 | regress_cell_cycle    | Empty | Cell cycle is not regressed. |

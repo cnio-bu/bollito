@@ -143,6 +143,7 @@ For the normalization, we have chosen to run the *standard* method. In our case,
 | Name             | Value |  Commentary                                             |
 |------------------|-------|---------------------------------------------------------|
 | normalization         | standard   | Standard normalization method used.           |
+| variable_features     | True  | PCA calculated using variable features only.       |
 | regress_out - enabled | False | Upper limit for the number of expressed genes.          |
 | regress_out - vars_to_regress | Empty | Unused filtering.                               |
 | regress_cell_cycle    | False | Unused filtering.                                       |
