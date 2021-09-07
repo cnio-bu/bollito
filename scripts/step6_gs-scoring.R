@@ -26,6 +26,7 @@ geneset_collection = snakemake@params[["gs_collection"]]
 random_seed = snakemake@params[["random_seed"]]
 resolutions = snakemake@params[["resolutions"]]
 geneset_percentage <- snakemake@params[["geneset_percentage"]]
+norm_type = snakemake@params[["norm_type"]]
 ram = snakemake@resources[["mem"]]
 message("3. Parameters were loaded.")
 
@@ -68,39 +69,53 @@ for (res in resolutions){
 mtx_pval <- matrix(nrow=length(res_clus_comb), ncol=length(names(genesets)))
 
 # 9.4 We fill the matrix with the p-value calculated at cluster level for each resolution and gene set.
+if(norm_type == "standard") {
+  norm_type <- "RNA"
+}
+
+if(assay_type == "integrated"){
+  seurat@active.assay <- norm_type
+}
+
 for (col in 1:length(genesets)) {
   row = 1
   for (res in resolutions){
     full_res = paste0(assay_type, "_snn_res.", res)
-    for (cluster in levels(seurat@meta.data[[full_res]])) {
-      # The resolution is set as Idents
-      Idents(seurat) <- seurat[[full_res]]
-      
-      #Counts per gene calculus.
-      seurat_target_clust <- subset(seurat, idents = cluster)
-      counts_in_gene_set_target<- rowMeans(as.matrix(seurat_target_clust@assays[[assay_type]]@counts))[which(names(rowSums(as.matrix(seurat_target_clust@assays[[assay_type]]@counts))) %in% genesets[[col]])]
-      #expr_genes_target <- length(counts_in_gene_set_target[counts_in_gene_set_target > 1])
-      #all_expr_genes_target <- length(rowMeans(as.matrix(seurat_target_clust@assays[[assay_type]]@counts))[rowSums(as.matrix(seurat_target_clust@assays[[assay_type]]@counts)) > 1])
-      
-      seurat_offtarget_clust <- subset(seurat, idents = cluster, invert = TRUE)
-      counts_in_gene_set_offtarget<- rowMeans(as.matrix(seurat_offtarget_clust@assays[[assay_type]]@counts))[which(names(rowSums(as.matrix(seurat_offtarget_clust@assays[[assay_type]]@counts))) %in% genesets[[col]])]
-      #expr_genes_offtarget <- length(counts_in_gene_set_offtarget[counts_in_gene_set_offtarget > 1])
-      #all_expr_genes_offtarget <- length(rowMeans(as.matrix(seurat_offtarget_clust@assays[[assay_type]]@counts))[rowSums(as.matrix(seurat_offtarget_clust@assays[[assay_type]]@counts)) > 1])
-      
-      #Max count value used to generate the factor. 
-      max_val <- max(c(counts_in_gene_set_target, counts_in_gene_set_offtarget))
-      #gene_matrix <- matrix(data = c(expr_genes_target, expr_genes_offtarget, all_expr_genes_target, all_expr_genes_offtarget), nrow = 2)    
-      
-      #The factor is calculated and applied for each vector.
-      target_factor <- length(counts_in_gene_set_target[counts_in_gene_set_target > 0.05*max_val])/length(counts_in_gene_set_target)
-      offtarget_factor <- length(counts_in_gene_set_offtarget[counts_in_gene_set_offtarget > 0.05*max_val])/length(counts_in_gene_set_offtarget)
-      
-      counts_in_gene_set_target_factor <- counts_in_gene_set_target*target_factor
-      counts_in_gene_set_offtarget_factor <- counts_in_gene_set_offtarget*offtarget_factor
-      
-      # Wilcoxon test: paired, using a vectors of gene means for each Seurat subset.
-      p_value <- wilcox.test(counts_in_gene_set_target_factor, counts_in_gene_set_offtarget_factor, paired = TRUE, alternative = "greater")$p.value
-      mtx_pval[row, col] <- p_value
+    if(length(levels(seurat@meta.data[[full_res]]))>1){
+      for (cluster in levels(seurat@meta.data[[full_res]])) {
+        # The resolution is set as Idents
+        Idents(seurat) <- seurat[[full_res]]
+        
+        #Counts per gene calculus.
+        seurat_target_clust <- subset(seurat, idents = cluster)
+        counts_in_gene_set_target<- rowMeans(as.matrix(seurat_target_clust@assays[[norm_type]]@data))[which(names(rowSums(as.matrix(seurat_target_clust@assays[[norm_type]]@data))) %in% 
+                                                                                                              genesets[[col]])]
+        #expr_genes_target <- length(counts_in_gene_set_target[counts_in_gene_set_target > 1])
+        #all_expr_genes_target <- length(rowMeans(as.matrix(seurat_target_clust@assays[[assay_type]]@counts))[rowSums(as.matrix(seurat_target_clust@assays[[assay_type]]@counts)) > 1])
+        
+        seurat_offtarget_clust <- subset(seurat, idents = cluster, invert = TRUE)
+        counts_in_gene_set_offtarget<- rowMeans(as.matrix(seurat_offtarget_clust@assays[[norm_type]]@data))[which(names(rowSums(as.matrix(seurat_offtarget_clust@assays[[norm_type]]@data))) %in% genesets[[col]])]
+        #expr_genes_offtarget <- length(counts_in_gene_set_offtarget[counts_in_gene_set_offtarget > 1])
+        #all_expr_genes_offtarget <- length(rowMeans(as.matrix(seurat_offtarget_clust@assays[[assay_type]]@counts))[rowSums(as.matrix(seurat_offtarget_clust@assays[[assay_type]]@counts)) > 1])
+        
+        #Max count value used to generate the factor. 
+        max_val <- max(c(counts_in_gene_set_target, counts_in_gene_set_offtarget))
+        #gene_matrix <- matrix(data = c(expr_genes_target, expr_genes_offtarget, all_expr_genes_target, all_expr_genes_offtarget), nrow = 2)    
+        
+        #The factor is calculated and applied for each vector.
+        target_factor <- length(counts_in_gene_set_target[counts_in_gene_set_target > 0.05*max_val])/length(counts_in_gene_set_target)
+        offtarget_factor <- length(counts_in_gene_set_offtarget[counts_in_gene_set_offtarget > 0.05*max_val])/length(counts_in_gene_set_offtarget)
+        
+        counts_in_gene_set_target_factor <- counts_in_gene_set_target*target_factor
+        counts_in_gene_set_offtarget_factor <- counts_in_gene_set_offtarget*offtarget_factor
+        
+        # Wilcoxon test: paired, using a vectors of gene means for each Seurat subset.
+        p_value <- wilcox.test(counts_in_gene_set_target_factor, counts_in_gene_set_offtarget_factor, paired = TRUE, alternative = "greater")$p.value
+        mtx_pval[row, col] <- p_value
+        row = row + 1
+      }
+    } else {
+      mtx_pval[row, col] <- NA
       row = row + 1
     }
   }

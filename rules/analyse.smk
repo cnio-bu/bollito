@@ -265,6 +265,7 @@ rule seurat_gs:
         output_dir = f"{OUTDIR}/seurat/{{sample}}",
         random_seed = config["random_seed"],
         resolutions = config["parameters"]["seurat_find_clusters"]["resolutions"],
+        norm_type = config["parameters"]["seurat_normalization"]["norm_type"],
         gs_collection = config["parameters"]["seurat_gs"]["geneset_collection"],
         geneset_percentage = config["parameters"]["seurat_gs"]["geneset_percentage"]
     conda: "../envs/seurat_gs.yaml"
