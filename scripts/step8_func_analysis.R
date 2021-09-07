@@ -59,30 +59,44 @@ message("1. Seurat object was loaded.")
 # 11.2. Vision object is created. 
 # If seurat object is not a integration.
 if (seurat@active.assay != "integrated"){
-# To avoid negative values with SCT normalization we use the standard, keeping the information from the previous analysis.
+  # To avoid negative values with SCT normalization we use the standard, keeping the information from the previous analysis.
   if (seurat@active.assay == "SCT") {
     seurat@active.assay <- "RNA"
     seurat <- NormalizeData(seurat, normalization.method = "LogNormalize", scale.factor = 10000, seed = TRUE)
     all.genes <- rownames(seurat)
     if(regress_out == TRUE){
-        if (regress_cell_cycle) {
-            seurat <- ScaleData(seurat, features = rownames(seurat), vars.to.regress = c(vars_to_regress, "S.Score", "G2M.Score"))
-        } else {
-            seurat <- ScaleData(seurat, features = rownames(seurat), vars.to.regress = vars_to_regress)
-        }
+      if (regress_cell_cycle) {
+        seurat <- ScaleData(seurat, features = rownames(seurat), vars.to.regress = c(vars_to_regress, "S.Score", "G2M.Score"))
+      } else {
+        seurat <- ScaleData(seurat, features = rownames(seurat), vars.to.regress = vars_to_regress)
+      }
     } else {
-        seurat <- ScaleData(seurat, features = rownames(seurat))
+      seurat <- ScaleData(seurat, features = rownames(seurat))
     }
   }
   suppressMessages(vis <- Vision(seurat,
-		  signatures = geneset_collection,
-                  meta = seurat@meta.data[,meta_columns],
-                  projection_methods = NULL))
+                                 signatures = geneset_collection,
+                                 meta = seurat@meta.data[,meta_columns],
+                                 projection_methods = NULL))
 } else {
-  suppressMessages(vis <- Vision(rescale(seurat@assays$integrated@scale.data, c(0,10)),
-                    signatures = geneset_collection,
-                    meta = seurat@meta.data[,c(meta_columns, "assay_name")],
-                    projection_methods = "UMAP"))
+# Calculate vision score using the RNA slot when samples have been integrated. 
+  seurat@active.assay <- "RNA"
+  seurat <- NormalizeData(seurat, normalization.method = "LogNormalize", scale.factor = 10000, seed = TRUE)
+  all.genes <- rownames(seurat)
+  if(regress_out == TRUE){
+    if (regress_cell_cycle) {
+      seurat <- ScaleData(seurat, features = rownames(seurat), vars.to.regress = c(vars_to_regress, "S.Score", "G2M.Score"))
+    } else {
+      seurat <- ScaleData(seurat, features = rownames(seurat), vars.to.regress = vars_to_regress)
+    }
+  } else {
+    seurat <- ScaleData(seurat, features = rownames(seurat))
+  }
+  suppressMessages(vis <- Vision(seurat,
+                                 signatures = geneset_collection,
+                                 meta = seurat@meta.data[,c(meta_columns, "assay_name")],
+                                 projection_methods =  NULL))
+  seurat@active.assay <- "integrated"
 }
 message("2. Vision object was created.")
 
@@ -94,9 +108,10 @@ message("3. Vision object was analyzed.")
 # 11.4. Outputs generation.
 # 11.4.1. Projection values stored.
 if (seurat@active.assay != "integrated"){
-    projections <- vis@Projections$Seurat_umap
+  projections <- vis@Projections$Seurat_umap
 } else {
-    projections <- vis@Projections[[1]]
+  vis@Projections[[1]] <- seurat@reductions$umap@cell.embeddings
+  projections <- seurat@reductions$umap@cell.embeddings
 }
 
 # 11.4.2. Cluster plot in UMAP projection.
