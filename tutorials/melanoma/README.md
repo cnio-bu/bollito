@@ -163,13 +163,14 @@ For this purpose, the "enable" parameter must be set to true in the configuratio
 
 #### Single-cell clustering - "seurat_find_clusters"
 <<<<<<< HEAD
-After taking a look at the elbow plot, we have decided to consider the 1-10 significant PCA components for the clustering analysis. We have also selected a set of resolutions to analyze. The k parameter was set to default. 
+After taking a look at the elbow plot, we have decided to consider the 1-10 significant PCA components for the clustering analysis. We have also selected a set of resolutions to analyze. The k parameter was set to default. The Local Inverse Simpson's Index (LISI) is computed for the "condition" metadata column in order to quantify the effects of the data integration/merging.   
 
 | Name                  | Value                   | Commentary                          |
 |-----------------------|-------------------------|-------------------------------------|
-| principal_components  | 10                      | Significant principal components.  |
+| principal_components  | 10                      | Significant principal components.   |
 | resolutions           | [0.2, 0.4, 0.8, 1.2, 1.6] | Set of tested resolutions.        |
 | k_neighbors           | 20                      | Number of *k* neighbors.            |
+| batch_metadata        | "condition"             | Calculate LISI index.               |
 
 #### Single-cell functional analysis Seurat-based - "seurat_gs"
 In this step, both the path to a GMT file storing molecular signatures (or gene sets) and a threshold value are required.

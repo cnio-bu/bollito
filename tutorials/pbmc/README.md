@@ -135,13 +135,14 @@ did not heavily affect the sample, so their regression was not needed. The cell 
 
 #### Single-cell clustering - “seurat_clustering“
 After taking a look at the elbow plot (output from the previous rule), we selected the 1-7 significant PCA components. 
-We also selected a set of resolutions to analyze. The *k* parameter was set to default. 
+We also selected a set of resolutions to analyze. The *k* parameter was set to default. Furthermore, we calculated the Local Inverse Simpson's Index (LISI) for the Phase metadata column to help us understand whether we need a cell cycle regression in our dataset. 
 
 | Name                  | Value                   | Commentary                          |
 |-----------------------|-------------------------|-------------------------------------|
 | principal_components  | 7                       | Significant principal components. |
 | resolutions           | [0.2, 0.4, 0.8, 1.2, 1.6] | Set of tested resolutions. |
 | k_neighbors           | 20                      | Number of *k* neighbors. |
+| batch_metadata        | "Phase"                 | LISI index.              |
 
 #### Single-cell functional analysis Seurat-based - “seurat_gs“
 In this step, both the path to a GMT file storing the molecular signatures and a threshold value are required.

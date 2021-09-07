@@ -76,6 +76,7 @@ parameters:
         principal_components: 10 # this number should be set based on the output of step 3 (normalization)
         resolutions: [0.2, 0.4, 0.8, 1.2, 1.6] # the resolution value(s) will set the granularity of the clustering (typicaly between 0.4-1.2).
         k_neighbors: 20 # number of neighbors (k) used to generate the SNN graph
+        batch_metadata: "condition" # Computes the Local Inverse Simpson’s Index (LISI) for all variables of interest. Specially recommended for measuring integration accuracy.
     seurat_degs: # [OPTIONAL] step 5: marker and differentially expressed genes calculation
         enabled: True
         selected_cond: [0.2, "condition"] # resolution or condition to be used in the downstream analysis. Resolutions can be written as follows: 0.2, 0.4... Conditions must be character vectors.

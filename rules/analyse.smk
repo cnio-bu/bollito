@@ -197,7 +197,8 @@ rule seurat_find_clusters:
         random_seed = config["random_seed"],
         pc = config["parameters"]["seurat_find_clusters"]["principal_components"],
         res = config["parameters"]["seurat_find_clusters"]["resolutions"],
-        k_neighbors = config["parameters"]["seurat_find_clusters"]["k_neighbors"]
+        k_neighbors = config["parameters"]["seurat_find_clusters"]["k_neighbors"], 
+        batch_metadata = config["parameters"]["seurat_find_clusters"]["batch_metadata"]
     conda: "../envs/seurat_clustering.yaml"
     resources:
         mem=get_resource("seurat_find_clusters","mem"),

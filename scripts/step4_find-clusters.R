@@ -15,6 +15,8 @@ suppressMessages(library("ggplot2"))
 suppressMessages(library("cluster"))
 suppressMessages(library("writexl"))
 suppressMessages(library("future"))
+suppressMessages(library("patchwork"))
+suppressMessages(library("lisi"))
 message("1. Libraries were loaded.")
 
 # 2. Folder configuration. 
@@ -28,6 +30,7 @@ pc = snakemake@params[["pc"]] # We should check the PCs using the Elbowplot and 
 res = as.vector(snakemake@params[["res"]])
 random_seed = snakemake@params[["random_seed"]]
 k_neighbors = snakemake@params[["k_neighbors"]]
+batch_metadata = snakemake@params[["batch_metadata"]] # check if null
 ram = snakemake@resources[["mem"]]
 threads = snakemake@threads
 message("3. Parameters were loaded.")
@@ -122,15 +125,30 @@ if (seurat@active.assay == TRUE || seurat@project.name == "merged"){
   ggsave(paste0(dir.name, "/", folders[3], "/2_umap_by_assay.pdf"), plot = p3, scale = 1.5)
 }
 
-# 7.5. Statistics table per cluster.
-# 7.5.1. Get the index of resolution columns.
+# 7.6 Compute LISI score using the desired variables. 
+if(!is.null(batch_metadata)){
+	X <- seurat@reductions$umap@cell.embeddings[1:dim(seurat)[2],] # Reductions matrix
+	meta_data <- seurat@meta.data[, batch_metadata, drop = FALSE] # Meta data object
+	res <- compute_lisi(X, meta_data, label_colnames = batch_metadata) # lisi scores
+	# 7.6.1 Superpose lisi score with umap
+	lapply(seq_along(batch_metadata), function(x){
+		# Orig 
+	        p1 <- ggplot(res, aes(x = res[,x])) + geom_density() + theme_classic() #+ theme_minimal()
+	        p2 <- DimPlot(seurat, group.by = batch_metadata[x])
+	        p3 <- p1 /  p2 + plot_layout(nrow = 2, heights = c(0.25, 2))
+	        ggsave(paste0(dir.name, "/", folders[3], "/5_lisi_score_by_", batch_metadata[x], ".pdf"), plot = p3, scale = 1.5)
+        })
+	message("5. LISI score was calculated.")
+}
+# 7.7. Statistics table per cluster.
+# 7.7.1. Get the index of resolution columns.
 resolutions = grep("snn_res", colnames(seurat@meta.data))
-# 7.5.2. Set the highest number of clusters.
+# 7.7.2. Set the highest number of clusters.
 number_clusters = length(unique(seurat@meta.data$seurat_clusters))
-# 7.5.3. Get the maximum cluster names vector.
+# 7.7.3. Get the maximum cluster names vector.
 cluster_names = paste0("Cluster ", seq(number_clusters)) 
 
-# 7.5.4. Loop for each resolution and write table.
+# 7.7.4. Loop for each resolution and write table.
 for(j in 1:length(resolutions)){
   # Set idents and levels.
   Idents(seurat) <- seurat@meta.data[,resolutions[j]]
@@ -149,10 +167,10 @@ for(j in 1:length(resolutions)){
 }
 message("5. Statistics table was done and saved.")
 
-# 7.6. Save Seurat object in AnnData
+# 7.8. Save Seurat object in AnnData
 SaveH5Seurat(seurat, filename = paste0(dir.name, "/", folders[3], "/seurat_find-clusters.h5Seurat"))
 Convert(paste0(dir.name, "/",folders[3], "/seurat_find-clusters.h5Seurat"), dest = "h5ad")
 
-# 7.7. Save RDS: we can use this object to generate all the rest of the data.
+# 7.9. Save RDS: we can use this object to generate all the rest of the data.
 saveRDS(seurat, file = paste0(dir.name, "/",folders[3], "/seurat_find-clusters.rds"))
 message("8. Seurat object was saved.")
