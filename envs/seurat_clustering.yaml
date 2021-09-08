@@ -4,6 +4,7 @@ channels:
     - conda-forge
 
 dependencies:
+    - r-base=4.0.0
     - r-lisi
     - libgfortran
     - r-seurat=3.2.3
