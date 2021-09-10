@@ -266,9 +266,10 @@ Then a Shared Nearest Neighbour (SNN) graph is constructed calculating the neare
 the Jaccard index.
 Once the graph is created, clusters are captured by using a the Louvain algorithm.
 
-To explore the clusters along the resolutions, bollito uses [Clustree](https://github.com/lazappi/clustree). Cluster validation is achieved by calculating silhouette scores
-for each cluster. 
-Additionally, once the main steps of the pipeline are finished, bollito creates a AnnData file from the Seurat file and test if it is correctly formatted.
+To explore the clusters along the resolutions, bollito uses [Clustree](https://github.com/lazappi/clustree). Cluster validation is achieved by calculating silhouette scores for each cluster. 
+LISI ([*(Korsunsky, I. et al.*](https://rdrr.io/github/immunogenomics/LISI/)) is used to assess if there is a batch effect produced by any of the categorical varaibles that are described in the experiment. If any batch effect is detected I would be advisabe to regress out that variable. 
+
+Additionally, once the main steps of the pipeline are finished, bollito creates a AnnData file from the Seurat output file and checks its formatting.
 
 For this step, the following parameters need to be adjusted via the configuration file:
 * Number of significant components based on the elbow plot or JackStraw analysis obtained in previous steps.
@@ -280,7 +281,7 @@ since it is used in posterior effects.
 
 ### 6. Differential expression analysis.
 
-Differential expression analysis is based on the condition that the user requieres, including a specific cluster resolution or some annotation information. For each condition, two analyses are performed:
+Differential expression analysis is based on the condition that the user requires, including a specific cluster resolution or some annotation information. For each condition, two analyses are performed:
 * Marker gene detection (for this test, only genes with a logFC threshold of 0.25, that are expressed in at least 10% of the cells are included).
 * Differential expression for all genes (no thresholds applied).
 
@@ -339,11 +340,10 @@ since it needs the BAM files to generate the three count matrices (spliced, unsp
 
 ## Configuration of computation resources
 
-The user can configure bollito to optimise the available computational resources, to reduce the computational time. The optimization is achieved thanks to Snakemake's ability to run several samples at the same time and single-cell script optimization using the future package implementation. Resources configuration is done through the configuration file.  This file has a field called _resources_, where the user can define the RAM memory usage and the number of threads (if the rule admits multithreading) provided to a specific step. Additionally, if the user does not provide any value for some of these fields, the pipeline will use the default values.
-
+The user can configure bollito to optimise the available computational resources in order to reduce the computational time. The optimization is achieved thanks to Snakemake's ability to run several samples at the same time and single-cell script parallelisation using the future package implementation. Resources configuration is done through the configuration file. This file has a field called _resources_, where the user can define the RAM memory usage and the number of threads (if the rule admits multithreading) available to a specific step. Additionally, if the user does not provide any value for some of these fields, the pipeline will use the default values.
 
 ## Shortcuts
-bollito has implemented a shortcut system based on specfic targets related to the pipeline's steps.
+bollito features a shortcut system based on specfic targets related to the pipeline's steps.
 Each target calls a end point rule which terminate the pipeline execution.
 
 To use the shorcuts, you only need to run the pipeline as usual, but with the --until option.
@@ -357,20 +357,39 @@ The available targets are:
 
 Additionally, the user might use the Snakemake rules names as targets, which are available in the config.yaml file.
 
-## Report
-bollito produces a HTML report using Snakemake automatic report generaration.
+## Reporting
+bollito produces a HTML report using Snakemake's automatic report generaration.
 This report includes the multiQC report and some quality control and normalization information at single-cell level from Seurat.
 
 To generate the report, you only need to use --report option when the analysis is finished.
 
     snakemake --report report.html 
 
-
 ## Scanpy interoperability
-Despite bollito is based on Seurat, it provides a AnnData file to help the users who prefer to work using Scanpy and python-based packages.
+Bollito generates an AnnData output file to allow users to perform downstream analyses using Scanpy and other python-based packages.
 This AnnData file is obtained from the post-clustering Seurat object, so it stores all the annotations and cell filterings applied until that step.
-To check whether the AnnData file was created successfuly or not, bollito runs a step which loads the file to see if any error is reported.
 
+## Pipeline benchmarking
+The following metrics were generating using the [10K PBMC 3p](https://s3-us-west-2.amazonaws.com/10x.files/samples/cell-exp/6.1.0/10k_PBMC_3p_nextgem_Chromium_X/10k_PBMC_3p_nextgem_Chromium_X_fastqs.tar
+) from 10x Next GEM Chromium X dataset on a HPC cluster running CentOS 8 (248 cores, 2Tb RAM).
+
+| pipeline step             | running time (s) | max RAM usage (MB) | threads |
+|---------------------------|------------------|--------------------|---------|
+| fastqc                    | 657.897          | 3830.980           | 4       |
+| star                      | 5388.925         | 36103.887          | 8       |
+| rseqc_junction_saturation | 1310.431         | 4848.223           | 1       |
+| rseqc_readdis             | 2507.294         | 1058.127           | 1       |
+| rseqc_stat                | 1022.082         | 116.960            | 1       |
+| rseqc_readgc              | 1166.199         | 2183.963           | 1       |
+| rseqc_readdup             | 2123.237         | 31723.523          | 1       |
+| rseqc_infer               | 7.545            | 150.740            | 1       |
+| rseqc_innerdis            | 630.251          | 970.620            | 1       |
+| rseqc_junction_annotation | 1171.999         | 291.133            | 1       |
+| multiQC                   | 40.741           | 212.860            | 2       |
+| seurat_preQC              | 120.221          | 2310.437           | 1       |
+| seurat_postQC             | 65.062           | 1869.23            | 1       |
+| seurat_normalization      | 405.939          | 9125.253           | 1       |
+| seurat_find-clusters      | 253.288          | 3710.987           | 2       |
 
 ## References
 * Andrews S. (2010). FastQC: a quality control tool for high throughput sequence data. Available at: <http://www.bioinformatics.babraham.ac.uk/projects/fastqc> [Accessed 13 March 2020]
@@ -384,9 +403,10 @@ To check whether the AnnData file was created successfuly or not, bollito runs a
 * DeTomaso, D., Jones, M., Subramaniam, M., Ashuach, T., Ye, C. and Yosef, N., 2019. Functional interpretation of single cell similarity maps. *Nature Communications*, 10(1).
 * Street, K., Risso, D., Fletcher, R., Das, D., Ngai, J., Yosef, N., Purdom, E. and Dudoit, S., 2018. Slingshot: cell lineage and pseudotime inference for single-cell transcriptomics. *BMC Genomics*, 19(1).
 * La Manno, G., Soldatov, R., Zeisel, A., Braun, E., Hochgerner, H., Petukhov, V., Lidschreiber, K., Kastriti, M., Lönnerberg, P., Furlan, A., Fan, J., Borm, L., Liu, Z., van Bruggen, D., Guo, J., He, X., Barker, R., Sundström, E., Castelo-Branco, G., Cramer, P., Adameyko, I., Linnarsson, S. and Kharchenko, P., 2018. RNA velocity of single cells. *Nature*, 560(7719), pp.494-498.
+*  Korsunsky, I., Millard, N., Fan, J., Slowikowski, K., Zhang, F., & Wei, K., Baglaenko, Y., Brenner, M., Loh, P. and Raychaudhuri, S. 2019. Fast, sensitive and accurate integration of single-cell data with Harmony. *Nature Methods*, 16(12), pp.1289-1296.
+
 
 ## Test data
-
 The system is pre-configured to run an example based on sample data available from 10x Genomics. The required datasets can be found at these URLS. Please update the "units.tsv" file to point at the data as needed.
 
 * https://support.10xgenomics.com/single-cell-gene-expression/datasets/3.0.0/neuron_10k_v3
