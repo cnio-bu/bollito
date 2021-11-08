@@ -31,8 +31,8 @@ This is a schema of the complete workflow. Certain parts may be skipped dependin
 ![bollito workflow diagram](./.img/Bollito.png)
 
 ## Authors
- * Coral Fustero-Torre
  * Luis García-Jimeno
+ * Coral Fustero-Torre
  * María José Jiménez-Santos
  * Gonzalo Gómez-López
  * Tomás Di Domenico
