@@ -4,9 +4,9 @@ Violin plot representing the number of reads, number of genes, mitochondrial per
 
 Filter paremeters used were:
 
-- **Min genes expressed**: {{ snakemake.config["rules"]["seurat_postqc"]["min_feat"] }}
-- **Max genes expressed**: {{ snakemake.config["rules"]["seurat_postqc"]["max_feat"] }}
-- **Min counts**: {{ snakemake.config["rules"]["seurat_postqc"]["min_count"] }}
-- **Max counts**: {{ snakemake.config["rules"]["seurat_postqc"]["max_count"] }}
-- **Max mitochondrial percentage**: {{ snakemake.config["rules"]["seurat_postqc"]["mit_pct"] }} %
-- **Max ribosomal percentage**: {{ snakemake.config["rules"]["seurat_postqc"]["ribo_pct"] }} %
+- **Min genes expressed**: {{ snakemake.config["parameters"]["seurat_postqc"]["min_feat"] }}
+- **Max genes expressed**: {{ snakemake.config["parameters"]["seurat_postqc"]["max_feat"] }}
+- **Min counts**: {{ snakemake.config["parameters"]["seurat_postqc"]["min_count"] }}
+- **Max counts**: {{ snakemake.config["parameters"]["seurat_postqc"]["max_count"] }}
+- **Max mitochondrial percentage**: {{ snakemake.config["parameters"]["seurat_postqc"]["mit_pct"] }} %
+- **Max ribosomal percentage**: {{ snakemake.config["parameters"]["seurat_postqc"]["ribo_pct"] }} %
