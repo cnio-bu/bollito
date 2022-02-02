@@ -5,4 +5,4 @@ channels:
 
 dependencies:
   - scanpy
-
+  - numpy <= 1.21

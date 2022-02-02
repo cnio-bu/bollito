@@ -1,7 +1,7 @@
 channels:
     - bu_cnio
-    - bioconda
     - conda-forge
+    - bioconda
 
 dependencies:
     - libgfortran
