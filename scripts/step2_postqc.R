@@ -105,7 +105,7 @@ message("6. Statistics table was saved.")
 
 # 3.6 Save expression matrix.
 if(write_table){
-	write.table(as.matrix(seurat@assays$RNA@counts), file = paste0(dir.name, "/", folders[1], "/expression_matrix.tsv"), sep = "\t", row.names = TRUE, col.names = TRUE, quote = FALSE)
+	write.table(as.matrix(seurat@assays$RNA@counts), file = paste0(dir.name, "/", folders[1], "/expression_matrix.tsv"), sep = "\t", row.names = TRUE, col.names = NA, quote = FALSE)
 	message("7. Post-qc expression matrix was saved.")
 } else {
 	message("7. Post-qc expression matrix was not saved, as specified in the configuration file.")

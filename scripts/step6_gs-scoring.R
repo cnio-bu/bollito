@@ -137,7 +137,7 @@ colnames(df_pval) <- names(genesets)
 df_pval <- df_pval[ order(row.names(df_pval)), ]
 
 # 9.7 Save p-value table
-write.table(df_pval, file = paste0(dir.name, "/",folders[5], "/pval_table.tsv"), sep = "\t", quote = FALSE, row.names = TRUE, col.names = TRUE)
+write.table(df_pval, file = paste0(dir.name, "/",folders[5], "/pval_table.tsv"), sep = "\t", quote = FALSE, row.names = TRUE, col.names = NA)
 message("5. P-value table was saved.")
 
 # 9.8 We loop for each geneset generating the plots

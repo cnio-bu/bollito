@@ -192,7 +192,7 @@ message("6. Cell-cycle analysis plot was done.")
 
 # 6.9. Save expression matrix.
 if(write_table){
-	write.table(as.matrix(seurat.integrated@assays$integrated@scale.data), file = paste0(dir.name, "/", folders[2], "/normalized_expression_matrix.tsv"), sep = "\t", row.names = TRUE, col.names = TRUE, quote = FALSE)
+	write.table(as.matrix(seurat.integrated@assays$integrated@scale.data), file = paste0(dir.name, "/", folders[2], "/normalized_expression_matrix.tsv"), sep = "\t", row.names = TRUE, col.names = NA, quote = FALSE)
 	message("7. Integrated expression matrix was saved.")
 } else {
 	message("7. Integrated expression matrix was not saved, as specified in the configuration file.")

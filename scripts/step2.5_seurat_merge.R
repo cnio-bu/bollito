@@ -84,7 +84,7 @@ message("3. Seurat objects were merged.")
 
 # Save expression matrix.
 if (write_table){
-	write.table(as.matrix(seurat@assays$RNA@counts), file = paste0(dir.name, "/", folders[1], "/expression_matrix.tsv"), sep = "\t", row.names = TRUE, col.names = TRUE, quote = FALSE)
+	write.table(as.matrix(seurat@assays$RNA@counts), file = paste0(dir.name, "/", folders[1], "/expression_matrix.tsv"), sep = "\t", row.names = TRUE, col.names = NA, quote = FALSE)
 	message("4. Merged expression matrix was saved.")
 } else {
 	message("4. Merged expression matrix was not saved, as specified in the configuration file.")

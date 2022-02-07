@@ -218,10 +218,10 @@ if (seurat@project.name == "merged"){
 # 5.4. Save the expresion matrix.
 if(write_table){
 	if (normalization == "SCT") {
-		write.table(as.matrix(seurat@assays$SCT@data), file = paste0(dir.name, "/", folders[2], "/normalized_expression_matrix.tsv"), sep = "\t", row.names = TRUE, col.names = TRUE, quote = FALSE)
+		write.table(as.matrix(seurat@assays$SCT@data), file = paste0(dir.name, "/", folders[2], "/normalized_expression_matrix.tsv"), sep = "\t", row.names = TRUE, col.names = NA, quote = FALSE)
         }
         if (normalization == "standard") {
-		write.table(as.matrix(seurat@assays$RNA@data), file = paste0(dir.name, "/", folders[2], "/normalized_expression_matrix.tsv"), sep = "\t", row.names = TRUE, col.names = TRUE, quote = FALSE)
+		write.table(as.matrix(seurat@assays$RNA@data), file = paste0(dir.name, "/", folders[2], "/normalized_expression_matrix.tsv"), sep = "\t", row.names = TRUE, col.names = NA, quote = FALSE)
 	}
 	message("6. Normalized expression matrix was saved.")
 } else {
