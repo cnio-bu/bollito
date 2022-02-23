@@ -18,18 +18,9 @@ The tutorial will analyse the dataset using the following steps:
 
 ## Input file configuration
 
-The first step is to download the data we will be analysing. In this case it will be composed of two pairs of paired-end, FASTQ-formatted files.
-You should download these files and put them in a directory of your choice. 
+First, download the raw FASTQ files using the following [link](https://zenodo.org/record/6136989) and put them in a directory of your choice. 
 
-We will use the example directory `/my/data/files` throughout the tutorial. You should instead use the real path to your files. Note we have generated an even smaller version or the samples in order to reduce the execution time required to complete the tutorial. 
-
-Parental sample - 451LU:
-- [2500K_451LU_L003_R1_001.fastq.gz](https://bioinformatics.cnio.es/data/pipelines/single_cell/10x_sample_data/melanoma_10M/2500K_451LU_L003_R1_001.fastq.gz)
-- [2500K_451LU_L003_R2_001.fastq.gz](https://bioinformatics.cnio.es/data/pipelines/single_cell/10x_sample_data/melanoma_10M/2500K_451LU_L003_R2_001.fastq.gz)
-
-Treated sample - 451LUBR3:
-- [2500K_451LUBR3_L004_R1_001.fastq.gz](https://bioinformatics.cnio.es/data/pipelines/single_cell/10x_sample_data/melanoma_10M/2500K_451LUBR3_L004_R1_001.fastq.gz)
-- [2500K_451LUBR3_L004_R2_001.fastq.gz](https://bioinformatics.cnio.es/data/pipelines/single_cell/10x_sample_data/melanoma_10M/2500K_451LUBR3_L004_R2_001.fastq.gz)
+> NOTE: we have generated an even smaller version or the samples in order to reduce the execution time required to complete the tutorial. 
 
 > The files including *R1* (for *read 1*) in ther names store the unique molecular identifiers (UMI) and cell barcodes.
 > The files with *R2* (for *read 2*) in their names store the cDNA data.
