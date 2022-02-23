@@ -365,7 +365,9 @@ This report includes the multiQC report and some quality control and normalizati
 
 To generate the report, you only need to use --report option when the analysis is finished.
 
-    snakemake --report report.html 
+    snakemake --report report.zip
+
+This will generate a zip file containing an HTML index page and all the files needed to correctly display the report.
 
 ## Scanpy interoperability
 Bollito generates an AnnData output file to allow users to perform downstream analyses using Scanpy and other python-based packages.
