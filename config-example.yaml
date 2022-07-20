@@ -125,51 +125,51 @@ parameters:
 resources:
     default:
         threads: 1
-        mem: 8000
+        mem_mb: 8000
         walltime: 480
     merge:
-        mem: 32000
+        mem_mb: 32000
     star_index:
         threads: 8
-        mem: 64000
+        mem_mb: 64000
     star:
         threads: 8
-        mem: 64000
+        mem_mb: 64000
     fastqc:
         threads: 4
     rseqc_junction_saturation:
-        mem: 8000
+        mem_mb: 8000
     rseqc_readdup:
-        mem: 24000
+        mem_mb: 24000
     seurat_qc:
-        mem: 3000
+        mem_mb: 3000
     seurat_postqc:
-        mem: 4000
+        mem_mb: 4000
     seurat_filter:
-        mem: 4000
+        mem_mb: 4000
     seurat_merge:
-        mem: 16000
+        mem_mb: 16000
     seurat_normalization:
         threads: 4
-        mem: 16000
+        mem_mb: 16000
     seurat_integration:
         threads: 4
-        mem: 32000
+        mem_mb: 32000
     seurat_find_clusters:
         threads: 4
-        mem: 8000
+        mem_mb: 8000
     seurat_degs:
         threads: 4
-        mem: 64000
+        mem_mb: 64000
     seurat_gs:
-        mem: 16000
+        mem_mb: 16000
     slingshot:
-        mem: 8000
+        mem_mb: 8000
     vision:
         threads: 4
-        mem: 16000 
+        mem_mb: 16000 
     velocyto:
-        mem: 32000
+        mem_mb: 32000
     fastq_screen_indexes:
         threads: 8
         outdir: "res"

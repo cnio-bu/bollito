@@ -6,7 +6,7 @@ rule star_index:
     threads: 
         get_resource("star_index","threads")
     resources:
-        mem=get_resource("star_index","mem"),
+        mem_mb=get_resource("star_index","mem_mb"),
         walltime=get_resource("star_index","walltime")
     params:
         extra = ""
@@ -29,7 +29,7 @@ rule merge:
         f"{OUTDIR}/merge/{{sample}}.r{{group}}.bmk"
     threads: get_resource("merge","threads")
     resources:
-        mem=get_resource("merge","mem"),
+        mem_mb=get_resource("merge","mem_mb"),
         walltime=get_resource("merge","walltime")
     shell:"""
         cat {input} > {output} 2> {log}
@@ -77,7 +77,7 @@ rule star:
         extra=extra_params
     threads: get_resource("star","threads")
     resources:
-        mem=get_resource("star","mem"),
+        mem_mb=get_resource("star","mem_mb"),
         walltime=get_resource("star","walltime")
     wrapper: 
         "0.60.0/bio/star/align"

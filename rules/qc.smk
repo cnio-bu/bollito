@@ -8,7 +8,7 @@ rule fastqc:
         zip="{}/qc/fastqc/{{sample}}.{{unit}}.r{{read}}_fastqc.zip".format(OUTDIR)
     threads: get_resource("fastqc","threads")
     resources:
-        mem=get_resource("fastqc","mem"),
+        mem_mb=get_resource("fastqc","mem_mb"),
         walltime=get_resource("fastqc","walltime")
     params: 
         lambda wc: "-t {}".format(get_resource("fastqc","threads"))
@@ -32,7 +32,7 @@ rule fastq_screen_indexes:
     params:
         outdir=config["parameters"]["fastq_screen_indexes"]["outdir"]
     resources:
-        mem=get_resource("fastq_screen_indexes","mem"),
+        mem_mb=get_resource("fastq_screen_indexes","mem_mb"),
         walltime=get_resource("fastq_screen_indexes","walltime")
     shell:"""
         fastq_screen --threads {threads} --get_genomes --outdir {params.outdir}/ &> {log}
@@ -51,7 +51,7 @@ rule fastq_screen:
         "{}/fastq_screen/{{sample}}.{{unit}}.r{{read}}.bmk".format(LOGDIR)
     threads: get_resource("fastq_screen","threads")
     resources:
-        mem=get_resource("fastq_screen","mem"),
+        mem_mb=get_resource("fastq_screen","mem_mb"),
         walltime=get_resource("fastq_screen","walltime")
     params:
         fastq_screen_config="{}/FastQ_Screen_Genomes/fastq_screen.conf".format(config["parameters"]["fastq_screen_indexes"]["outdir"]),
@@ -74,7 +74,7 @@ rule rseqc_gtf2bed:
         "../envs/gffutils.yaml"
     threads: get_resource("rseqc_gtf2bed","threads")
     resources:
-        mem=get_resource("rseqc_gtf2bed","mem"),
+        mem_mb=get_resource("rseqc_gtf2bed","mem_mb"),
         walltime=get_resource("rseqc_gtf2bed","walltime")
     script:
         "../scripts/gtf2bed.py"
@@ -97,7 +97,7 @@ rule rseqc_junction_annotation:
         "../envs/rseqc.yaml"
     threads: get_resource("rseqc_junction_annotation","threads")
     resources:
-        mem=get_resource("rseqc_junction_annotation","mem"),
+        mem_mb=get_resource("rseqc_junction_annotation","mem_mb"),
         walltime=get_resource("rseqc_junction_annotation","walltime")
     shell:
         "junction_annotation.py {params.extra} -i {input.bam} -r {input.bed} -o {params.prefix} "
@@ -121,7 +121,7 @@ rule rseqc_junction_saturation:
         "../envs/rseqc.yaml"
     threads: get_resource("rseqc_junction_saturation","threads")
     resources:
-        mem=get_resource("rseqc_junction_saturation","mem"),
+        mem_mb=get_resource("rseqc_junction_saturation","mem_mb"),
         walltime=get_resource("rseqc_junction_saturation","walltime")
     shell:
         "junction_saturation.py {params.extra} -i {input.bam} -r {input.bed} -o {params.prefix} "
@@ -141,7 +141,7 @@ rule rseqc_stat:
         "../envs/rseqc.yaml"
     threads: get_resource("rseqc_stat","threads")
     resources:
-        mem=get_resource("rseqc_stat","mem"),
+        mem_mb=get_resource("rseqc_stat","mem_mb"),
         walltime=get_resource("rseqc_stat","walltime")
     shell:
         "bam_stat.py -i {input} > {output} 2> {log}"
@@ -162,7 +162,7 @@ rule rseqc_infer:
         "../envs/rseqc.yaml"
     threads: get_resource("rseqc_infer","threads")
     resources:
-        mem=get_resource("rseqc_infer","mem"),
+        mem_mb=get_resource("rseqc_infer","mem_mb"),
         walltime=get_resource("rseqc_infer","walltime")
     shell:
         "infer_experiment.py -r {input.bed} -i {input.bam} > {output} 2> {log}"
@@ -184,7 +184,7 @@ rule rseqc_innerdis:
         "../envs/rseqc.yaml"
     threads: get_resource("rseqc_innerdis","threads")
     resources:
-        mem=get_resource("rseqc_innerdis","mem"),
+        mem_mb=get_resource("rseqc_innerdis","mem_mb"),
         walltime=get_resource("rseqc_innerdis","walltime")
     shell:
         "inner_distance.py -r {input.bed} -i {input.bam} -o {params.prefix} > {log} 2>&1"
@@ -204,7 +204,7 @@ rule rseqc_readdis:
         "../envs/rseqc.yaml"
     threads: get_resource("rseqc_readdis","threads")
     resources:
-        mem=get_resource("rseqc_readdis","mem"),
+        mem_mb=get_resource("rseqc_readdis","mem_mb"),
         walltime=get_resource("rseqc_readdis","walltime")
     shell:
         "read_distribution.py -r {input.bed} -i {input.bam} > {output} 2> {log}"
@@ -225,7 +225,7 @@ rule rseqc_readdup:
         "../envs/rseqc.yaml"
     threads: get_resource("rseqc_readdup","threads")
     resources:
-        mem=get_resource("rseqc_readdup","mem"),
+        mem_mb=get_resource("rseqc_readdup","mem_mb"),
         walltime=get_resource("rseqc_readdup","walltime")
     shell:
         "read_duplication.py -i {input} -o {params.prefix} > {log} 2>&1"
@@ -246,7 +246,7 @@ rule rseqc_readgc:
         "../envs/rseqc.yaml"
     threads: get_resource("rseqc_readgc","threads")
     resources:
-        mem=get_resource("rseqc_readgc","mem"),
+        mem_mb=get_resource("rseqc_readgc","mem_mb"),
         walltime=get_resource("rseqc_readgc","walltime")
     shell:
         "read_GC.py -i {input} -o {params.prefix} > {log} 2>&1"
@@ -283,7 +283,7 @@ rule multiqc:
         "{}/multiqc.log".format(LOGDIR)
     threads: get_resource("multiqc","threads")
     resources:
-        mem=get_resource("multiqc","mem"),
+        mem_mb=get_resource("multiqc","mem_mb"),
         walltime=get_resource("multiqc","walltime")
     wrapper:
         "v1.0.0/bio/multiqc"

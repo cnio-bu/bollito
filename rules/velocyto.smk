@@ -12,7 +12,7 @@ rule STAR_to_velocyto:
     params:
         input_dir= lambda wc: "{}/star/{}/Solo.out/Velocyto/raw".format(OUTDIR,wc.sample)
     resources:
-        mem=get_resource("STAR_to_velocyto","mem"),
+        mem_mb=get_resource("STAR_to_velocyto","mem_mb"),
         walltime=get_resource("STAR_to_velocyto","walltime")
     shell:"""
         bash scripts/STAR_to_velocyto.sh {params.input_dir} 2> {log}
@@ -37,7 +37,7 @@ rule velocyto:
         n_cells = config["parameters"]["velocyto"]["downsampling"]["n_cells"]
     conda: "../envs/velocyto.yaml"
     resources:
-        mem=get_resource("velocyto","mem"),
+        mem_mb=get_resource("velocyto","mem_mb"),
         walltime=get_resource("velocyto","walltime")
     script:
         "../scripts/step9_RNA_velocity.R"

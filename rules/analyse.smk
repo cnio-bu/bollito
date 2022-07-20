@@ -22,7 +22,7 @@ rule seurat_qc:
         min_cells_per_gene = config["parameters"]["seurat_qc"]["min_cells_per_gene"]
     conda: "../envs/seurat_qc.yaml"
     resources:
-        mem=get_resource("seurat_qc","mem"),
+        mem_mb=get_resource("seurat_qc","mem_mb"),
         walltime=get_resource("seurat_qc","walltime")
     script: 
         "../scripts/step1_qc.R"
@@ -58,7 +58,7 @@ rule seurat_post_qc:
 	write_table=config["write_table"]
     conda: "../envs/seurat_qc.yaml"
     resources:
-        mem=get_resource("seurat_postqc","mem"),
+        mem_mb=get_resource("seurat_postqc","mem_mb"),
         walltime=get_resource("seurat_postqc","walltime")
     script:
         "../scripts/step2_postqc.R"
@@ -80,7 +80,7 @@ rule seurat_filter:
         threshold = config["parameters"]["seurat_filter"]["threshold"]
     conda: "../envs/seurat_qc.yaml"
     resources:
-        mem=get_resource("seurat_filter", "mem"),
+        mem_mb=get_resource("seurat_filter", "mem_mb"),
         walltime=get_resource("seurat_filter", "walltime")
     script:
         "../scripts/step2.1_filter.R"
@@ -103,7 +103,7 @@ rule seurat_merge:
 	write_table=config["write_table"]
     conda: "../envs/seurat_qc.yaml"
     resources:
-        mem=get_resource("seurat_merge","mem"),
+        mem_mb=get_resource("seurat_merge","mem_mb"),
         walltime=get_resource("seurat_merge","walltime")
     script:
         "../scripts/step2.5_seurat_merge.R"
@@ -147,7 +147,7 @@ rule seurat_normalization:
         write_table=config["write_table"]
     conda: "../envs/seurat_norm.yaml"
     resources:
-        mem=get_resource("seurat_normalization","mem"),
+        mem_mb=get_resource("seurat_normalization","mem_mb"),
         walltime=get_resource("seurat_normalization","walltime")
     threads: 
         get_resource("seurat_normalization","threads")
@@ -175,7 +175,7 @@ rule seurat_integration:
 	write_table=config["write_table"]
     conda: "../envs/seurat_norm.yaml"
     resources:
-        mem=get_resource("seurat_integration","mem"),
+        mem_mb=get_resource("seurat_integration","mem_mb"),
         walltime=get_resource("seurat_integration","walltime")
     threads: 
         get_resource("seurat_integration","threads")
@@ -201,7 +201,7 @@ rule seurat_find_clusters:
         batch_metadata = config["parameters"]["seurat_find_clusters"]["batch_metadata"]
     conda: "../envs/seurat_clustering.yaml"
     resources:
-        mem=get_resource("seurat_find_clusters","mem"),
+        mem_mb=get_resource("seurat_find_clusters","mem_mb"),
         walltime=get_resource("seurat_find_clusters","walltime")
     threads: 
         get_resource("seurat_find_clusters","threads")
@@ -221,7 +221,7 @@ rule scanpy_load_anndata:
         output_dir = f"{OUTDIR}/scanpy/{{sample}}",
     conda: "../envs/scanpy.yaml"
     resources:
-        mem=get_resource("seurat_find_clusters","mem"),
+        mem_mb=get_resource("seurat_find_clusters","mem_mb"),
         walltime=get_resource("seurat_find_clusters","walltime")
     threads: 
         get_resource("seurat_find_clusters","threads")
@@ -245,7 +245,7 @@ rule seurat_degs:
         test = config["parameters"]["seurat_degs"]["test"]
     conda: "../envs/seurat_degs.yaml"
     resources:
-        mem=get_resource("seurat_degs","mem"),
+        mem_mb=get_resource("seurat_degs","mem_mb"),
         walltime=get_resource("seurat_degs","walltime")
     threads: 
         get_resource("seurat_degs","threads")
@@ -270,7 +270,7 @@ rule seurat_gs:
         geneset_percentage = config["parameters"]["seurat_gs"]["geneset_percentage"]
     conda: "../envs/seurat_gs.yaml"
     resources:
-        mem=get_resource("seurat_gs","mem"),
+        mem_mb=get_resource("seurat_gs","mem_mb"),
         walltime=get_resource("seurat_gs","walltime")
     script:
         "../scripts/step6_gs-scoring.R"
@@ -296,7 +296,7 @@ rule slingshot:
 	graphics = config["graphics"]
     conda: "../envs/slingshot.yaml"
     resources:
-        mem=get_resource("slingshot","mem"),
+        mem_mb=get_resource("slingshot","mem_mb"),
         walltime=get_resource("slingshot","walltime")
     script:
         "../scripts/step7_traj_in.R"
@@ -321,7 +321,7 @@ rule vision:
         regress_cell_cycle = config["parameters"]["seurat_normalization"]["regress_cell_cycle"]
     conda: "../envs/vision.yaml"
     resources:
-        mem=get_resource("vision","mem"),
+        mem_mb=get_resource("vision","mem_mb"),
         walltime=get_resource("vision","walltime")
     threads: 
         get_resource("vision","threads")
