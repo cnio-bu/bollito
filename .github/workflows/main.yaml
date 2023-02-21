@@ -22,16 +22,7 @@ jobs:
         environment-file: .test/environment.yaml
         activate-environment: test
     - name: Generate test data
-      shell: bash -el {0}
-      run: |
-        git clone http://github.com/cnio-bu/sc-test-data data
-        cd data
-        snakemake --use-conda -c 1
-        cd ..
-        mkdir data/ref/genome.chr19.fa_idx
-        STAR --runMode genomeGenerate --genomeDir data/ref/genome.chr19.fa_idx --genomeFastaFiles data/ref/genome.chr19.fa --genomeSAindexNbases 11
-        mkdir -p res/whitelists
-        curl -L "https://github.com/10XGenomics/cellranger/blob/master/lib/python/cellranger/barcodes/translation/3M-february-2018.txt.gz?raw=true" | gunzip -c | cut -f1 > res/whitelists/3M-february-2018.txt
+      run: bash .test/generate_data.sh
     - name: snakemake
       uses: snakemake/snakemake-github-action@v1.24.0
       with:
