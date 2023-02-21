@@ -1,8 +1,11 @@
-git clone http://github.com/cnio-bu/sc-test-data data
+curl --parallel --parallel-immediate $(cat files_reads) -o data/reads
+curl --parallel --parallel-immediate $(cat files_ref) -o data/ref
 
-cd data
-snakemake --use-conda
-cd ..
+for f in data/ref/*
+do
+    bunzip2 $f
+done
+
 mkdir data/ref/genome.chr19.fa_idx
 STAR --runMode genomeGenerate --genomeDir data/ref/genome.chr19.fa_idx --genomeFastaFiles data/ref/genome.chr19.fa --genomeSAindexNbases 11
 
