@@ -27,7 +27,7 @@ random_seed = snakemake@params[["random_seed"]]
 resolutions = snakemake@params[["resolutions"]]
 geneset_percentage <- snakemake@params[["geneset_percentage"]]
 norm_type = snakemake@params[["norm_type"]]
-ram = snakemake@resources[["mem"]]
+ram = snakemake@resources[["mem_mb"]]
 message("3. Parameters were loaded.")
 
 # 4. Analysis configuration. 

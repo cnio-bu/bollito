@@ -24,7 +24,7 @@ selected_res = snakemake@params[["selected_res"]]
 random_seed = snakemake@params[["random_seed"]]
 downsampling = snakemake@params[["downsampling"]]
 n_cells = snakemake@params[["n_cells"]]
-ram = snakemake@resources[["mem"]]
+ram = snakemake@resources[["mem_mb"]]
 threads = snakemake@threads
 message("3. Parameters were loaded.")
 

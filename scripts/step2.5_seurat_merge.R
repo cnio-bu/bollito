@@ -17,7 +17,7 @@ input_data = snakemake@input[["data"]]
 random_seed = snakemake@params[["random_seed"]]
 velocyto = snakemake@params[["velocyto"]]
 outdir_config = snakemake@params[["outdir_config"]]
-ram = snakemake@resources[["mem"]]
+ram = snakemake@resources[["mem_mb"]]
 write_table = as.logical(snakemake@params[["write_table"]])
 message("3. Parameters were loaded.")
 
@@ -44,7 +44,7 @@ combine_object <- function(x, velocyto) {
                             col.name = 'assay_name')
   # If RNA velocity is going to be performed, we add the velocyto matrices in this step.
   if (velocyto){
-    # Velocyto matrices path is infered. 
+    # Velocyto matrices path is infered.
     velocyto_dir = paste0(outdir_config,"/star/", experiment,"/Solo.out/Velocyto/raw/")
     velo_names = c("spliced", "unspliced", "ambiguous")
     vel_matrices = list()

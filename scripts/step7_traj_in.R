@@ -32,7 +32,7 @@ n_plotted_genes = snakemake@params[["n_plotted_genes"]]
 random_seed = snakemake@params[["random_seed"]]
 pc = snakemake@params[["pc"]]
 graphics = snakemake@params[["graphics"]]
-ram = snakemake@resources[["mem"]]
+ram = snakemake@resources[["mem_mb"]]
 threads = snakemake@threads
 message("3. Parameters were loaded.")
 

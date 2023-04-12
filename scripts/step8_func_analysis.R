@@ -28,7 +28,7 @@ random_seed = snakemake@params[["random_seed"]]
 regress_out = snakemake@params[["regress_out"]]
 vars_to_regress = snakemake@params[["vars_to_regress"]]
 regress_cell_cycle = snakemake@params[["regress_cell_cycle"]]
-ram = snakemake@resources[["mem"]]
+ram = snakemake@resources[["mem_mb"]]
 threads = snakemake@threads
 message("3. Parameters were loaded.")
 

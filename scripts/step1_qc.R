@@ -30,7 +30,7 @@ units_path = snakemake@params[["units_path"]]
 sample = snakemake@params[["sample"]]
 random_seed = snakemake@params[["random_seed"]]
 case =  snakemake@params[["case"]]
-ram = snakemake@resources[["mem"]]
+ram = snakemake@resources[["mem_mb"]]
 message("3. Parameters were loaded.")
 
 # 4. Analysis configuration. 
