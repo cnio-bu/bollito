@@ -29,7 +29,7 @@ random_seed = snakemake@params[["random_seed"]]
 regress_cell_cycle = snakemake@params[["regress_cell_cycle"]]
 regress_merge_effect = snakemake@params[["regress_merge_effect"]]
 case = snakemake@params[["case"]]
-ram = snakemake@resources[["mem"]]
+ram = snakemake@resources[["mem_mb"]]
 threads = snakemake@threads
 write_table = as.logical(snakemake@params[["write_table"]])
 message("3. Parameters were loaded.")

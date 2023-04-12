@@ -22,7 +22,7 @@ gene.filter = c(snakemake@params[["genes"]]) # Gene or list of genes.
 filter.out = snakemake@params[["filter_out"]] # true or false
 filter.threshold = snakemake@params[["threshold"]] # numeric
 random_seed = snakemake@params[["random_seed"]]
-ram = snakemake@resources[["mem"]]
+ram = snakemake@resources[["mem_mb"]]
 message("3. Parameters were loaded.")
 
 # 4. Analysis configuration. 

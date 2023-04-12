@@ -26,7 +26,7 @@ selected_cond = snakemake@params[["selected_cond"]]
 random_seed = snakemake@params[["random_seed"]]
 test = snakemake@params[["test"]]
 ranking = snakemake@params[["ranking"]]
-ram = snakemake@resources[["mem"]]
+ram = snakemake@resources[["mem_mb"]]
 threads = snakemake@threads
 message("3. Parameters were loaded.")
 

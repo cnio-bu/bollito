@@ -26,7 +26,7 @@ max_count = snakemake@params[["max_count"]]
 mit = snakemake@params[["mit"]]
 ribo = snakemake@params[["ribo"]]
 random_seed = snakemake@params[["random_seed"]]
-ram = snakemake@resources[["mem"]]
+ram = snakemake@resources[["mem_mb"]]
 write_table = as.logical(snakemake@params[["write_table"]])
 message("3. Parameters were loaded.")
 

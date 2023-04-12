@@ -29,7 +29,7 @@ random_seed = snakemake@params[["random_seed"]]
 velocyto = snakemake@params[["velocyto"]]
 outdir_config = snakemake@params[["outdir_config"]]
 case = snakemake@params[["case"]]
-ram = snakemake@resources[["mem"]]
+ram = snakemake@resources[["mem_mb"]]
 threads = snakemake@threads
 write_table = as.logical(snakemake@params[["write_table"]])
 message("3. Parameters were loaded.")
@@ -97,7 +97,7 @@ path_to_seurat_object <- function(x, regress_out, vars_to_regress, regress_cell_
     # Save regression parameters variable
     regression_param <- c(regress_out, regress_cell_cycle)
     vars_param <- list(vars_to_regress = vars_to_regress, cell_cycle = c("S.Score", "G2M.Score"))
-
+    
     # Normalization of the individual samples
     if(norm_type == "standard"){
         seurat_obj <- NormalizeData(seurat_obj, normalization.method = "LogNormalize", scale.factor = 10000)

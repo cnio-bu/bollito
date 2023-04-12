@@ -31,7 +31,7 @@ res = as.vector(snakemake@params[["res"]])
 random_seed = snakemake@params[["random_seed"]]
 k_neighbors = snakemake@params[["k_neighbors"]]
 batch_metadata = snakemake@params[["batch_metadata"]] # check if null
-ram = snakemake@resources[["mem"]]
+ram = snakemake@resources[["mem_mb"]]
 threads = snakemake@threads
 message("3. Parameters were loaded.")
 
